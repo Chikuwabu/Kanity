@@ -35,10 +35,22 @@ public:
 
     auto bg1 = new BG(window_, 0, 0, mapchip);
 
-    renderer.SDL_RenderClear;
-    bg1.draw;
-    renderer.SDL_RenderPresent;
-    SDL_Delay(3000);
+    while(true){
+        renderer.SDL_RenderClear;
+        bg1.draw;
+        renderer.SDL_RenderPresent;
+        SDL_Event event;
+        while (SDL_PollEvent(&event)){
+            switch (event.type){
+                case SDL_QUIT:
+                    return;
+                default:
+                    break;
+            }
+        }
+        //TODO:ちゃんと停止する
+        SDL_Delay(16);
+    }
   }
   @property{
     public SDL_Window* window(){ return window_;}
