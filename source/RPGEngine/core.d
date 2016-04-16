@@ -14,12 +14,10 @@ class engine{
     info("Load a library \"SDL_Image\".");
     DerelictSDL2Image.load;
 
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0){
-      logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
-    }
-    /+if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG){
-      logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
-    }+/
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
+    info("Success initalization of \"SDL2\".");
+    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
+    info("Success initalization of \"SDL_Image\"");
     return;
   }
   ~this(){

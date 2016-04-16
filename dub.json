@@ -1,5 +1,5 @@
 {
-  "name":"RPGEngine",
+  "name":"rpgengine",
   "dependencies":{
     "derelict-sdl2":"~master"
   },
