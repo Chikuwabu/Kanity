@@ -10,22 +10,20 @@ private:
   Renderer renderer;
   bool running;
 public:
-  this(Renderer renderer_){
+  void init(Renderer renderer_){
+    running = true;
     renderer = renderer_;
   }
-
   bool isRunning()
   {
     return running;
   }
   void process(){
-    running = true;
     SDL_Event event;
     SDL_PollEvent(&event);
     switch(event.type){
       case SDL_QUIT:
         this.stop;
-        renderer.stop;
         break;
       default:
         break;

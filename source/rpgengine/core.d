@@ -5,6 +5,7 @@ import rpgengine.event;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
+import core.thread;
 
 class Engine{
   //フィールド
@@ -34,13 +35,18 @@ public:
   int run(string title, int width, int height){
     //初期化
     renderer = new Renderer();
-    renderer.init(title, width, height);
-    event = new Event(renderer);
-    loop();
+    event = new Event();
+
+    auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
+    TrenderAndEvent.start;
+    TrenderAndEvent.join;
+    //loop(title, width, height);
     return 0;
   }
-  void loop()
+  void loop(string title, int width, int height)
   {
+    renderer.init(title, width, height);
+    event.init(renderer);
     do
     {
       renderer.render();
@@ -49,4 +55,29 @@ public:
     } while(event.isRunning);
   }
 
+}
+
+
+class UnderLayer : Thread {
+  private bool running;
+
+  this(string title, int width, int height, Renderer renderer, Event event){
+    running = true;
+    super(() => run(title, width, height, renderer, event));
+  }
+
+  void run(string title, int width, int height, Renderer renderer, Event event){
+    renderer.init(title, width, height);
+    event.init(renderer);
+    do
+    {
+      renderer.render();
+      event.process();
+      SDL_Delay(16);
+    } while(event.isRunning);
+  }
+
+  void stop(){
+    running = false;
+  }
 }
