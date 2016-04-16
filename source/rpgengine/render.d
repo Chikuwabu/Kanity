@@ -21,47 +21,45 @@ public:
     renderer.SDL_DestroyRenderer;
   }
 
-  void run(string title, int width, int height){
-    init(title, width, height);
-
-    auto mapchip = IMG_Load("BGTest.png");
-    auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
-    renderer.SDL_RenderCopy(tex, null, null);
-    window_.SDL_ShowWindow;
-    renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
-    renderer.SDL_RenderClear;
-    renderer.SDL_RenderPresent;
-
-    auto bg1 = new BG(window_, 0, 0, mapchip);
-
-    running = true;
-    while(running){
-        renderer.SDL_RenderClear;
-        bg1.draw;
-        renderer.SDL_RenderPresent;
-    }
-  }
   @property{
     public SDL_Window* window(){ return window_;}
   }
-
+  void render()
+  {
+    renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
+    renderer.SDL_RenderClear;
+    foreach(b; bgList)
+    {
+      b.draw();
+    }
+    renderer.SDL_RenderPresent;
+  }
   void stop(){
     running = false;
     return;
   }
   //Utils
 private:
+  BG[] bgList;
   SDL_Window* createWindow(string title, int width, int height){
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               width, height, SDL_WINDOW_HIDDEN);
   }
-  void init(string title, int width, int height){
+  public void init(string title, int width, int height){
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
     renderer = window_.SDL_CreateRenderer( -1, 0 );
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
     info("Success to create renderer.");
+    
+    auto mapchip = IMG_Load("BGTest.png");
+    auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
+    renderer.SDL_RenderCopy(tex, null, null);
+    window_.SDL_ShowWindow;
 
+    auto bg1 = new BG(window_, 0, 0, mapchip);
+    bgList = new BG[1];
+    bgList[0] = bg1;
   }
 }
