@@ -1,4 +1,4 @@
-module RPGEngine.BG;
+module rpgengine.bg;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
