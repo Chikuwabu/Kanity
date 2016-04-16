@@ -1,0 +1,8 @@
+{
+  "name":"RPGEngine",
+  "dependencies":{
+    "derelict-sdl2":"~master"
+  },
+  "targetPath":"bin",
+  "workingDirectory":"bin",
+}
