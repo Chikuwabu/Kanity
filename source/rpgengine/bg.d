@@ -30,8 +30,12 @@ public:
     //転送先座標の計算
     SDL_Rect rectS, rectD;
     int window_w, window_h;
+    int scaley = 2, scalex = 2;
+    renderer.SDL_RenderSetScale(scalex, scaley);
     window.SDL_GetWindowSize(&window_w, &window_h);
 
+    window_w /= scalex;
+    window_h /= scaley;
     with(rectS){
       x = 0; y = 0;
       w = window_w; h = window_h;
@@ -45,8 +49,8 @@ public:
       rectS.x = 0;
       rectD.w = rectS.w;
       rectD.x = -bg.x;
-    }else if(16*64 - bg.x < window_w){
-      rectS.w = 16*64 - bg.x;
+    }else if(window_w - bg.x){
+      rectS.w = window_w - bg.x;
       rectS.x = bg.x;
       rectD.w = rectS.w;
       rectD.x = 0;
@@ -61,8 +65,8 @@ public:
       rectS.y = 0;
       rectD.h = rectS.h;
       rectD.y = -bg.y;
-    }else if(16*64 - bg.y < window_h){
-      rectS.h = 16*64 - bg.y;
+    }else if(window_h - bg.y){
+      rectS.h = window_h - bg.y;
       rectS.y = bg.y;
       rectD.h = rectS.h;
       rectD.y = 0;
@@ -108,7 +112,6 @@ private:
       for(int y = 0; y < 64; y++){
         rectD.x = x*16; rectD.y = y*16;
         rectS.y = mapData[x][y] * 16;
-
         SDL_BlitSurface(mapChip, &rectS, bgScreen, &rectD);
       }
     }
