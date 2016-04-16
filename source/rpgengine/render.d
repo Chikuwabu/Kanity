@@ -12,6 +12,7 @@ private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
   BG[] bgList;
+  bool drawFlag;
 
 public:
   this(){
@@ -31,6 +32,7 @@ public:
     renderer = window_.SDL_CreateRenderer( -1, 0 );
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
     info("Success to create renderer.");
+    renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
 
     auto mapchip = IMG_Load("BGTest.png");
     auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
@@ -40,16 +42,20 @@ public:
     auto bg1 = new BG(window_, 0, 0, mapchip);
     bgList = new BG[1];
     bgList[0] = bg1;
+
+    drawFlag = true;
   }
-  void render()
-  {
-    renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
+  void render(){
     renderer.SDL_RenderClear;
     foreach(b; bgList)
     {
       b.draw();
     }
     renderer.SDL_RenderPresent;
+  }
+
+  void draw(){
+
   }
   //Utils
 private:

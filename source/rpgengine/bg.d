@@ -18,6 +18,7 @@ public:
   this(SDL_Window* lWindow, int x, int y, SDL_Surface* lmapChip){
     init(lWindow, x, y, lmapChip);
     setTexture();
+    //foreach()
     return;
   }
   ~this(){
@@ -45,7 +46,7 @@ public:
       rectS.x = 0;
       rectD.w = rectS.w;
       rectD.x = -bg.x;
-    }else if(16*64 - bg.x){
+    }else if(16*64 - bg.x < window_w){
       rectS.w = 16*64 - bg.x;
       rectS.x = bg.x;
       rectD.w = rectS.w;
@@ -61,7 +62,7 @@ public:
       rectS.y = 0;
       rectD.h = rectS.h;
       rectD.y = -bg.y;
-    }else if(16*64 - bg.y){
+    }else if(16*64 - bg.y < window_h){
       rectS.h = 16*64 - bg.y;
       rectS.y = bg.y;
       rectD.h = rectS.h;
@@ -74,6 +75,9 @@ public:
     }
     renderer.SDL_RenderCopy(tex, &rectS, &rectD);
     return;
+  }
+  void scroll(int x, int y){
+    bg.x += x; bg.y += y;
   }
   //Utils
 private:
@@ -104,7 +108,8 @@ private:
     for(int x = 0; x < 64; x++){
       for(int y = 0; y < 64; y++){
         rectD.x = x*16; rectD.y = y*16;
-        rectS.y = /+mapData[x][y]+/1 * 16;
+        rectS.y = 0 * 16;
+
         SDL_BlitSurface(mapChip, &rectS, bgScreen, &rectD);
       }
     }
