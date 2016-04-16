@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 .dub/*
 bin/*
 .git
 dub.selections.json
 .atom-build.json
+=======
+.dub/
+bin/
+dub.selections.json
+>>>>>>> 7b164a4f8a595dbc53a9d80467e7eab0d31b9a83
