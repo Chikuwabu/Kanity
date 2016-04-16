@@ -82,7 +82,7 @@ private:
     renderer = window.SDL_GetRenderer;
     bg.x = x; bg.y = y;
     //Deep copy(mapChip)
-    mapChip = SDL_CreateRGBSurface(0, lmapChip.w, lmapChip.h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    mapChip = SDL_CreateRGBSurface(0, 16, 16*256, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     SDL_BlitSurface(lmapChip, null, mapChip, null);
 
     bgScreen = window.SDL_GetWindowSurface;

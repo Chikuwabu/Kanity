@@ -21,16 +21,15 @@ public:
   void process(){
     running = true;
     SDL_Event event;
-    while(SDL_PollEvent(&event)){
-      switch(event.type){
-        case SDL_QUIT:
-          this.stop;
-          renderer.stop;
-          break;
-        default:
-          break;
+    SDL_PollEvent(&event);
+    switch(event.type){
+      case SDL_QUIT:
+        this.stop;
+        renderer.stop;
+        break;
+      default:
+        break;
       }
-    }
   }
   void stop(){
     running = false;
