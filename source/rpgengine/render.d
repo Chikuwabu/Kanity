@@ -35,16 +35,13 @@ public:
 
     auto bg1 = new BG(window_, 0, 0, mapchip);
 
-    while(true)
-    {
+    while(true){
         renderer.SDL_RenderClear;
         bg1.draw;
         renderer.SDL_RenderPresent;
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
+        while (SDL_PollEvent(&event)){
+            switch (event.type){
                 case SDL_QUIT:
                     return;
                 default:
