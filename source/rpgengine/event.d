@@ -9,6 +9,7 @@ class Event{
 private:
   Renderer renderer;
   bool running;
+  
 public:
   void init(Renderer renderer_){
     running = true;

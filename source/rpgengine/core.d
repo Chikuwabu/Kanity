@@ -40,23 +40,9 @@ public:
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
     TrenderAndEvent.join;
-    //loop(title, width, height);
     return 0;
   }
-  void loop(string title, int width, int height)
-  {
-    renderer.init(title, width, height);
-    event.init(renderer);
-    do
-    {
-      renderer.render();
-      event.process();
-      SDL_Delay(16);
-    } while(event.isRunning);
-  }
-
 }
-
 
 class UnderLayer : Thread {
   private bool running;

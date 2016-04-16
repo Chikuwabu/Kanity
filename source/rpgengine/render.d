@@ -11,7 +11,6 @@ class Renderer{
 private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
-  bool running;//制御
   BG[] bgList;
 
 public:
