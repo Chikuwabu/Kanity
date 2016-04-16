@@ -31,11 +31,9 @@ public:
     SDL_Rect rectS, rectD;
     int window_w, window_h;
     int scaley = 2, scalex = 2;
-    renderer.SDL_RenderSetScale(scalex, scaley);
     window.SDL_GetWindowSize(&window_w, &window_h);
-
-    window_w /= scalex;
-    window_h /= scaley;
+    renderer.SDL_RenderSetLogicalSize(window_w / scalex, window_h / scaley);
+    renderer.SDL_RenderGetLogicalSize(&window_w, &window_h);
     with(rectS){
       x = 0; y = 0;
       w = window_w; h = window_h;
