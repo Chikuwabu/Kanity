@@ -1,9 +1,9 @@
 import std.stdio;
-import RPGEngine.core;
+import rpgengine.core;
 
 void main(){
 	//writeln("Edit source/app.d to start your project.");
-	auto engine = new engine();
+	auto engine = new Engine();
 	engine.run("闇の裏", 640, 480);
 	return;
 }

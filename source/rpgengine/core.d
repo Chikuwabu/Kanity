@@ -1,12 +1,12 @@
-module RPGEngine.core;
+module rpgengine.core;
 
-import RPGEngine.render;
+import rpgengine.render;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
 //import std.string;
 
-class engine{
+class Engine{
   //フィールド
 private:
   Renderer renderer;
