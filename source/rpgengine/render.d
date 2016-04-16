@@ -34,7 +34,7 @@ public:
     info("Success to create renderer.");
     renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
 
-    auto mapchip = IMG_Load("BGTest.png");
+    auto mapchip = IMG_Load("BGTest2.png");
     auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
     renderer.SDL_RenderCopy(tex, null, null);
     window_.SDL_ShowWindow;
