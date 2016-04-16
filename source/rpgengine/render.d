@@ -32,7 +32,7 @@ public:
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
     info("Success to create renderer.");
 
-    auto mapchip = IMG_Load("BGTest.png");
+    auto mapchip = IMG_Load("BGTest2.png");
     auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
     renderer.SDL_RenderCopy(tex, null, null);
     window_.SDL_ShowWindow;
