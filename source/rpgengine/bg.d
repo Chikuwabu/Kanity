@@ -18,7 +18,6 @@ public:
   this(SDL_Window* lWindow, int x, int y, SDL_Surface* lmapChip){
     init(lWindow, x, y, lmapChip);
     setTexture();
-    //foreach()
     return;
   }
   ~this(){
@@ -108,7 +107,7 @@ private:
     for(int x = 0; x < 64; x++){
       for(int y = 0; y < 64; y++){
         rectD.x = x*16; rectD.y = y*16;
-        rectS.y = 0 * 16;
+        rectS.y = mapData[x][y] * 16;
 
         SDL_BlitSurface(mapChip, &rectS, bgScreen, &rectD);
       }

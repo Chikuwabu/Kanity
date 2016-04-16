@@ -54,12 +54,12 @@ class UnderLayer : Thread {
 
   void run(string title, int width, int height, Renderer renderer, Event event){
     renderer.init(title, width, height);
-    event.init(renderer);
+    event.init();
     do
     {
       renderer.render();
       event.process();
-      SDL_Delay(16);
+      SDL_Delay(10);
     } while(event.isRunning);
   }
 

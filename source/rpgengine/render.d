@@ -46,16 +46,18 @@ public:
     drawFlag = true;
   }
   void render(){
-    renderer.SDL_RenderClear;
-    foreach(b; bgList)
-    {
-      b.draw();
+    if(drawFlag){
+      renderer.SDL_RenderClear;
+      foreach(b; bgList)
+      {
+        b.draw();
+      }
+      renderer.SDL_RenderPresent;
     }
-    renderer.SDL_RenderPresent;
   }
 
   void draw(){
-
+    drawFlag = true;
   }
   //Utils
 private:

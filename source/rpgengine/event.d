@@ -7,13 +7,11 @@ import std.experimental.logger;
 
 class Event{
 private:
-  Renderer renderer;
   bool running;
-  
+
 public:
-  void init(Renderer renderer_){
+  void init(){
     running = true;
-    renderer = renderer_;
   }
   bool isRunning()
   {
