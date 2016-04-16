@@ -1,6 +1,6 @@
-module RPGEngine.render;
+module rpgengine.render;
 
-import RPGEngine.BG;
+import rpgengine.bg;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
@@ -45,12 +45,12 @@ public:
   }
   //Utils
 private:
-  SDL_Window* CreateWindow(string title, int width, int height){
+  SDL_Window* createWindow(string title, int width, int height){
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               width, height, SDL_WINDOW_HIDDEN);
   }
   void init(){
-    window_ = CreateWindow(title, width, height);
+    window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
     renderer = window_.SDL_CreateRenderer( -1, 0 );
