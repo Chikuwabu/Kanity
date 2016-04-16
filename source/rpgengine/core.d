@@ -1,15 +1,16 @@
 module rpgengine.core;
 
 import rpgengine.render;
+import rpgengine.event;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
-//import std.string;
 
 class Engine{
   //フィールド
 private:
   Renderer renderer;
+  Event event;
 
 public:
   //コンストラクタとデコンストラクタ
@@ -32,19 +33,15 @@ public:
 
   int run(string title, int width, int height){
     //初期化
-    renderer = new Renderer(title, width, height);
+    renderer = new Renderer();
+    event = new Event(renderer);
     import core.thread;
-    auto Trender = new Thread(() => renderer.run());
+    auto Trender = new Thread(() => renderer.run(title, width, height));
+    auto Tevent = new Thread(() => event.run());
     Trender.start;
-    Trender.join;
+    Tevent.start;
+    Tevent.join;
     return 0;
   }
 
 }
-
-// 制御処理するとこ
-/+class control{
-private:
-public:
-  this()
-}+/

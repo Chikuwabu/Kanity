@@ -11,19 +11,18 @@ class Renderer{
 private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
-  string title; int width, height;
+  bool running;//制御
 
 public:
-  this(string title_, int width_, int height_){
-    title = title_; width = width_; height = height_;
+  this(){
   }
   ~this(){
     window_.SDL_DestroyWindow;
     renderer.SDL_DestroyRenderer;
   }
 
-  void run(){
-    init();
+  void run(string title, int width, int height){
+    init(title, width, height);
 
     auto mapchip = IMG_Load("BGTest.png");
     auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
@@ -35,25 +34,20 @@ public:
 
     auto bg1 = new BG(window_, 0, 0, mapchip);
 
-    while(true){
+    running = true;
+    while(running){
         renderer.SDL_RenderClear;
         bg1.draw;
         renderer.SDL_RenderPresent;
-        SDL_Event event;
-        while (SDL_PollEvent(&event)){
-            switch (event.type){
-                case SDL_QUIT:
-                    return;
-                default:
-                    break;
-            }
-        }
-        //TODO:ちゃんと停止する
-        SDL_Delay(16);
     }
   }
   @property{
     public SDL_Window* window(){ return window_;}
+  }
+
+  void stop(){
+    running = false;
+    return;
   }
   //Utils
 private:
@@ -61,7 +55,7 @@ private:
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               width, height, SDL_WINDOW_HIDDEN);
   }
-  void init(){
+  void init(string title, int width, int height){
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
