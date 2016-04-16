@@ -1,2 +1,3 @@
-.dub/build/*
-bin/*
+.dub/
+bin/
+dub.selections.json
