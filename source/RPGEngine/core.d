@@ -7,6 +7,11 @@ import std.experimental.logger;
 //import std.string;
 
 class engine{
+  //フィールド
+private:
+  Renderer renderer;
+
+public:
   //コンストラクタとデコンストラクタ
   this(){
     info("Load a library \"SDL2\".");
@@ -25,21 +30,21 @@ class engine{
     IMG_Quit();
   }
 
-  //フィールド
-  Renderer renderer;
-
   int run(string title, int width, int height){
     //初期化
     renderer = new Renderer(title, width, height);
     import core.thread;
-    auto Trender = new Thread(&render);
+    auto Trender = new Thread(() => renderer.run());
     Trender.start;
     Trender.join;
     return 0;
   }
 
-  void render(){
-    renderer.run();
-    return;
-  }
 }
+
+// 制御処理するとこ
+/+class control{
+private:
+public:
+  this()
+}+/

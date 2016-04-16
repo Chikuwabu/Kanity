@@ -26,8 +26,8 @@ public:
     init();
 
     auto mapchip = IMG_Load("BGTest.png");
-    /+auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
-    renderer.SDL_RenderCopy(tex, null, null);+/
+    auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
+    renderer.SDL_RenderCopy(tex, null, null);
     window_.SDL_ShowWindow;
     renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
     renderer.SDL_RenderClear;

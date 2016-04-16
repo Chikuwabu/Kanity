@@ -1,0 +1,5 @@
+.dub/*
+bin/*
+.git
+dub.selections.json
+.atom-build.json

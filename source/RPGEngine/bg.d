@@ -13,6 +13,7 @@ private:
   int[64][64] mapData;//[x][y]
   SDL_Surface* bgScreen;
   SDL_Texture* tex;
+
 public:
   this(SDL_Window* lWindow, int x, int y, SDL_Surface* lmapChip){
     init(lWindow, x, y, lmapChip);
