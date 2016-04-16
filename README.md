@@ -10,16 +10,16 @@ Simple RPG game engine.
 `$ ./bin/rpgengine`
 or
 `$ dub run`
-## build dependencies
+## Build dependencies
 - git
 - dub
 - SDL 2.0 (sdl2)
 - SDL_image 2.0 (sdl2_image)
 
-## run dependencies
+## Run dependencies
 - SDL 2.0 (sdl2)
 - SDL_image 2.0 (sdl2_image)
 
-## LICENSE
-This software is released under the MIT License, see LICENSE.
+## License
+This software is released under the MIT License, see LICENSE.  
 Copyright (c) 2016 Chikuwabu
