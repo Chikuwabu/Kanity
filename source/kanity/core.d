@@ -1,9 +1,11 @@
-module rpgengine.core;
+module kanity.core;
 
-import rpgengine.render;
-import rpgengine.event;
+import kanity.render;
+import kanity.event;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import derelict.opengl3.gl;
+import derelict.opengl3.gl;
 import std.experimental.logger;
 import core.thread;
 
@@ -20,6 +22,9 @@ public:
     DerelictSDL2.load;
     info("Load a library \"SDL_Image\".");
     DerelictSDL2Image.load;
+
+    DerelictGL.load;
+    DerelictGL3.load;
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
     info("Success initalization of \"SDL2\".");

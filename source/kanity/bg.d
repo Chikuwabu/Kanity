@@ -1,4 +1,4 @@
-module rpgengine.bg;
+module kanity.bg;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
@@ -32,8 +32,8 @@ public:
     int window_w, window_h;
     int scaley = 2, scalex = 2;
     window.SDL_GetWindowSize(&window_w, &window_h);
-    renderer.SDL_RenderSetLogicalSize(window_w / scalex, window_h / scaley);
-    renderer.SDL_RenderGetLogicalSize(&window_w, &window_h);
+    //renderer.SDL_RenderSetLogicalSize(window_w / scalex, window_h / scaley);
+    //renderer.SDL_RenderGetLogicalSize(&window_w, &window_h);
     with(rectS){
       x = 0; y = 0;
       w = window_w; h = window_h;
@@ -47,7 +47,7 @@ public:
       rectS.x = 0;
       rectD.w = rectS.w;
       rectD.x = -bg.x;
-    }else if(window_w - bg.x){
+    }else if(0){
       rectS.w = window_w - bg.x;
       rectS.x = bg.x;
       rectD.w = rectS.w;
@@ -63,7 +63,7 @@ public:
       rectS.y = 0;
       rectD.h = rectS.h;
       rectD.y = -bg.y;
-    }else if(window_h - bg.y){
+    }else if(0){
       rectS.h = window_h - bg.y;
       rectS.y = bg.y;
       rectD.h = rectS.h;
@@ -74,7 +74,7 @@ public:
       rectD.h = rectS.h;
       rectD.y = 0;
     }
-    renderer.SDL_RenderCopy(tex, &rectS, &rectD);
+    renderer.SDL_RenderCopy(tex, null, null);
     return;
   }
   void scroll(int x, int y){
@@ -92,6 +92,7 @@ private:
 
     bgScreen = window.SDL_GetWindowSurface;
     tex = renderer.SDL_CreateTextureFromSurface(bgScreen);
+    renderer.SDL_RenderCopy(tex, null, null);
     return;
   }
 
