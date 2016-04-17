@@ -1,13 +1,13 @@
-# RPGEngine
+# Kanity
 Simple RPG game engine.
 
 ## How to build
-1. `$ git clone git@github.com:Tosuke/RPGEngine.git` or `$ https://github.com/atnanasi/RPGEngine.git`
-2. `$ cd RPGEngine`
+1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ https://github.com/Chikuwabu/Kanity.git`
+2. `$ cd Kanity`
 3. `$ dub build`
 
 ## How to run
-`$ ./bin/rpgengine`
+`$ ./bin/kanity`
 or
 `$ dub run`
 ## Build dependencies
