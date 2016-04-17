@@ -1,5 +1,5 @@
 import std.stdio;
-import rpgengine.core;
+import kanity.core;
 
 void main(){
 	auto engine = new Engine();
