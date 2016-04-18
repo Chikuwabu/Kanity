@@ -1,6 +1,6 @@
-module rpgengine.render;
+module kanity.render;
 
-import rpgengine.bg;
+import kanity.bg;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;

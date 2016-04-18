@@ -1,4 +1,4 @@
-module rpgengine.bg;
+module kanity.bg;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;

@@ -1,10 +1,10 @@
-module rpgengine.control;
+module kanity.control;
 
-import rpgengine.render;
-import rpgengine.event;
-import rpgengine.core;
+import kanity.render;
+import kanity.event;
+import kanity.core;
 
-class control{
+class Control{
 private:
   Renderer renderer;
   Event event;

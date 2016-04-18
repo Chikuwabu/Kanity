@@ -1,1 +1,1 @@
-module rpgengine.type;
+module kanity.type;

@@ -1,7 +1,7 @@
 //イベント処理
-module rpgengine.event;
+module kanity.event;
 
-import rpgengine.render;
+import kanity.render;
 import derelict.sdl2.sdl;
 import std.experimental.logger;
 
