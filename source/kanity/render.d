@@ -1,6 +1,7 @@
 module kanity.render;
 
 import kanity.bg;
+import kanity.sprite;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
@@ -13,6 +14,7 @@ private:
   SDL_Renderer* renderer;
   BG[] bgList;
   bool drawFlag;
+  Sprite[] spriteList;
 
 public:
   this(){
@@ -43,6 +45,15 @@ public:
     bgList = new BG[1];
     bgList[0] = bg1;
 
+    spriteList = new Sprite[100];
+    auto testtex = renderer.SDL_CreateTextureFromSurface(mapchip);
+    spriteList[0] = new Sprite(testtex);
+    spriteList[0].move(13, 12);
+    spriteList[0].textureX = 0;
+    spriteList[0].textureY = 16;
+    spriteList[0].width = 17;
+    spriteList[0].height = 13;
+
     drawFlag = true;
   }
   void render(){
@@ -51,6 +62,11 @@ public:
       foreach(b; bgList)
       {
         b.draw();
+      }
+      foreach(s; spriteList)
+      {
+          if(s)
+              s.draw(window, renderer);
       }
       renderer.SDL_RenderPresent;
     }
