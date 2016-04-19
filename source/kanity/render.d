@@ -52,6 +52,7 @@ public:
     spriteList[0] = new Sprite(toriniku);
     spriteList[0].move(13, 12);
     spriteList[0].move(130, 120, 120);
+    spriteList[0].setCharacterNumber(23, 230);
 
     drawFlag = true;
   }

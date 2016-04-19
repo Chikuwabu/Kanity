@@ -65,6 +65,7 @@ class Sprite
         this.m_character = c;
         xAnim.ptr = &x;
         yAnim.ptr = &y;
+        characterAnim.ptr = &characterNumber;
     }
 
     public void move(int x, int y)
@@ -77,6 +78,16 @@ class Sprite
     {
         xAnim.setAnimation(ax, frame);
         yAnim.setAnimation(ay, frame);
+    }
+
+    public void setCharacterNumber(int num)
+    {
+        characterNumber = num;
+    }
+
+    public void setCharacterNumber(int num, int frame)
+    {
+        characterAnim.setAnimation(num, frame);
     }
 
     public void draw(SDL_Window* window, SDL_Renderer* renderer)
@@ -97,6 +108,7 @@ class Sprite
     {
         xAnim.animation();
         yAnim.animation();
+        characterAnim.animation();
     }
 }
 
