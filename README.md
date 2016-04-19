@@ -2,7 +2,7 @@
 Simple RPG game engine.
 
 ## How to build
-1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ https://github.com/Chikuwabu/Kanity.git`
+1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ git clone https://github.com/Chikuwabu/Kanity.git`
 2. `$ cd Kanity`
 3. `$ dub build`
 
@@ -21,5 +21,5 @@ or
 - SDL_image 2.0 (sdl2_image)
 
 ## License
-This software is released under the MIT License, see LICENSE.  
-Copyright (c) 2016 Chikuwabu
+This software is released under the MIT License, see [LICENSE](LICENSE).  
+Copyright (c) 2016 [Chikuwabu](http://tkwb.otyakai.xyz)
