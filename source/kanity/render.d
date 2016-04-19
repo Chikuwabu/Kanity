@@ -1,10 +1,12 @@
 module kanity.render;
 
+import kanity.object;
 import kanity.bg;
+
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
-import derelict.opengl3.gl;
+import derelict.opengl3.gl3;
 import std.experimental.logger;
 import std.string;
 
@@ -33,13 +35,7 @@ public:
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
-
     context = window.SDL_GL_CreateContext;
-
-    /*renderer = window_.SDL_CreateRenderer( -1, 0 );
-    if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
-    info("Success to create renderer.");*/
-    //renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
 
     //auto mapchip = IMG_Load("BGTest2.png");
     //auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
@@ -54,18 +50,21 @@ public:
   }
   void render(){
     if(drawFlag){
-      //renderer.SDL_RenderClear;
-      //glClearColor(255,255,255,1);
-      glClear(GL_COLOR_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
+      //glClear(GL_COLOR_BUFFER_BIT);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glOrtho(-1, 1, -1, 1, 0, 4);
+
 
       glBegin(GL_TRIANGLES);
-        glVertex2f(0 , 0);
-        glVertex2f(-1 , 1);
-        glVertex2f(1 , 1);
+        glVertex3f(0, 0, 0);
+        glVertex3f(-1, 1, 0);
+        glVertex3f(1, 1, 0);
 
-        glVertex2f(0 , 0);
-        glVertex2f(-1 , -1);
-        glVertex2f(1 , -1);
+        glVertex3f(0, 0, -3);
+        glVertex3f(-1, -1, -3);
+        glVertex3f(1, -1, -3);
       glEnd();
       glFinish();
       /+foreach(b; bgList)
@@ -85,5 +84,9 @@ private:
   SDL_Window* createWindow(string title, int width, int height){
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+  }
+
+  void glSetup(){
+
   }
 }

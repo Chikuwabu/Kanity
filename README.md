@@ -13,6 +13,7 @@ or
 ## Build dependencies
 - git
 - dub
+- dmd
 - SDL 2.0 (sdl2)
 - SDL_image 2.0 (sdl2_image)
 
