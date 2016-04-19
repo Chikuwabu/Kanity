@@ -48,16 +48,21 @@ class Sprite
     private AnimationData!int yAnim;
 
     private AnimationData!int characterAnim;
-    public int textureX;
-    public int textureY;
-    public int width;
-    public int height;
-
-    private SDL_Texture* texture;
-
-    public this(SDL_Texture* texture)
+    public int characterNumber;
+    private Character m_character;
+    public Character character()
     {
-        this.texture = texture;
+        return m_character;
+    }
+    public void character(Character c)
+    {
+        m_character = c;
+    }
+
+
+    public this(Character c)
+    {
+        this.m_character = c;
         xAnim.ptr = &x;
         yAnim.ptr = &y;
     }
@@ -77,16 +82,13 @@ class Sprite
     public void draw(SDL_Window* window, SDL_Renderer* renderer)
     {
         SDL_Rect rectS, rectD;
-        rectS.x = textureX;
-        rectS.y = textureY;
-        rectS.w = width - 1;
-        rectS.h = height - 1;
+        rectS = character.definition[characterNumber].rect;
         rectD.x = x;
         rectD.y = y;
-        rectD.w = width - 1;
-        rectD.h = height - 1;
+        rectD.w = rectS.w;
+        rectD.h = rectS.h;
 
-        renderer.SDL_RenderCopy(texture, &rectS, &rectD);
+        renderer.SDL_RenderCopy(character.m_texture, &rectS, &rectD);
 
         animation();
     }
@@ -95,5 +97,54 @@ class Sprite
     {
         xAnim.animation();
         yAnim.animation();
+    }
+}
+
+struct CharacterData
+{
+    SDL_Rect rect;
+    int rotation;
+    double scaleX;
+    double scaleY;
+}
+
+class Character
+{
+    public CharacterData[] definition;
+    private SDL_Texture* m_texture;
+    public SDL_Texture* texture()
+    {
+        return m_texture;
+    }
+    //自動分割
+    public this(int width, int height, SDL_Texture* tex)
+    {
+        int textureWidth;
+        int textureHeight;
+        uint f;
+        int a;
+        SDL_QueryTexture(tex, &f, &a, &textureWidth, &textureHeight);
+        int widthcount = textureWidth / width;
+        int heightcount = textureHeight / height;
+        int chrcount = widthcount * heightcount;
+        definition = new CharacterData[chrcount];
+        CharacterData initialdata = CharacterData();
+        initialdata.rect.w = width;
+        initialdata.rect.h = height;
+        initialdata.rotation = 0;
+        initialdata.scaleX = 1;
+        initialdata.scaleY = 1;
+        definition[] = initialdata;
+        int i;
+        for (int y = 0; y < heightcount; y++)
+        {
+            for (int x = 0; x < widthcount; x++)
+            {
+                definition[i].rect.x = x * width;
+                definition[i].rect.y = y * height;
+                i++;
+            }
+        }
+        m_texture = tex;
     }
 }

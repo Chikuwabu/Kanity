@@ -48,13 +48,10 @@ public:
     spriteList = new Sprite[100];
     auto spchip = IMG_Load("SPTest.png");
     auto testtex = renderer.SDL_CreateTextureFromSurface(spchip);
-    spriteList[0] = new Sprite(testtex);
+    auto toriniku = new Character(20, 16, testtex);
+    spriteList[0] = new Sprite(toriniku);
     spriteList[0].move(13, 12);
     spriteList[0].move(130, 120, 120);
-    spriteList[0].textureX = 0;
-    spriteList[0].textureY = 0;
-    spriteList[0].width = 20;
-    spriteList[0].height = 16;
 
     drawFlag = true;
   }
