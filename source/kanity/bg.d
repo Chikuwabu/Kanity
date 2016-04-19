@@ -5,7 +5,7 @@ import derelict.sdl2.image;
 import std.experimental.logger;
 
 class BG{
-private:
+//private:
   SDL_Window* window; //描画先ウィンドウ
   SDL_Renderer* renderer;
   SDL_Rect bg;

@@ -4,16 +4,16 @@ import derelict.sdl2.sdl;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 import std.experimental.logger;
+import std.stdio;
 
 abstract class DrawableObject{
 private:
   float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
   float z;//Z座標(描画優先度)
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
-  int draw_w, draw_h; //描画領域の幅、高さ
-  int tex_w, tex_h; //テクスチャの幅、高さ
-protected:
-  SDL_Surface* surface; //テクスチャの元になるサーフェス
+  float draw_w, draw_h; //描画領域の幅、高さ
+  float tex_w, tex_h; //テクスチャの幅、高さ
+  GLuint glTexture;
 
 public:
   this(int drawArea_w,int drawArea_h){
@@ -21,11 +21,17 @@ public:
   }
 
   void draw(){
+    glBindTexture(GL_TEXTURE_2D, glTexture);
     glBegin(GL_QUADS);
       glVertex3f(x1, y1, z);
       glVertex3f(x1, y2, z);
       glVertex3f(x2, y2, z);
       glVertex3f(x2, y1, z);
+
+      glTexCoord2f(0,0);
+      glTexCoord2f(0,1);
+      glTexCoord2f(1,1);
+      glTexCoord2f(1,0);
     glEnd();
   }
 protected:
@@ -68,16 +74,55 @@ protected:
     }
     SDL_Rect texRect(SDL_Rect rect){
       with(rect){
-        u1 = x / tex_w;
-        v1 = y / tex_h;
-        u2 = (x + w) / tex_w;
-        v2 = (y + h) / tex_h;
+        u1 = cast(float)x / tex_w;
+        v1 = cast(float)y / tex_h;
+        u2 = cast(float)(x + w) / tex_w;
+        v2 = cast(float)(y + h) / tex_h;
       }
       return rect;
     }
+    SDL_Surface* surface(SDL_Surface* surface){
+      GLenum pixelFormat;
+
+      //Surfaceのピクセルフォーマットを得る
+      int bytesPerPixel = surface.format.BytesPerPixel;
+      /+if(bytesPerPixel == 4){ //透明度情報を持つ
+        if(surface.format.Rmask == 0x000000ff){ //色の配列
+          pixelFormat = GL_RGBA;
+        }else{
+          pixelFormat = GL_BGRA;
+        }
+      }else if(bytesPerPixel == 3){ //透明度情報を持たない
+        if(surface.format.Rmask == 0x000000ff){ //同上
+          pixelFormat = GL_RGB;
+        }else{
+          pixelFormat = GL_BGR;
+        }
+      }else{
+        //fatal("This is unsupported pixel format!");
+        //TODO:SDL_ConvertPixelsを使ってなんとかする
+        SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA8888.SDL_AllocFormat, 0);
+        pixelFormat = GL_RGBA;
+      }+/
+
+      surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
+      SDL_GetError().puts();
+      pixelFormat = GL_RGBA;
+      //得た情報を使ってOpenGLのテクスチャを生成する
+      //テクスチャ生成
+      glGenTextures(1, &glTexture);
+      //バインド
+      glBindTexture(GL_TEXTURE_2D, glTexture);
+      //テクスチャフィルタ
+      //フィルタかけないほうがいいような気がする
+      //サーフェスからテクスチャイメージを作成する
+      glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, surface.w, surface.h, 0,
+                  pixelFormat, GL_UNSIGNED_BYTE, surface.pixels);
+
+      tex_w = surface.w; tex_h = surface.h;
+      return surface;
+    }
   }
-
-
 }
 
 class TestSP : DrawableObject{
@@ -90,8 +135,11 @@ public:
   @property{
     override SDL_Rect drawRect(){return super.drawRect;}
     override SDL_Rect drawRect(SDL_Rect rect){super.drawRect = rect; return rect;}
+    override SDL_Rect texRect(){return super.texRect;}
+    override SDL_Rect texRect(SDL_Rect rect){super.texRect = rect; return rect;}
     override int priority(){return super.priority;}
     override float priority(int p_){super.priority = p_; return p_;}
+    override SDL_Surface* surface(SDL_Surface* surface){super.surface = surface; return surface;}
   }
 
 }
