@@ -18,6 +18,7 @@ private:
   SDL_GLContext context;
   BG[] bgList;
   bool drawFlag;
+  TestSP test;
 
 public:
   this(){
@@ -45,6 +46,15 @@ public:
     //auto bg1 = new BG(window_, 0, 0, mapchip);
     bgList = new BG[1];
     //bgList[0] = bg1;
+    test = new TestSP(width, height);
+    test.priority = 0;
+    SDL_Rect rect;
+    with(rect){
+      x = 100; y = 30;
+      w = width/2 ; h = height/2;
+    }
+    test.drawRect = rect;
+
 
     drawFlag = true;
   }
@@ -56,16 +66,7 @@ public:
       glLoadIdentity();
       glOrtho(-1, 1, -1, 1, 0, 4);
 
-
-      glBegin(GL_TRIANGLES);
-        glVertex3f(0, 0, 0);
-        glVertex3f(-1, 1, 0);
-        glVertex3f(1, 1, 0);
-
-        glVertex3f(0, 0, -3);
-        glVertex3f(-1, -1, -3);
-        glVertex3f(1, -1, -3);
-      glEnd();
+      test.draw;
       glFinish();
       /+foreach(b; bgList)
       {

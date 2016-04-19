@@ -3,10 +3,12 @@ module kanity.object;
 import derelict.sdl2.sdl;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
+import std.experimental.logger;
 
 abstract class DrawableObject{
 private:
-  float x,y,z; //ワールド座標系での値
+  float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
+  float z;//Z座標(描画優先度)
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
   int draw_w, draw_h; //描画領域の幅、高さ
   int tex_w, tex_h; //テクスチャの幅、高さ
@@ -19,21 +21,42 @@ public:
   }
 
   void draw(){
-
+    glBegin(GL_QUADS);
+      glVertex3f(x1, y1, z);
+      glVertex3f(x1, y2, z);
+      glVertex3f(x2, y2, z);
+      glVertex3f(x2, y1, z);
+    glEnd();
   }
 protected:
   @property{
-    int drawX(){return cast(int)(x * draw_w);}
-    float drawX(int x_){return x = x_ / draw_w;}
-
-    int drawY(){return cast(int)(y * draw_h);}
-    float drawY(int y_){return y = y_ / draw_h;}
-
     int priority(){return cast(int)(z * 256);} //描画優先度のZ座標に対する倍率は暫定
     float priority(int p_){return z = p_ / 256;}
 
+    //描画先領域
+    SDL_Rect drawRect(){
+      SDL_Rect rect;
+      with(rect){
+        x = cast(int)((1 + x1) * draw_w / 2);
+        y = cast(int)((1 - y1) * draw_h / 2);
+        w = cast(int)((1 + (x2 - x1)) * draw_w / 2);
+        h = cast(int)((1 - (y2 - y1)) * draw_h);
+      }
+      return rect;
+    }
+    SDL_Rect drawRect(SDL_Rect rect){
+      with(rect){
+        //座標系の変換
+        x1 = (cast(float)x / draw_w * 2) - 1;
+        y1 = 1 - (cast(float)y * 2 / draw_h);
+        x2 = (cast(float)(x + w) / draw_w * 2) - 1;
+        y2 = 1 - (cast(float)(y + h) / draw_h * 2);
+      }
+      return rect;
+    }
+
     //サーフェスの描画に使う領域
-    SDL_Rect rect(){
+    SDL_Rect texRect(){
       SDL_Rect rect;
       with(rect){
         x = cast(int)(u1 * tex_w);
@@ -43,7 +66,7 @@ protected:
       }
       return rect;
     }
-    SDL_Rect rect(SDL_Rect rect){
+    SDL_Rect texRect(SDL_Rect rect){
       with(rect){
         u1 = x / tex_w;
         v1 = y / tex_h;
@@ -54,13 +77,21 @@ protected:
     }
   }
 
-  
+
 }
 
 class TestSP : DrawableObject{
+public:
   this(int drawArea_w,int drawArea_h){
     super(drawArea_w, drawArea_h);
   }
   ~this(){
   }
+  @property{
+    override SDL_Rect drawRect(){return super.drawRect;}
+    override SDL_Rect drawRect(SDL_Rect rect){super.drawRect = rect; return rect;}
+    override int priority(){return super.priority;}
+    override float priority(int p_){super.priority = p_; return p_;}
+  }
+
 }
