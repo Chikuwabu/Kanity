@@ -46,13 +46,15 @@ public:
     bgList[0] = bg1;
 
     spriteList = new Sprite[100];
-    auto testtex = renderer.SDL_CreateTextureFromSurface(mapchip);
+    auto spchip = IMG_Load("SPTest.png");
+    auto testtex = renderer.SDL_CreateTextureFromSurface(spchip);
     spriteList[0] = new Sprite(testtex);
     spriteList[0].move(13, 12);
+    spriteList[0].move(130, 120, 120);
     spriteList[0].textureX = 0;
-    spriteList[0].textureY = 16;
-    spriteList[0].width = 17;
-    spriteList[0].height = 13;
+    spriteList[0].textureY = 0;
+    spriteList[0].width = 20;
+    spriteList[0].height = 16;
 
     drawFlag = true;
   }
