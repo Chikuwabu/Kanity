@@ -2,6 +2,7 @@ module kanity.core;
 
 import kanity.render;
 import kanity.event;
+import kanity.lua;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.experimental.logger;
@@ -10,7 +11,7 @@ import core.thread;
 class Engine{
   //フィールド
 private:
-  Renderer renderer;
+ public Renderer renderer;
   Event event;
 
 public:
@@ -39,6 +40,13 @@ public:
 
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
+    auto script = new LuaLibrary(this);
+    while (true)
+    {
+        auto s = std.stdio.readln();
+        if (s == "exit") break;
+        script.doString(s);
+    }
     TrenderAndEvent.join;
     return 0;
   }

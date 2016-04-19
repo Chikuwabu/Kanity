@@ -17,6 +17,14 @@ private:
   Sprite[] spriteList;
 
 public:
+  SDL_Renderer* SDLRenderer()
+  {
+      return renderer;
+  }
+  void setSprite(Sprite sprite, int number)
+  {
+      spriteList[number] = sprite;
+  }
   this(){
   }
   ~this(){
