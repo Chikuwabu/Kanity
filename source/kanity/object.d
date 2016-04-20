@@ -11,13 +11,12 @@ private:
   float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
   float z;//Z座標(描画優先度)
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
-  float draw_w, draw_h; //描画領域の幅、高さ
-  float tex_w, tex_h; //テクスチャの幅、高さ
   float glTex_w, glTex_h;
 protected:
   SDL_Renderer* renderer;
-
-public SDL_Texture* texture;
+  SDL_Texture* texture;
+  int draw_w, draw_h; //描画領域の幅、高さ
+  int tex_w, tex_h; //テクスチャの幅、高さ
 
 public:
   this(){
@@ -26,6 +25,9 @@ public:
     window.SDL_GetWindowSize(&w, &h);
     draw_w = w; draw_h = h;
     renderer = window.SDL_GetRenderer();
+    texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+
+    this.priority = 0;
   }
   ~this(){
     texture.SDL_DestroyTexture;
@@ -90,6 +92,7 @@ protected:
       return rect;
     }
     SDL_Surface* surface(SDL_Surface* surface){
+      texture.SDL_DestroyTexture;
       texture = renderer.SDL_CreateTextureFromSurface(surface);
       tex_w = surface.w; tex_h = surface.h;
       return surface;

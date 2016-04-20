@@ -42,9 +42,7 @@ public:
     SDL_Surface* mapchip = IMG_Load("BGTest2.png");
     window_.SDL_ShowWindow;
 
-    //bgList = new BG[1];
-    //bgList[0] = bg1;
-    test = new TestSP();
+    /*test = new TestSP();
     test.priority = 0;
     test.surface = mapchip;
     SDL_Rect rect;
@@ -53,7 +51,11 @@ public:
       w = mapchip.w; h = mapchip.h;
     }
     test.drawRect = rect;
-    test.texRect = rect;
+    test.texRect = rect;*/
+    auto bg1 = new BG(0, 0, mapchip);
+    
+    bgList = new BG[1];
+    bgList[0] = bg1;
 
     SDL_Delay(100);
     drawFlag = true;
@@ -66,13 +68,13 @@ public:
       glLoadIdentity();
       glOrtho(-1, 1, -1, 1, 0, 4);
 
-      test.draw;
+      //test.draw;
 
-      glFinish();
-      /+foreach(b; bgList)
+      foreach(b; bgList)
       {
-        //b.draw();
-      }+/
+        b.draw();
+      }
+      glFinish();
       renderer.SDL_RenderPresent;
       window_.SDL_GL_SwapWindow;
       //drawFlag = false;
