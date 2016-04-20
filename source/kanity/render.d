@@ -44,7 +44,7 @@ public:
 
     //bgList = new BG[1];
     //bgList[0] = bg1;
-    test = new TestSP(width, height);
+    test = new TestSP();
     test.priority = 0;
     test.surface = mapchip;
     SDL_Rect rect;

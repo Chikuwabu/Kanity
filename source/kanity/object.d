@@ -20,9 +20,12 @@ protected:
 public SDL_Texture* texture;
 
 public:
-  this(int drawArea_w,int drawArea_h){
-    draw_w = drawArea_w; draw_h = drawArea_h;
-    renderer = SDL_GL_GetCurrentWindow().SDL_GetRenderer();
+  this(){
+    SDL_Window* window = SDL_GL_GetCurrentWindow();
+    int w,h;
+    window.SDL_GetWindowSize(&w, &h);
+    draw_w = w; draw_h = h;
+    renderer = window.SDL_GetRenderer();
   }
   ~this(){
     texture.SDL_DestroyTexture;
@@ -96,9 +99,6 @@ protected:
 
 class TestSP : DrawableObject{
 public:
-  this(int drawArea_w,int drawArea_h){
-    super(drawArea_w, drawArea_h);
-  }
   ~this(){
   }
   @property{
