@@ -13,26 +13,31 @@ private:
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
   float draw_w, draw_h; //描画領域の幅、高さ
   float tex_w, tex_h; //テクスチャの幅、高さ
-  GLuint glTexture;
+  float glTex_w, glTex_h;
+protected:
+  SDL_Renderer* renderer;
+
+public SDL_Texture* texture;
 
 public:
   this(int drawArea_w,int drawArea_h){
     draw_w = drawArea_w; draw_h = drawArea_h;
+    renderer = SDL_GL_GetCurrentWindow().SDL_GetRenderer();
+  }
+  ~this(){
+    texture.SDL_DestroyTexture;
   }
 
   void draw(){
-    glBindTexture(GL_TEXTURE_2D, glTexture);
+    texture.SDL_GL_BindTexture(&glTex_w, &glTex_h);
     glBegin(GL_QUADS);
-      glVertex3f(x1, y1, z);
-      glVertex3f(x1, y2, z);
-      glVertex3f(x2, y2, z);
-      glVertex3f(x2, y1, z);
-
-      glTexCoord2f(0,0);
-      glTexCoord2f(0,1);
-      glTexCoord2f(1,1);
-      glTexCoord2f(1,0);
+      glTexCoord2f(u1 * glTex_w, v1 * glTex_h); glVertex3f(x1, y1, z);
+      glTexCoord2f(u1 * glTex_w, v2 * glTex_h); glVertex3f(x1, y2, z);
+      glTexCoord2f(u2 * glTex_w, v2 * glTex_h); glVertex3f(x2, y2, z);
+      glTexCoord2f(u2 * glTex_w, v1 * glTex_h); glVertex3f(x2, y1, z);
     glEnd();
+    texture.SDL_GL_UnbindTexture();
+    glFlush();
   }
 protected:
   @property{
@@ -82,43 +87,7 @@ protected:
       return rect;
     }
     SDL_Surface* surface(SDL_Surface* surface){
-      GLenum pixelFormat;
-
-      //Surfaceのピクセルフォーマットを得る
-      int bytesPerPixel = surface.format.BytesPerPixel;
-      /+if(bytesPerPixel == 4){ //透明度情報を持つ
-        if(surface.format.Rmask == 0x000000ff){ //色の配列
-          pixelFormat = GL_RGBA;
-        }else{
-          pixelFormat = GL_BGRA;
-        }
-      }else if(bytesPerPixel == 3){ //透明度情報を持たない
-        if(surface.format.Rmask == 0x000000ff){ //同上
-          pixelFormat = GL_RGB;
-        }else{
-          pixelFormat = GL_BGR;
-        }
-      }else{
-        //fatal("This is unsupported pixel format!");
-        //TODO:SDL_ConvertPixelsを使ってなんとかする
-        SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA8888.SDL_AllocFormat, 0);
-        pixelFormat = GL_RGBA;
-      }+/
-
-      surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-      SDL_GetError().puts();
-      pixelFormat = GL_RGBA;
-      //得た情報を使ってOpenGLのテクスチャを生成する
-      //テクスチャ生成
-      glGenTextures(1, &glTexture);
-      //バインド
-      glBindTexture(GL_TEXTURE_2D, glTexture);
-      //テクスチャフィルタ
-      //フィルタかけないほうがいいような気がする
-      //サーフェスからテクスチャイメージを作成する
-      glTexImage2D(GL_TEXTURE_2D, 0, bytesPerPixel, surface.w, surface.h, 0,
-                  pixelFormat, GL_UNSIGNED_BYTE, surface.pixels);
-
+      texture = renderer.SDL_CreateTextureFromSurface(surface);
       tex_w = surface.w; tex_h = surface.h;
       return surface;
     }

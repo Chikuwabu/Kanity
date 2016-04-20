@@ -30,6 +30,8 @@ public:
     info("Success initalization of \"SDL2\".");
     if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
     info("Success initalization of \"SDL_Image\"");
+
+    SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
     return;
   }
   ~this(){
@@ -64,7 +66,7 @@ class UnderLayer : Thread {
     {
       renderer.render();
       event.process();
-      SDL_Delay(10);
+      SDL_Delay(15);
     } while(event.isRunning);
   }
 
