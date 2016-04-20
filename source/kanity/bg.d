@@ -68,6 +68,10 @@ public:
       rectD.h = rectS.h;
       rectD.y = 0;
     }
+    with(rectS){
+      w = w/2;
+      h = h/2;
+    }
     this.texRect = rectS;
     this.drawRect = rectD;
     super.draw();
