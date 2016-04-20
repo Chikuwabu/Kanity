@@ -18,7 +18,6 @@ private:
   SDL_GLContext context;
   BG[] bgList;
   bool drawFlag;
-  TestSP test;
 
 public:
   this(){
@@ -53,7 +52,7 @@ public:
     test.drawRect = rect;
     test.texRect = rect;*/
     auto bg1 = new BG(0, 0, mapchip);
-    
+
     bgList = new BG[1];
     bgList[0] = bg1;
 

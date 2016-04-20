@@ -12,9 +12,9 @@ private:
   float z;//Z座標(描画優先度)
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
   float glTex_w, glTex_h;
+  SDL_Texture* texture_;
 protected:
   SDL_Renderer* renderer;
-  SDL_Texture* texture;
   int draw_w, draw_h; //描画領域の幅、高さ
   int tex_w, tex_h; //テクスチャの幅、高さ
 
@@ -34,14 +34,14 @@ public:
   }
 
   void draw(){
-    texture.SDL_GL_BindTexture(&glTex_w, &glTex_h);
+    texture_.SDL_GL_BindTexture(&glTex_w, &glTex_h);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * glTex_w, v1 * glTex_h); glVertex3f(x1, y1, z);
       glTexCoord2f(u1 * glTex_w, v2 * glTex_h); glVertex3f(x1, y2, z);
       glTexCoord2f(u2 * glTex_w, v2 * glTex_h); glVertex3f(x2, y2, z);
       glTexCoord2f(u2 * glTex_w, v1 * glTex_h); glVertex3f(x2, y1, z);
     glEnd();
-    texture.SDL_GL_UnbindTexture();
+    texture_.SDL_GL_UnbindTexture();
     glFlush();
   }
 protected:
@@ -97,21 +97,12 @@ protected:
       tex_w = surface.w; tex_h = surface.h;
       return surface;
     }
+    SDL_Texture* texture(){return texture_;}
+    SDL_Texture* texture(SDL_Texture* tex){
+      uint f; int a;
+      tex.SDL_QueryTexture(&f, &a, &tex_w, &tex_h);
+      texture_ = tex;
+      return tex;
+    }
   }
-}
-
-class TestSP : DrawableObject{
-public:
-  ~this(){
-  }
-  @property{
-    override SDL_Rect drawRect(){return super.drawRect;}
-    override SDL_Rect drawRect(SDL_Rect rect){super.drawRect = rect; return rect;}
-    override SDL_Rect texRect(){return super.texRect;}
-    override SDL_Rect texRect(SDL_Rect rect){super.texRect = rect; return rect;}
-    override int priority(){return super.priority;}
-    override float priority(int p_){super.priority = p_; return p_;}
-    override SDL_Surface* surface(SDL_Surface* surface){super.surface = surface; return surface;}
-  }
-
 }

@@ -2,7 +2,6 @@ module kanity.bg;
 
 import kanity.object;
 import derelict.sdl2.sdl;
-import derelict.sdl2.image;
 import std.experimental.logger;
 
 class BG : DrawableObject{
@@ -80,6 +79,7 @@ public:
 
 private:
   void setTexture(){
+    //TODO:ハードコーディングが(ry
     //転送
     SDL_Rect rectS, rectD;//source, destnation
     with(rectS){
