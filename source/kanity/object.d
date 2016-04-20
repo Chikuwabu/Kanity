@@ -21,9 +21,10 @@ protected:
 public:
   this(){
     SDL_Window* window = SDL_GL_GetCurrentWindow();
-    int w,h;
+    int w,h; float* renderScale;
     window.SDL_GetWindowSize(&w, &h);
-    draw_w = w; draw_h = h;
+    renderScale = cast(float*)window.SDL_GetWindowData("renderScale");
+    draw_w = cast(int)(cast(float)w / *renderScale); draw_h = cast(int)(cast(float)h / *renderScale);
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
 

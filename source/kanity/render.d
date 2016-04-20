@@ -18,9 +18,12 @@ private:
   SDL_GLContext context;
   BG[] bgList;
   bool drawFlag;
-
 public:
+  float renderScale = 1.0f;
   this(){
+  }
+  this(float scale){
+    renderScale = scale;
   }
   ~this(){
     window_.SDL_DestroyWindow;
@@ -35,37 +38,31 @@ public:
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
+    window_.SDL_SetWindowData("renderScale", &renderScale);
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
-    SDL_Surface* mapchip = IMG_Load("BGTest2.png");
+    SDL_Surface* mapchip = IMG_Load("BGTest.png");
     window_.SDL_ShowWindow;
 
-    /*test = new TestSP();
-    test.priority = 0;
-    test.surface = mapchip;
-    SDL_Rect rect;
-    with(rect){
-      x = 0; y = 0;
-      w = mapchip.w; h = mapchip.h;
-    }
-    test.drawRect = rect;
-    test.texRect = rect;*/
     auto bg1 = new BG(0, 0, mapchip);
 
     bgList = new BG[1];
     bgList[0] = bg1;
 
     SDL_Delay(100);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1, 1, -1, 1, 0, 4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
     drawFlag = true;
   }
   void render(){
     if(drawFlag){
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_TEXTURE_2D);
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glOrtho(-1, 1, -1, 1, 0, 4);
 
       //test.draw;
 

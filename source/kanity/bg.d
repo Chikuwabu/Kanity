@@ -21,6 +21,10 @@ public:
     setTexture();
     return;
   }
+  this(int w, int h, int x, int y, SDL_Surface* lmapChip){
+    this(x, y, lmapChip);
+    draw_w = w; draw_h = h;
+  }
   ~this(){
     bgScreen.SDL_FreeSurface;
   }
@@ -67,10 +71,6 @@ public:
       rectS.y = bg.y;
       rectD.h = rectS.h;
       rectD.y = 0;
-    }
-    with(rectS){
-      w = w/2;
-      h = h/2;
     }
     this.texRect = rectS;
     this.drawRect = rectD;

@@ -41,7 +41,7 @@ public:
 
   int run(string title, int width, int height){
     //初期化
-    renderer = new Renderer();
+    renderer = new Renderer(2.0f);
     event = new Event();
 
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
