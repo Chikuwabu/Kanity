@@ -93,6 +93,7 @@ public:
     if(drawFlag){
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_TEXTURE_2D);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       //test.draw;
 
