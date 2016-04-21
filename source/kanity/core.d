@@ -5,6 +5,8 @@ import kanity.event;
 import kanity.lua;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import derelict.opengl3.gl;
+import derelict.opengl3.gl;
 import std.experimental.logger;
 import core.thread;
 
@@ -22,10 +24,15 @@ public:
     info("Load a library \"SDL_Image\".");
     DerelictSDL2Image.load;
 
+    DerelictGL.load;
+    DerelictGL3.load;
+
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
     info("Success initalization of \"SDL2\".");
     if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
     info("Success initalization of \"SDL_Image\"");
+
+    SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
     return;
   }
   ~this(){
@@ -35,7 +42,7 @@ public:
 
   int run(string title, int width, int height){
     //初期化
-    renderer = new Renderer();
+    renderer = new Renderer(2.0f);
     event = new Event();
 
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
@@ -62,7 +69,6 @@ class UnderLayer : Thread {
     {
       renderer.render();
       event.process();
-      SDL_Delay(10);
     } while(event.isRunning);
   }
 
