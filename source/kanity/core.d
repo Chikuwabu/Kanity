@@ -66,7 +66,6 @@ class UnderLayer : Thread {
     {
       renderer.render();
       event.process();
-      SDL_Delay(15);
     } while(event.isRunning);
   }
 

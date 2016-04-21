@@ -18,8 +18,13 @@ private:
   SDL_GLContext context;
   BG[] bgList;
   bool drawFlag;
+  //もろもろの情報
+  float renderScale = 1.0f; //拡大率
+  uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
+  uint bgSizeWidth = 64; //横方向に配置するチップの数
+  uint bgSizeHeight = 64; //縦方向に配置するチップの数
+
 public:
-  float renderScale = 1.0f;
   this(){
   }
   this(float scale){
@@ -38,26 +43,26 @@ public:
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
+    //ウインドウに情報を埋めこむ
     window_.SDL_SetWindowData("renderScale", &renderScale);
+    window_.SDL_SetWindowData("bgChipSize", &bgChipSize);
+    window_.SDL_SetWindowData("bgSizeWidth", &bgSizeWidth);
+    window_.SDL_SetWindowData("bgSizeHeight", &bgSizeHeight);
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-
-    SDL_Surface* mapchip = IMG_Load("BGTest.png");
     window_.SDL_ShowWindow;
 
+    SDL_Surface* mapchip = IMG_Load("BGTest.png");
+
     auto bg1 = new BG(0, 0, mapchip);
+    bg1.renderScale = 1.0f;
 
     bgList = new BG[1];
     bgList[0] = bg1;
 
-    SDL_Delay(100);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1, 1, -1, 1, 0, 4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
     drawFlag = true;
+    SDL_Delay(100);
+    glInit;
   }
   void render(){
     if(drawFlag){
@@ -72,7 +77,7 @@ public:
       }
       glFinish();
       renderer.SDL_RenderPresent;
-      window_.SDL_GL_SwapWindow;
+      //window_.SDL_GL_SwapWindow;
       //drawFlag = false;
     }
   }
@@ -87,7 +92,11 @@ private:
                               width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
   }
 
-  void glSetup(){
-
+  //OpenGL関連初期化
+  void glInit(){
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1, 1, -1, 1, -1, 4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
 }
