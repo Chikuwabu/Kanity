@@ -69,10 +69,11 @@ public:
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     window_.SDL_ShowWindow;
 
-    SDL_Surface* mapchip = IMG_Load("BGTest.png");
+    SDL_Surface* mapchip = IMG_Load("BGTest2.png");
 
     auto bg1 = new BG(0, 0, mapchip);
-    bg1.renderScale = 1.0f;
+    version(none) bg1.renderScale = 1.0f;
+    bg1.scroll(100, 100, 120);
 
     bgList = new BG[1];
     bgList[0] = bg1;

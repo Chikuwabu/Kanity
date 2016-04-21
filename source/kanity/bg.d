@@ -14,6 +14,9 @@ public:
   //情報
   uint chipSize;
   uint sizeWidth, sizeHeight;
+  import kanity.sprite;
+  AnimationData!int xAnim;
+  AnimationData!int yAnim;
 
 public:
   this(SDL_Surface* lmapChip){
@@ -25,6 +28,8 @@ public:
     mapChip = lmapChip;
     bgScreen = SDL_CreateRGBSurface(0, chipSize * sizeWidth, chipSize * sizeHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     setTexture();
+    xAnim.ptr = &bg.x;
+    yAnim.ptr = &bg.y;
   }
   this(int x, int y, SDL_Surface* lmapChip){
     this(lmapChip);
@@ -38,8 +43,21 @@ public:
   ~this(){
     bgScreen.SDL_FreeSurface;
   }
+  bool updateFlag;
   //functions
   override public void draw(){
+      xAnim.animation;
+      yAnim.animation;
+      if (xAnim.isStarted  || yAnim.isStarted)
+      {
+          updateFlag = true;
+      }
+      //toriaezu
+      if(updateFlag)
+      {
+          setTexture();
+          updateFlag = false;
+      }
     //転送先座標の計算
     SDL_Rect rectS, rectD;
     with(rectS){
@@ -88,7 +106,13 @@ public:
     return;
   }
   void scroll(int x, int y){
+      updateFlag = true;
     bg.x += x; bg.y += y;
+  }
+
+  void scroll(int x, int y, int frame){
+      xAnim.setAnimation(x, frame);
+      yAnim.setAnimation(y, frame);
   }
 
 private:

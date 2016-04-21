@@ -11,7 +11,7 @@ struct AnimationData(T)
         return m_isStarted;
     }
     private bool m_isStarted;
-    private T* ptr;
+    public T* ptr;
     private int frame;
     private int elapse;
     private T start;
