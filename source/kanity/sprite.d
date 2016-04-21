@@ -1,4 +1,5 @@
 module kanity.sprite;
+import kanity.object;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 
@@ -40,7 +41,7 @@ struct AnimationData(T)
     }
 
 }
-class Sprite
+class Sprite : DrawableObject
 {
     public int x;
     private AnimationData!int xAnim;
@@ -62,6 +63,8 @@ class Sprite
 
     public this(Character c)
     {
+        super();
+        texture = c.m_texture;
         this.m_character = c;
         xAnim.ptr = &x;
         yAnim.ptr = &y;
@@ -99,7 +102,9 @@ class Sprite
         rectD.w = rectS.w;
         rectD.h = rectS.h;
 
-        renderer.SDL_RenderCopy(character.m_texture, &rectS, &rectD);
+        this.texRect = rectS;
+        this.drawRect = rectD;
+        super.draw();
 
         animation();
     }
