@@ -93,7 +93,7 @@ class Sprite : DrawableObject
         characterAnim.setAnimation(num, frame);
     }
 
-    public void draw(SDL_Window* window, SDL_Renderer* renderer)
+    public override void draw()
     {
         SDL_Rect rectS, rectD;
         rectS = character.definition[characterNumber].rect;

@@ -99,7 +99,7 @@ public:
       foreach(s; spriteList)
       {
           if(s)
-              s.draw(window, renderer);
+              s.draw();
       }
       foreach(b; bgList)
       {
