@@ -65,10 +65,17 @@ class UnderLayer : Thread {
   void run(string title, int width, int height, Renderer renderer, Event event){
     renderer.init(title, width, height);
     event.init();
+    auto frame1 = 1000 / 60;
     do
     {
+      auto start = cast(long)SDL_GetTicks;
       renderer.render();
       event.process();
+      auto end = cast(long)SDL_GetTicks;
+      if (end - start < frame1)
+      {
+          SDL_Delay(cast(uint)(frame1 - end + start));
+      }
     } while(event.isRunning);
   }
 
