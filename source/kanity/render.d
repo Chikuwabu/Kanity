@@ -1,6 +1,7 @@
 module kanity.render;
 
 import kanity.object;
+import kanity.sprite;
 import kanity.bg;
 
 import derelict.sdl2.sdl;
@@ -16,6 +17,7 @@ private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
   SDL_GLContext context;
+  Sprite[] spriteList;
   BG[] bgList;
   bool drawFlag;
   //もろもろの情報
@@ -26,6 +28,18 @@ private:
 
 public:
   this(){
+  } 
+  SDL_Renderer* SDLRenderer()
+  {
+      return renderer;
+  }
+  void setSprite(Sprite sprite, int number)
+  {
+      spriteList[number] = sprite;
+  }
+  Sprite getSprite(int number)
+  {
+      return spriteList[number];
   }
   this(float scale){
     renderScale = scale;
@@ -36,6 +50,9 @@ public:
     renderer.SDL_DestroyRenderer;
   }
 
+  @property{
+    public SDL_Window* window(){ return window_;}
+  }
   void init(string title, int width, int height){
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
     SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(1);
@@ -59,6 +76,14 @@ public:
 
     bgList = new BG[1];
     bgList[0] = bg1;
+    spriteList = new Sprite[100];
+    auto spchip = IMG_Load("SPTest.png");
+    auto testtex = renderer.SDL_CreateTextureFromSurface(spchip);
+    auto toriniku = new Character(20, 16, testtex);
+    spriteList[0] = new Sprite(toriniku);
+    spriteList[0].move(13, 12);
+    spriteList[0].move(130, 120, 120);
+    spriteList[0].setCharacterNumber(23, 230);
 
     drawFlag = true;
     SDL_Delay(100);
@@ -74,6 +99,11 @@ public:
       foreach(b; bgList)
       {
         b.draw();
+      }
+      foreach(s; spriteList)
+      {
+          if(s)
+              s.draw(window, renderer);
       }
       glFinish();
       renderer.SDL_RenderPresent;

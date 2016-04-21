@@ -2,6 +2,7 @@ module kanity.core;
 
 import kanity.render;
 import kanity.event;
+import kanity.lua;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
@@ -12,8 +13,8 @@ import core.thread;
 class Engine{
   //フィールド
 private:
-  Renderer renderer;
-  Event event;
+ public Renderer renderer;
+public  Event event;
 
 public:
   //コンストラクタとデコンストラクタ
@@ -46,6 +47,8 @@ public:
 
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
+    auto script = new LuaLibrary(this);
+    script.doFile("test.lua");
     TrenderAndEvent.join;
     return 0;
   }

@@ -1,13 +1,13 @@
-# RPGEngine
+# Kanity
 Simple RPG game engine.
 
 ## How to build
-1. `$ git clone git@github.com:Tosuke/RPGEngine.git` or `$ https://github.com/atnanasi/RPGEngine.git`
-2. `$ cd RPGEngine`
+1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ git clone https://github.com/Chikuwabu/Kanity.git`
+2. `$ cd Kanity`
 3. `$ dub build`
 
 ## How to run
-`$ ./bin/rpgengine`
+`$ ./bin/kanity`
 or
 `$ dub run`
 ## Build dependencies
@@ -24,5 +24,5 @@ or
 - OpenGL3
 
 ## License
-This software is released under the MIT License, see LICENSE.  
-Copyright (c) 2016 Chikuwabu
+This software is released under the MIT License, see [LICENSE](LICENSE).  
+Copyright (c) 2016 [Chikuwabu](http://tkwb.otyakai.xyz)

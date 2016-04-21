@@ -3,6 +3,7 @@
   "dependencies":{
     "derelict-sdl2":"*",
     "derelict-gl3":"*",
+    "luad": "~master"
   },
   "targetPath":"bin",
   "workingDirectory":"bin",
