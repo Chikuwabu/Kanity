@@ -12,7 +12,7 @@ class Engine{
   //フィールド
 private:
  public Renderer renderer;
-  Event event;
+public  Event event;
 
 public:
   //コンストラクタとデコンストラクタ
@@ -41,12 +41,7 @@ public:
     auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
     auto script = new LuaLibrary(this);
-    while (true)
-    {
-        auto s = std.stdio.readln();
-        if (s == "exit") break;
-        script.doString(s);
-    }
+    script.doFile("test.lua");
     TrenderAndEvent.join;
     return 0;
   }

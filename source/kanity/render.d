@@ -25,6 +25,10 @@ public:
   {
       spriteList[number] = sprite;
   }
+  Sprite getSprite(int number)
+  {
+      return spriteList[number];
+  }
   this(){
   }
   ~this(){
