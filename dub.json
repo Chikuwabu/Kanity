@@ -1,9 +1,9 @@
 {
-  "name":"rpgengine",
+  "name":"kanity",
   "dependencies":{
-    "derelict-sdl2": "~master",
-    "luad": "~master",
+    "derelict-sdl2":"*",
     "derelict-gl3":"*",
+    "luad": "~master"
   },
   "targetPath":"bin",
   "workingDirectory":"bin",

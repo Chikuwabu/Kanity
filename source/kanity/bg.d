@@ -10,7 +10,12 @@ private:
   SDL_Rect bg;
   Character character;
   int[] mapData;
+
   SDL_Surface* bgScreen;
+  //TODO:インポートしてる目的とインポート元が一致してない
+  import kanity.sprite;
+  AnimationData!int xAnim;
+  AnimationData!int yAnim;
 public:
   //情報
   uint chipSize;
@@ -35,13 +40,26 @@ public:
   }
   this(int w, int h, int x, int y, Character chara){
     this(x, y, chara);
-    drawWidth = w; drawHeight = h;
+    xAnim.ptr = &bg.x;
+    yAnim.ptr = &bg.y;
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
   }
+
+  bool updateFlag;
   //functions
-  override public void draw(){
+  override void draw(){
+    xAnim.animation;
+    yAnim.animation;
+    if (xAnim.isStarted  || yAnim.isStarted){
+        updateFlag = true;
+    }
+    //toriaezu
+    if(updateFlag){
+        setTexture();
+        updateFlag = false;
+    }
     //転送先座標の計算
     SDL_Rect rectS, rectD;
     with(rectS){
@@ -90,7 +108,13 @@ public:
     return;
   }
   void scroll(int x, int y){
+    updateFlag = true;
     bg.x += x; bg.y += y;
+  }
+
+  void scroll(int x, int y, int frame){
+      xAnim.setAnimation(x, frame);
+      yAnim.setAnimation(y, frame);
   }
 
 private:

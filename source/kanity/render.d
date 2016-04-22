@@ -3,6 +3,7 @@ module kanity.render;
 import kanity.bg;
 import kanity.sprite;
 import kanity.character;
+
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
@@ -16,9 +17,10 @@ private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
   SDL_GLContext context;
+
+  Sprite[] spriteList;
   BG[] bgList;
   bool drawFlag;
-  Sprite[] spriteList;
   //もろもろの情報
   float renderScale = 1.0f; //拡大率
   uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
@@ -26,18 +28,6 @@ private:
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
 
 public:
-  SDL_Renderer* SDLRenderer()
-  {
-      return renderer;
-  }
-  /*void setSprite(Sprite sprite, int number)
-  {
-      spriteList[number] = sprite;
-  }
-  Sprite getSprite(int number)
-  {
-      return spriteList[number];
-  }*/
   this(){
   }
   this(float scale){
@@ -45,11 +35,13 @@ public:
   }
   ~this(){
     window_.SDL_DestroyWindow;
+    context = SDL_GL_DeleteContext;
     renderer.SDL_DestroyRenderer;
   }
 
   @property{
     public SDL_Window* window(){ return window_;}
+    public SDL_Renderer* SDLRenderer(){return renderer;}
   }
   void init(string title, int width, int height){
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
@@ -82,12 +74,13 @@ public:
     bg1.priority = 256;
     bgList = new BG[1];
     bgList[0] = bg1;
+    //Rbg1.scroll(100, 100, 120);
 
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
     spriteList = new Sprite[1];
     spriteList[0] = new Sprite(spchip, 0, 0, 0);
-    spriteList[0].priority = 255;
+    spriteList[0].priority = 0;
     spriteList[0].characterNum = 1;
     spriteList[0].move(13, 12);
     //spriteList[0].move(130, 120, 120);
@@ -98,23 +91,20 @@ public:
   }
   void render(){
     if(drawFlag){
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_TEXTURE_2D);
-      glAlphaFunc(GL_GEQUAL, 0.1f);
-      glEnable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      foreach(b; bgList)
-      {
-        b.draw();
-      }
       foreach(s; spriteList)
       {
           if(s)
               s.draw();
       }
+      foreach(b; bgList)
+      {
+        b.draw();
+      }
+      glFinish();
       renderer.SDL_RenderPresent;
+      window_.SDL_GL_SwapWindow;
+      //drawFlag = false;
     }
   }
 
@@ -133,5 +123,12 @@ private:
     glLoadIdentity();
     glOrtho(-1, 1, -1, 1, -1, 4);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glAlphaFunc(GL_GEQUAL, 0.1f);
+    glEnable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   }
 }

@@ -12,7 +12,7 @@ struct AnimationData(T)
         return m_isStarted;
     }
     private bool m_isStarted;
-    private T* ptr;
+    public T* ptr;
     private int frame;
     private int elapse;
     private T start;
@@ -44,26 +44,47 @@ struct AnimationData(T)
 }
 class Sprite : DrawableObject{
 private:
-  Character character_;
-  uint charaNum_;
-  string charaString_;
+    Character character_;
+    uint charaNum_;
+    string charaString_;
+    AnimationData!int xAnim;
+    AnimationData!int yAnim;
 
-public:
-  this(Character chara, int x, int y, uint charaNum){
-    super();
-    character_ = chara;
-    this.surface = character_.surface;
-    this.characterNum = charaNum;
-    this.move(x, y);
-  }
-  void move(int x, int y){
-    SDL_Rect rect;
-    rect.x = x; rect.y = y;
-    rect.w = texRect.w; rect.h = texRect.h;
-    this.drawRect = rect;
-  }
-  @property{
-    void characterNum(uint a){this.texRect = character_.getWithNum(a);}
-    void characterString(string s){this.texRect = character_.getWithString(s);}
-  }
+    AnimationData!int characterAnim;
+    int characterNumber;
+
+  public:
+    this(Character chara, int x, int y, uint charaNum){
+      super();
+      character_ = chara;
+      this.surface = character_.surface;
+      this.characterNum = charaNum;
+      this.move(x, y);
+    }
+    void move(int x, int y){
+      SDL_Rect rect;
+      rect.x = x; rect.y = y;
+      rect.w = texRect.w; rect.h = texRect.h;
+      this.drawRect = rect;
+    }
+    void move(int ax, int ay, int frame){
+        xAnim.setAnimation(ax, frame);
+        yAnim.setAnimation(ay, frame);
+    }
+    @property{
+      void characterNum(uint a){this.texRect = character_.getWithNum(a);}
+      void characterString(string s){this.texRect = character_.getWithString(s);}
+    }
+
+    public override void draw(){
+        super.draw();
+        animation();
+    }
+
+    void animation()
+    {
+        xAnim.animation();
+        yAnim.animation();
+        characterAnim.animation();
+    }
 }
