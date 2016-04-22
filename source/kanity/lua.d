@@ -5,6 +5,7 @@ import kanity.bg;
 import kanity.sprite;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import std.string;
 
 class LuaLibrary
 {
@@ -12,16 +13,16 @@ class LuaLibrary
     {
         auto spchip = IMG_Load(texturefile.toStringz);
         auto testtex = SDL_CreateTextureFromSurface(engine.renderer.SDLRenderer, spchip);
-        auto toriniku = new Character(width, height, testtex);
-        engine.renderer.setSprite(new Sprite(toriniku), no);
+        //auto toriniku = new Character(width, height, testtex);
+        //engine.renderer.setSprite(new Sprite(toriniku), no);
     }
     void moveSprite(int no, int x, int y)
     {
-        engine.renderer.getSprite(no).move(x, y);
+        //engine.renderer.getSprite(no).move(x, y);
     }
     void moveSpriteAnimation(int no, int x, int y, int frame)
     {
-        engine.renderer.getSprite(no).move(x, y, frame);
+        //engine.renderer.getSprite(no).move(x, y, frame);
     }
     void setLeftButtonEvent(LuaFunction luafunc)
     {
@@ -54,7 +55,7 @@ class LuaLibrary
         lua["setLeftButtonEvent"] = &setLeftButtonEvent;
 
         lua["test"] = &test;
-        
+
     }
     void doFile(string name)
     {

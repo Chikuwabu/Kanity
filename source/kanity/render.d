@@ -2,8 +2,11 @@ module kanity.render;
 
 import kanity.bg;
 import kanity.sprite;
+import kanity.character;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import derelict.opengl3.gl;
+import derelict.opengl3.gl3;
 import std.experimental.logger;
 import std.string;
 
@@ -12,24 +15,33 @@ class Renderer{
 private:
   SDL_Window* window_;
   SDL_Renderer* renderer;
+  SDL_GLContext context;
   BG[] bgList;
   bool drawFlag;
   Sprite[] spriteList;
+  //もろもろの情報
+  float renderScale = 1.0f; //拡大率
+  uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
+  uint bgSizeWidth = 64; //横方向に配置するチップの数
+  uint bgSizeHeight = 64; //縦方向に配置するチップの数
 
 public:
   SDL_Renderer* SDLRenderer()
   {
       return renderer;
   }
-  void setSprite(Sprite sprite, int number)
+  /*void setSprite(Sprite sprite, int number)
   {
       spriteList[number] = sprite;
   }
   Sprite getSprite(int number)
   {
       return spriteList[number];
-  }
+  }*/
   this(){
+  }
+  this(float scale){
+    renderScale = scale;
   }
   ~this(){
     window_.SDL_DestroyWindow;
@@ -40,37 +52,60 @@ public:
     public SDL_Window* window(){ return window_;}
   }
   void init(string title, int width, int height){
+    SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
+    SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(1);
+
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
-    renderer = window_.SDL_CreateRenderer( -1, 0 );
+
+    //ウインドウに情報を埋めこむ
+    window_.SDL_SetWindowData("renderScale", &renderScale);
+    window_.SDL_SetWindowData("bgChipSize", &bgChipSize);
+    window_.SDL_SetWindowData("bgSizeWidth", &bgSizeWidth);
+    window_.SDL_SetWindowData("bgSizeHeight", &bgSizeHeight);
+
+    renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
     info("Success to create renderer.");
-    renderer.SDL_SetRenderDrawColor(255, 255, 255, 255);
-
-    auto mapchip = IMG_Load("BGTest2.png");
-    auto tex = renderer.SDL_CreateTextureFromSurface(window_.SDL_GetWindowSurface);
-    renderer.SDL_RenderCopy(tex, null, null);
     window_.SDL_ShowWindow;
 
-    auto bg1 = new BG(window_, 0, 0, mapchip);
+    auto mapchip = IMG_Load("BGTest2.png");
+    SDL_Rect[] rect; rect.length = 1;
+    with(rect[0]){
+      x = 32; y = 0;
+      w = 16; h = 16;
+    }
+    auto chara = new Character(mapchip,rect);
+
+    auto bg1 = new BG(chara);
+    bg1.priority = 256;
     bgList = new BG[1];
     bgList[0] = bg1;
 
-    spriteList = new Sprite[100];
-    auto spchip = IMG_Load("SPTest.png");
-    auto testtex = renderer.SDL_CreateTextureFromSurface(spchip);
-    auto toriniku = new Character(20, 16, testtex);
-    spriteList[0] = new Sprite(toriniku);
+    //spriteList = new Sprite[100];
+    auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
+    spriteList = new Sprite[1];
+    spriteList[0] = new Sprite(spchip, 0, 0, 0);
+    spriteList[0].priority = 255;
+    spriteList[0].characterNum = 1;
     spriteList[0].move(13, 12);
-    spriteList[0].move(130, 120, 120);
-    spriteList[0].setCharacterNumber(23, 230);
+    //spriteList[0].move(130, 120, 120);
+    //spriteList[0].setCharacterNumber(23, 230);
 
     drawFlag = true;
+    SDL_Delay(100);
+    glInit;
   }
   void render(){
     if(drawFlag){
-      renderer.SDL_RenderClear;
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_TEXTURE_2D);
+      glAlphaFunc(GL_GEQUAL, 0.1f);
+      glEnable(GL_ALPHA_TEST);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
       foreach(b; bgList)
       {
         b.draw();
@@ -78,7 +113,7 @@ public:
       foreach(s; spriteList)
       {
           if(s)
-              s.draw(window, renderer);
+              s.draw();
       }
       renderer.SDL_RenderPresent;
     }
@@ -91,6 +126,13 @@ public:
 private:
   SDL_Window* createWindow(string title, int width, int height){
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              width, height, SDL_WINDOW_HIDDEN);
+                              width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+  }
+  //OpenGL関連初期化
+  void glInit(){
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1, 1, -1, 1, -1, 4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
 }

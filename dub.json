@@ -2,7 +2,8 @@
   "name":"rpgengine",
   "dependencies":{
     "derelict-sdl2": "~master",
-    "luad": "~master"
+    "luad": "~master",
+    "derelict-gl3":"*",
   },
   "targetPath":"bin",
   "workingDirectory":"bin",

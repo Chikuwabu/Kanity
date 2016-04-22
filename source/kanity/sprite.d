@@ -1,6 +1,8 @@
 module kanity.sprite;
+
 import derelict.sdl2.sdl;
-import derelict.sdl2.image;
+import kanity.object;
+import kanity.character;
 
 //なんかとりあえず実装
 struct AnimationData(T)
@@ -40,123 +42,28 @@ struct AnimationData(T)
     }
 
 }
-class Sprite
-{
-    public int x;
-    private AnimationData!int xAnim;
-    public int y;
-    private AnimationData!int yAnim;
+class Sprite : DrawableObject{
+private:
+  Character character_;
+  uint charaNum_;
+  string charaString_;
 
-    private AnimationData!int characterAnim;
-    public int characterNumber;
-    private Character m_character;
-    public Character character()
-    {
-        return m_character;
-    }
-    public void character(Character c)
-    {
-        m_character = c;
-    }
-
-
-    public this(Character c)
-    {
-        this.m_character = c;
-        xAnim.ptr = &x;
-        yAnim.ptr = &y;
-        characterAnim.ptr = &characterNumber;
-    }
-
-    public void move(int x, int y)
-    {
-        this.x = x;
-        this.y = y;
-    }
-
-    public void move(int ax, int ay, int frame)
-    {
-        xAnim.setAnimation(ax, frame);
-        yAnim.setAnimation(ay, frame);
-    }
-
-    public void setCharacterNumber(int num)
-    {
-        characterNumber = num;
-    }
-
-    public void setCharacterNumber(int num, int frame)
-    {
-        characterAnim.setAnimation(num, frame);
-    }
-
-    public void draw(SDL_Window* window, SDL_Renderer* renderer)
-    {
-        SDL_Rect rectS, rectD;
-        rectS = character.definition[characterNumber].rect;
-        rectD.x = x;
-        rectD.y = y;
-        rectD.w = rectS.w;
-        rectD.h = rectS.h;
-
-        renderer.SDL_RenderCopy(character.m_texture, &rectS, &rectD);
-
-        animation();
-    }
-
-    void animation()
-    {
-        xAnim.animation();
-        yAnim.animation();
-        characterAnim.animation();
-    }
-}
-
-struct CharacterData
-{
+public:
+  this(Character chara, int x, int y, uint charaNum){
+    super();
+    character_ = chara;
+    this.surface = character_.surface;
+    this.characterNum = charaNum;
+    this.move(x, y);
+  }
+  void move(int x, int y){
     SDL_Rect rect;
-    int rotation;
-    double scaleX;
-    double scaleY;
-}
-
-class Character
-{
-    public CharacterData[] definition;
-    private SDL_Texture* m_texture;
-    public SDL_Texture* texture()
-    {
-        return m_texture;
-    }
-    //自動分割
-    public this(int width, int height, SDL_Texture* tex)
-    {
-        int textureWidth;
-        int textureHeight;
-        uint f;
-        int a;
-        SDL_QueryTexture(tex, &f, &a, &textureWidth, &textureHeight);
-        int widthcount = textureWidth / width;
-        int heightcount = textureHeight / height;
-        int chrcount = widthcount * heightcount;
-        definition = new CharacterData[chrcount];
-        CharacterData initialdata = CharacterData();
-        initialdata.rect.w = width;
-        initialdata.rect.h = height;
-        initialdata.rotation = 0;
-        initialdata.scaleX = 1;
-        initialdata.scaleY = 1;
-        definition[] = initialdata;
-        int i;
-        for (int y = 0; y < heightcount; y++)
-        {
-            for (int x = 0; x < widthcount; x++)
-            {
-                definition[i].rect.x = x * width;
-                definition[i].rect.y = y * height;
-                i++;
-            }
-        }
-        m_texture = tex;
-    }
+    rect.x = x; rect.y = y;
+    rect.w = texRect.w; rect.h = texRect.h;
+    this.drawRect = rect;
+  }
+  @property{
+    void characterNum(uint a){this.texRect = character_.getWithNum(a);}
+    void characterString(string s){this.texRect = character_.getWithString(s);}
+  }
 }
