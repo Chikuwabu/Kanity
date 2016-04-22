@@ -40,12 +40,16 @@ public:
     IMG_Quit();
   }
 
+  protected UnderLayer createUnderLayer(string title, int width, int height, Renderer renderer, Event event)
+  {
+      return new UnderLayer(title, width, height, renderer, event);
+  }
   int run(string title, int width, int height){
     //初期化
     renderer = new Renderer(2.0f);
     event = new Event();
 
-    auto TrenderAndEvent = new UnderLayer(title, width, height, renderer, event);
+    auto TrenderAndEvent = createUnderLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
     auto script = new LuaLibrary(this);
     script.doFile("test.lua");
