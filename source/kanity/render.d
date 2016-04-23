@@ -72,19 +72,20 @@ public:
 
     auto bg1 = new BG(chara);
     bg1.priority = 256;
+    bg1.scroll(-50, -50);
     bgList = new BG[1];
     bgList[0] = bg1;
-    //Rbg1.scroll(100, 100, 120);
 
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
     spriteList = new Sprite[1];
-    spriteList[0] = new Sprite(spchip, 0, 0, 0);
-    spriteList[0].priority = 0;
-    spriteList[0].characterNum = 1;
-    spriteList[0].scale = 1.5;
-    spriteList[0].move(13, 12);
+    auto sp = new Sprite(spchip, 14, 13, 0);
+    sp.priority = 0;
+    sp.characterNum = 1;
+    sp.scale = 1.0;
+    sp.move(13, 14);
     //spriteList[0].move(130, 120, 120);
+    spriteList[0] = sp;
 
     drawFlag = true;
     SDL_Delay(100);

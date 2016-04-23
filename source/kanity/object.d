@@ -53,22 +53,35 @@ public:
     glFlush();
   }
 
-  @property{
+  void move(int x, int y){
+    auto rect = drawRect;
+    rect.x += x; rect.y += y;
+    drawRect = rect;
+  }
+
   public:
+  @property{
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
     float priority(int p_){return z = 1.0 - (p_ / 256);}
 
+    //描画される大きさ(倍率)
     float scale(){return scale_;}
-    float scale(float s){
+    void scale(float s){
       scale_ = s;
       SDL_Rect rect = this.drawRect;
       drawWidth = cast(int)(drawWidthOrigin / (scale_ * scaleOrigin));
       drawHeight = cast(int)(drawHeightOrigin / (scale_ * scaleOrigin));
       this.drawRect = rect;
-      return scale;
     }
+    //描画先座標
+    int posX(){ return drawRect.x; }
+    int posY(){ return drawRect.y; }
+    void posX(int n){ auto rect = drawRect; rect.x = n; drawRect = rect; }
+    void posY(int n){ auto rect = drawRect; rect.y = n; drawRect = rect; }
+  }
 
   protected:
+  @property{
     //描画先領域
     SDL_Rect drawRect(){
       SDL_Rect rect;
@@ -80,7 +93,7 @@ public:
       }
       return rect;
     }
-    SDL_Rect drawRect(SDL_Rect rect){
+    void drawRect(SDL_Rect rect){
       with(rect){
         //座標系の変換
         x1 = (cast(float)x / drawWidth * 2) - 1;
@@ -88,7 +101,6 @@ public:
         x2 = (cast(float)(x + w) / drawWidth * 2) - 1;
         y2 = 1 - (cast(float)(y + h) / drawHeight * 2);
       }
-      return rect;
     }
 
     //サーフェスの描画に使う領域
@@ -102,14 +114,13 @@ public:
       }
       return rect;
     }
-    SDL_Rect texRect(SDL_Rect rect){
+    void texRect(SDL_Rect rect){
       with(rect){
         u1 = cast(float)x / texWidth;
         v1 = cast(float)y / texHeight;
         u2 = cast(float)(x + w) / texWidth;
         v2 = cast(float)(y + h) / texHeight;
       }
-      return rect;
     }
     SDL_Surface* surface(SDL_Surface* surface){
       texture.SDL_DestroyTexture;

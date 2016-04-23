@@ -21,19 +21,14 @@ private:
       super();
       character_ = chara;
       this.surface = character_.surface;
+      this.posX = x; this.posY = y;
       this.characterNum = charaNum;
-      this.move(x, y);
     }
-    void move(int x, int y){
-      SDL_Rect rect;
-      rect.x = x; rect.y = y;
-      rect.w = drawRect.w; rect.h = drawRect.h;
-      this.drawRect = rect;
-    }
-    void move(int ax, int ay, int frame){
-        //xAnim.setAnimation(ax, frame);
-        //yAnim.setAnimation(ay, frame);
-    }
+    /*void move(int ax, int ay, int frame){
+        xAnim.setAnimation(ax, frame);
+        yAnim.setAnimation(ay, frame);
+    }*/
+
     @property{
       void characterNum(uint a){
         this.texRect = character_.getWithNum(a);
