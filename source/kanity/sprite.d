@@ -3,6 +3,7 @@ module kanity.sprite;
 import derelict.sdl2.sdl;
 import kanity.object;
 import kanity.character;
+import kanity.animation;
 import std.experimental.logger;
 
 class Sprite : DrawableObject{
@@ -10,8 +11,9 @@ private:
     Character character_;
     uint charaNum_;
     string charaString_;
-    //AnimationData!int xAnim;
-    //AnimationData!int yAnim;
+    AnimationData!int xAnim;
+    AnimationData!int yAnim;
+    AnimationData!float scaleAnim;
 
     //AnimationData!int characterAnim;
     int characterNumber;
@@ -22,21 +24,33 @@ private:
       character_ = chara;
       this.surface = character_.surface;
       this.posX = x; this.posY = y;
-      this.characterNum = charaNum;
+      this.character = charaNum;
+
+      xAnim.setter = &posX; xAnim.getter = &posX;
+      yAnim.setter = &posY; yAnim.getter = &posY;
+      scaleAnim.setter = &scale; scaleAnim.getter = &scale;
     }
-    /*void move(int ax, int ay, int frame){
-        xAnim.setAnimation(ax, frame);
-        yAnim.setAnimation(ay, frame);
-    }*/
+    void move(int ax, int ay, int frame){
+        xAnim.setAnimation(ax + posX, frame);
+        yAnim.setAnimation(ay + posY, frame);
+    }
+    void scaleAnimation(float as, int frame){
+      scaleAnim.setAnimation(as + scale, frame);
+    }
 
     @property{
-      void characterNum(uint a){
-        this.texRect = character_.getWithNum(a);
+      void character(uint a){
+        this.texRect = character_.get(a);
         auto rect = this.drawRect;
         rect.w = this.texRect.w; rect.h = this.texRect.h;
         this.drawRect = rect;
       }
-      void characterString(string s){this.texRect = character_.getWithString(s);}
+      void character(string s){
+        this.texRect = character_.get(s);
+        auto rect = this.drawRect;
+        rect.w = this.texRect.w; rect.h = this.texRect.h;
+        this.drawRect = rect;
+      }
     }
 
     public override void draw(){
@@ -46,8 +60,9 @@ private:
 
     private void animation()
     {
-        //xAnim.animation();
-        //yAnim.animation();
+        xAnim.animation();
+        yAnim.animation();
+        scaleAnim.animation();
         //characterAnim.animation();
     }
 }

@@ -62,15 +62,16 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto mapchip = IMG_Load("BGTest2.png");
     SDL_Rect[] rect; rect.length = 1;
     with(rect[0]){
-      x = 32; y = 0;
+      x = 64; y = 0;
       w = 16; h = 16;
     }
-    auto chara = new Character(mapchip,rect);
-
-    auto bg1 = new BG(chara);
+    auto chara = new Character(IMG_Load("BGTest2.png"),rect);
+    auto a = chara.add(64, 0);
+    int[64*64] m;
+    m[] = a;
+    auto bg1 = new BG(chara, m);
     bg1.priority = 256;
     bg1.scroll(-50, -50);
     bgList = new BG[1];
@@ -79,12 +80,13 @@ public:
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
     spriteList = new Sprite[1];
-    auto sp = new Sprite(spchip, 14, 13, 0);
+    auto sp = new Sprite(spchip, 50, 50, 0);
     sp.priority = 0;
-    sp.characterNum = 1;
+    sp.character = 0;
     sp.scale = 1.0;
-    sp.move(13, 14);
-    //spriteList[0].move(130, 120, 120);
+    sp.scale.log;
+    //sp.move(13, 14);
+    sp.scaleAnimation(2.0,60);
     spriteList[0] = sp;
 
     drawFlag = true;

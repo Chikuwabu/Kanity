@@ -13,8 +13,8 @@ private:
 
   SDL_Surface* bgScreen;
   import kanity.animation;
-  AnimationData!int xAnim;
-  AnimationData!int yAnim;
+  //AnimationData!int xAnim;
+  //AnimationData!int yAnim;
 public:
   //情報
   uint chipSize;
@@ -41,14 +41,12 @@ public:
   }
   this(int x, int y, Character chara){
     this(chara);
-    //bg.x = x; bg.y = y;
     scroll(x, y);
     return;
   }
-  this(int w, int h, int x, int y, Character chara){
-    this(x, y, chara);
-    xAnim.ptr = &bg.x;
-    yAnim.ptr = &bg.y;
+  this(Character chara, int[] mapData_){
+    this(chara);
+    mapData[] = mapData_[];
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
@@ -57,9 +55,9 @@ public:
   bool updateFlag;
   //functions
   override void draw(){
-    xAnim.animation;
-    yAnim.animation;
-    if (xAnim.isStarted  || yAnim.isStarted){
+    //xAnim.animation;
+    //yAnim.animation;
+    /*if (xAnim.isStarted  || yAnim.isStarted){
         updateFlag = true;
     }
     //toriaezu
@@ -78,8 +76,8 @@ public:
   }
 
   void scroll(int x, int y, int frame){
-      xAnim.setAnimation(x, frame);
-      yAnim.setAnimation(y, frame);
+      //xAnim.setAnimation(x, frame);
+      //yAnim.setAnimation(y, frame);
   }
   @property{
     override int posX(){ return bg.x; }
@@ -117,18 +115,15 @@ private:
   void setTexture(){
     //転送
     SDL_Rect rectS, rectD;//source, destnation
-    with(rectS){
-      x = 0; y = 0;
-      w = chipSize; h = chipSize;
-    }
     with(rectD){
       x = 0; y = 0;
       w = chipSize; h = chipSize;
     }
     for(int x = 0; x < sizeWidth; x++){
       for(int y = 0; y < sizeHeight; y++){
+        rectS = character.get(mapData[x * sizeHeight + y]);
         rectD.x = x * chipSize; rectD.y = y * chipSize;
-        SDL_BlitSurface(character.surface, &(character.characters[mapData[x * sizeHeight + y]]), bgScreen, &rectD);
+        SDL_BlitSurface(character.surface, &rectS, bgScreen, &rectD);
       }
     }
     super.surface = bgScreen;
