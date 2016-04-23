@@ -45,7 +45,7 @@ public:
   }
   void init(string title, int width, int height){
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
-    SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(1);
+    SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(true);
 
     window_ = createWindow(title, width, height);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
@@ -58,7 +58,7 @@ public:
     window_.SDL_SetWindowData("bgSizeHeight", &bgSizeHeight);
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-    if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.\n%s", SDL_GetError());
+    if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.");
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
