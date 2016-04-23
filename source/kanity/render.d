@@ -82,6 +82,7 @@ public:
     spriteList[0] = new Sprite(spchip, 0, 0, 0);
     spriteList[0].priority = 0;
     spriteList[0].characterNum = 1;
+    spriteList[0].scale = 1.5;
     spriteList[0].move(13, 12);
     //spriteList[0].move(130, 120, 120);
 

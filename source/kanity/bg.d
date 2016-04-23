@@ -12,8 +12,7 @@ private:
   int[] mapData;
 
   SDL_Surface* bgScreen;
-  //TODO:インポートしてる目的とインポート元が一致してない
-  import kanity.sprite;
+  import kanity.animation;
   AnimationData!int xAnim;
   AnimationData!int yAnim;
 public:

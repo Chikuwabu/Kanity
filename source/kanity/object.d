@@ -14,7 +14,7 @@ private:
   float drawWidthOrigin, drawHeightOrigin;
   float gltexWidth, gltexHeight;
   SDL_Texture* texture_;
-  float scale_;
+  float scale_ = 1.0f, scaleOrigin;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -27,7 +27,10 @@ public:
     int w, h;
     window.SDL_GetWindowSize(&w, &h);
     drawWidthOrigin = w; drawHeightOrigin = h;
-    renderScale = *(cast(float*)window.SDL_GetWindowData("renderScale"));
+
+    scaleOrigin = *(cast(float*)window.SDL_GetWindowData("renderScale"));
+    drawWidth = cast(int)(drawWidthOrigin / (scale_ * scaleOrigin));
+    drawHeight = cast(int)(drawHeightOrigin / (scale_ * scaleOrigin));
 
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
@@ -55,11 +58,13 @@ public:
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
     float priority(int p_){return z = 1.0 - (p_ / 256);}
 
-    float renderScale(){return scale_;}
-    float renderScale(float scale){
-      scale_ = scale;
-      drawWidth = cast(int)(drawWidthOrigin / scale_);
-      drawHeight = cast(int)(drawHeightOrigin / scale_);
+    float scale(){return scale_;}
+    float scale(float s){
+      scale_ = s;
+      SDL_Rect rect = this.drawRect;
+      drawWidth = cast(int)(drawWidthOrigin / (scale_ * scaleOrigin));
+      drawHeight = cast(int)(drawHeightOrigin / (scale_ * scaleOrigin));
+      this.drawRect = rect;
       return scale;
     }
 
@@ -68,10 +73,10 @@ public:
     SDL_Rect drawRect(){
       SDL_Rect rect;
       with(rect){
-        x = cast(int)((1 + x1) * drawWidth / 2);
-        y = cast(int)((1 - y1) * drawHeight / 2);
-        w = cast(int)((1 + (x2 - x1)) * drawWidth / 2);
-        h = cast(int)((1 - (y2 - y1)) * drawHeight / 2);
+        x = cast(int)((1 + x1) / 2 * drawWidth);
+        y = cast(int)((1 - y1) / 2 * drawHeight);
+        w = cast(int)(((1 + x2) - (1 + x1)) / 2 * drawWidth);
+        h = cast(int)(((1 - y2) - (1 - y1)) / 2 * drawHeight);
       }
       return rect;
     }
