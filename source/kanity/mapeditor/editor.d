@@ -31,8 +31,14 @@ class EditorUnderLayer : UnderLayer
         super(title, width, height, renderer, event);
     }
 
-    override void run(string title, int width, int height, Renderer renderer, Event event)
+    override void init()
     {
-        super.run(title, width, height, renderer, event);
+        super.init();
+        renderer.clear();
+    }
+
+    override void run()
+    {
+        super.run();
     }
 }

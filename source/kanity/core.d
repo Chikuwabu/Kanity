@@ -59,31 +59,45 @@ public:
 }
 
 class UnderLayer : Thread {
-  private bool running;
+    private bool running;
+    string title;
+    int width;
+    int height;
+    Renderer renderer;
+    Event event;
+    this(string title, int width, int height, Renderer renderer, Event event){
+        running = true;
+        this.title = title;
+        this.width = width;
+        this.height = height;
+        this.renderer = renderer;
+        this.event = event;
+        super(&run);
+    }
 
-  this(string title, int width, int height, Renderer renderer, Event event){
-    running = true;
-    super(() => run(title, width, height, renderer, event));
-  }
-
-  void run(string title, int width, int height, Renderer renderer, Event event){
-    renderer.init(title, width, height);
-    event.init();
-    auto frame1 = 1000 / 60;
-    do
+    protected void init()
     {
-      auto start = cast(long)SDL_GetTicks;
-      renderer.render();
-      event.process();
-      auto end = cast(long)SDL_GetTicks;
-      if (end - start < frame1)
-      {
-          SDL_Delay(cast(uint)(frame1 - end + start));
-      }
-    } while(event.isRunning);
-  }
+        renderer.init(title, width, height);
+        event.init();
+    }
 
-  void stop(){
-    running = false;
-  }
+    void run(){
+        init();
+        auto frame1 = 1000 / 60;
+        do
+        {
+            auto start = cast(long)SDL_GetTicks;
+            renderer.render();
+            event.process();
+            auto end = cast(long)SDL_GetTicks;
+            if (end - start < frame1)
+            {
+                SDL_Delay(cast(uint)(frame1 - end + start));
+            }
+        } while(event.isRunning);
+    }
+
+    void stop(){
+        running = false;
+    }
 }

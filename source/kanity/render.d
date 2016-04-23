@@ -33,6 +33,7 @@ public:
   {
       return renderer;
   }
+  //とりあえず番号で管理している
   void setSprite(Sprite sprite, int number)
   {
       spriteList[number] = sprite;
@@ -40,6 +41,11 @@ public:
   Sprite getSprite(int number)
   {
       return spriteList[number];
+  }
+  void clear()
+  {
+      bgList[] = null;
+      spriteList[] = null;
   }
   this(float scale){
     renderScale = scale;
@@ -108,7 +114,8 @@ public:
       }
       foreach(b; bgList)
       {
-        b.draw();
+        if (b)
+            b.draw();
       }
       glFinish();
       renderer.SDL_RenderPresent;
