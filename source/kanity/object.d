@@ -24,9 +24,9 @@ protected:
 public:
   this(){
     window = SDL_GL_GetCurrentWindow();
-    int w, h;
-    window.SDL_GetWindowSize(&w, &h);
-    drawWidth = w; drawHeight = h;
+
+    drawWidth = *cast(uint*)kanity.render.Renderer.getData("windowWidth");
+    drawHeight = *cast(uint*)kanity.render.Renderer.getData("windowHeight");
 
     scaleOrigin = *cast(float*)kanity.render.Renderer.getData("renderScale");
 

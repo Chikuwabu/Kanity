@@ -21,12 +21,17 @@ private:
   Sprite[] spriteList;
   BG[] bgList;
   bool drawFlag;
+  static void*[string] data;
+public:
   //もろもろの情報
+  uint windowWidth = 640; //ウインドウのサイズ
+  uint windowHeight = 480;
+  string title = "Kanity"; //ウインドウタイトル
+  bool isFullScreen = false; //フルスクリーンにするかどうか
   float renderScale = 1.0f; //拡大率
   uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
   uint bgSizeWidth = 64; //横方向に配置するチップの数
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
-  static void*[string] data;
 
 public:
   static void* getData(string s){
@@ -34,9 +39,7 @@ public:
   }
   this(){
   }
-  this(float scale){
-    renderScale = scale;
-  }
+
   ~this(){
     window_.SDL_DestroyWindow;
     context = SDL_GL_DeleteContext;
@@ -47,14 +50,16 @@ public:
     public SDL_Window* window(){ return window_;}
     public SDL_Renderer* SDLRenderer(){return renderer;}
   }
-  void init(string title, int width, int height){
+  void init(){
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
     SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(true);
 
-    window_ = createWindow(title, width, height);
+    window_ = createWindow(title, windowWidth, windowHeight, isFullScreen);
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
 
+    data["windowWidth"] = &windowWidth;
+    data["windowHeight"] = &windowHeight;
     data["renderScale"] = &renderScale;
     data["bgChipSize"] = &bgChipSize;
     data["bgSizeWidth"] = &bgSizeWidth;
@@ -120,9 +125,10 @@ public:
   }
   //Utils
 private:
-  SDL_Window* createWindow(string title, int width, int height){
+  SDL_Window* createWindow(string title, int width, int height, bool fullScreen){
+    uint windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | (fullScreen ? SDL_WINDOW_FULLSCREEN : 0);
     return SDL_CreateWindow(title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+                              width, height, windowFlags);
   }
   //OpenGL関連初期化
   void glInit(){

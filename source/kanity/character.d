@@ -88,7 +88,8 @@ public:
   private uint bgChipSize(){
     static uint size; static bool flag;
     if(flag){
-      size = *cast(uint*)kanity.render.Renderer.getData("bgChipSize");
+      import kanity.render;
+      size = *cast(uint*)Renderer.getData("bgChipSize");
       flag = true;
     }
     return size;
