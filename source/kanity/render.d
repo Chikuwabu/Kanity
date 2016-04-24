@@ -11,6 +11,7 @@ import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 import std.experimental.logger;
 import std.string;
+import std.variant;
 
 class Renderer{
   //フィールド
@@ -21,7 +22,7 @@ private:
 
   DrawableObject root;
   bool drawFlag;
-  static void*[string] data;
+  static Variant[string] data;
 public:
   //もろもろの情報
   uint windowWidth = 640; //ウインドウのサイズ
@@ -34,7 +35,7 @@ public:
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
 
 public:
-  static void* getData(string s){
+  static Variant getData(string s){
     return data[s];
   }
   void addObject(DrawableObject obj)
@@ -74,12 +75,12 @@ public:
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
 
-    data["windowWidth"] = &windowWidth;
-    data["windowHeight"] = &windowHeight;
-    data["renderScale"] = &renderScale;
-    data["bgChipSize"] = &bgChipSize;
-    data["bgSizeWidth"] = &bgSizeWidth;
-    data["bgSizeHeight"] = &bgSizeHeight;
+    data["windowWidth"] = windowWidth;
+    data["windowHeight"] = windowHeight;
+    data["renderScale"] = renderScale;
+    data["bgChipSize"] = bgChipSize;
+    data["bgSizeWidth"] = bgSizeWidth;
+    data["bgSizeHeight"] = bgSizeHeight;
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.");

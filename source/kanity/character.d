@@ -89,7 +89,7 @@ public:
     static uint size; static bool flag;
     if(flag){
       import kanity.render;
-      size = *cast(uint*)Renderer.getData("bgChipSize");
+      size = Renderer.getData("bgChipSize").get!uint;
       flag = true;
     }
     return size;

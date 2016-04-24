@@ -29,9 +29,9 @@ public:
     window = SDL_GL_GetCurrentWindow();
 
     static import kanity.render;
-    drawWidth = *cast(uint*)kanity.render.Renderer.getData("windowWidth");
-    drawHeight = *cast(uint*)kanity.render.Renderer.getData("windowHeight");
-    scaleOrigin = *cast(float*)kanity.render.Renderer.getData("renderScale");
+    drawWidth = kanity.render.Renderer.getData("windowWidth").get!uint;
+    drawHeight = kanity.render.Renderer.getData("windowHeight").get!uint;
+    scaleOrigin = kanity.render.Renderer.getData("renderScale").get!float;
 
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
