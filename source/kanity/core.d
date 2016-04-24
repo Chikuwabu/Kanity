@@ -63,6 +63,8 @@ class LowLayer : Thread {
   }
 
   void run(string title, int width, int height, Renderer renderer, Event event){
+      try
+      {
     renderer.init(title, width, height);
     event.init();
     Control control = new Control();
@@ -80,6 +82,11 @@ class LowLayer : Thread {
           SDL_Delay(cast(uint)(frame1 - end + start));
       }
     } while(event.isRunning);
+      }
+      catch(Throwable t)
+      {
+          error(t);
+      }
   }
 
   void stop(){
