@@ -30,10 +30,10 @@ private:
       yAnim.setter = &posY; yAnim.getter = &posY;
       scaleAnim.setter = &scale; scaleAnim.getter = &scale;
     }
-    this(Character chara, int x, int y, int home_x, int home_y, uint charaNum){
+    /*this(Character chara, int x, int y, int home_x, int home_y, uint charaNum){
       this(chara, x, y, charaNum);
       this.setHome(home_x, home_y);
-    }
+    }*/
     override void move(int x, int y){ super.move(x, y);}
     void move(int ax, int ay, int frame){
         xAnim.setAnimation(ax + posX, frame);
@@ -42,7 +42,6 @@ private:
     void scaleAnimation(float as, int frame){
       scaleAnim.setAnimation(as + scale, frame);
     }
-
     @property{
       void character(uint a){
         this.texRect = character_.get(a);
@@ -56,6 +55,8 @@ private:
         rect.w = this.texRect.w; rect.h = this.texRect.h;
         this.drawRect = rect;
       }
+      bool isXAnimationStarted() { return xAnim.isStarted; }
+      bool isYAnimationStarted() { return yAnim.isStarted; }
     }
 
     public override void draw(){
