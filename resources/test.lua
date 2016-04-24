@@ -4,4 +4,6 @@ end
 setLeftButtonEvent(yopi)
 
 test();
-print(newSprite(0, "SPTest.png", 20, 16))
+tst = (newSprite(0, "SPTest.png", 20, 16))
+tst:move(20,3,1);
+tst:draw()

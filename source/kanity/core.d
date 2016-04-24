@@ -48,8 +48,6 @@ public:
     auto TrenderAndEvent = new LowLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
 
-    Control control = new Control();
-    control.run(renderer, event, TrenderAndEvent);
     TrenderAndEvent.join;
     return 0;
   }
@@ -67,6 +65,8 @@ class LowLayer : Thread {
   void run(string title, int width, int height, Renderer renderer, Event event){
     renderer.init(title, width, height);
     event.init();
+    Control control = new Control();
+    control.run(renderer, event, this);
     auto frame1 = 1000 / 60;
     do
     {
