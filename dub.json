@@ -10,5 +10,7 @@
   "copyFiles":["resources/*"],
   "subPackages": [
       "./LuaD/"
-  ]
+  ],
+  "preGenerateCommands":["git submodule init"],
+  "preBuildCommands":["git submodule update"]
 }
