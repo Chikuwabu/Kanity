@@ -58,7 +58,6 @@ public:
     return 0;
   }
   private void loadConfig(string jsonText){
-    //jsonText.log;
     import std.json;
     import std.exception;
     JSONValue root = parseJSON(jsonText);

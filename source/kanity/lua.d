@@ -10,7 +10,7 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.string;
 
-class LuaLibrary
+/*class LuaLibrary
 {
     Sprite newSprite(int no, string texturefile, int width, int height)
     {
@@ -74,4 +74,4 @@ class LuaLibrary
     {
         lua.doString(s);
     }
-}
+}*/

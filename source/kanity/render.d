@@ -102,9 +102,11 @@ public:
 
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
-    auto sp = new Sprite(spchip, 50, 50, 0);
+    auto sp = new Sprite(spchip, 0, 0, 0);
+    sp.setHome(10, 8);
     sp.priority = 0;
     sp.character = 0;
+    sp.move(50, 50);
     sp.scale = 1.0;
     sp.scale.log;
     //sp.move(13, 14);

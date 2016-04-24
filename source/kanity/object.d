@@ -11,10 +11,12 @@ private:
   float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
   float z;//Z座標(描画優先度)
   float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
+  float hx = 0.0f, hy = 0.0f; //描画時用の原点
   float gltexWidth, gltexHeight;
   SDL_Texture* texture_;
   float scale_ = 1.0f, scaleOrigin;
   SDL_Rect drawRect_, texRect_; //誤差対策
+  int homeX_ = 0, homeY_ = 0;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -26,9 +28,9 @@ public:
   this(){
     window = SDL_GL_GetCurrentWindow();
 
+    static import kanity.render;
     drawWidth = *cast(uint*)kanity.render.Renderer.getData("windowWidth");
     drawHeight = *cast(uint*)kanity.render.Renderer.getData("windowHeight");
-
     scaleOrigin = *cast(float*)kanity.render.Renderer.getData("renderScale");
 
     renderer = window.SDL_GetRenderer();
@@ -43,10 +45,10 @@ public:
   void draw(){
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
-      glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1, y1, z);
-      glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(x1, y2, z);
-      glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(x2, y2, z);
-      glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(x2, y1, z);
+      glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
+      glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(x1 - hx, y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(x2 - hx ,y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(x2 - hx, y1 - hy, z);
     glEnd();
     texture_.SDL_GL_UnbindTexture();
     glFlush();
@@ -55,7 +57,7 @@ public:
         next.draw();
     }
   }
-  
+
   void addObject(DrawableObject obj)
   {
       auto last = obj;
@@ -72,7 +74,15 @@ public:
     rect.x += x; rect.y += y;
     drawRect = rect;
   }
-
+  void setHome(int x, int y){
+    homeX_ = x; homeY_ = y;
+    reloadHome;
+  }
+private:
+  void reloadHome(){
+    hx = +cast(float)(homeX * (scaleOrigin * scale_) / drawWidth * 2);
+    hy = -cast(float)(homeY * (scaleOrigin * scale_) / drawHeight * 2);
+  }
   public:
   @property{
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
@@ -84,12 +94,18 @@ public:
       SDL_Rect rect = this.drawRect;
       scale_ = s;
       this.drawRect = rect;
+      reloadHome;
     }
     //描画先座標
     int posX(){ return drawRect.x; }
     int posY(){ return drawRect.y; }
     void posX(int n){ auto rect = drawRect; rect.x = n; drawRect = rect; }
     void posY(int n){ auto rect = drawRect; rect.y = n; drawRect = rect; }
+    //描画原点
+    int homeX(){ return homeX_; }
+    int homeY(){ return homeY_; }
+    void homeX(int n){ homeX_ = n; reloadHome; }
+    void homeY(int n){ homeY_ = n; reloadHome; }
   }
 
   protected:
