@@ -52,10 +52,6 @@ public:
     glEnd();
     texture_.SDL_GL_UnbindTexture();
     glFlush();
-    if (next)
-    {
-        next.draw();
-    }
   }
 
   void addObject(DrawableObject obj)

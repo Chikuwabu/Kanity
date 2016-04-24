@@ -12,6 +12,7 @@ import derelict.opengl3.gl3;
 import std.experimental.logger;
 import std.string;
 import std.variant;
+import std.container;
 
 class Renderer{
   //フィールド
@@ -23,6 +24,7 @@ private:
   DrawableObject root;
   bool drawFlag;
   static Variant[string] data;
+  SList!(DrawableObject) object;
 public:
   //もろもろの情報
   uint windowWidth = 640; //ウインドウのサイズ
@@ -38,19 +40,10 @@ public:
   static Variant getData(string s){
     return data[s];
   }
-  void addObject(DrawableObject obj)
-  {
-      if (root)
-      {
-          root.addObject(obj);
-      }
-      else
-      {
-          root = obj;
-      }
+  void addObject(DrawableObject obj){
+      object.insertFront(obj);
   }
-  void clear()
-  {
+  void clear(){
       root = null;
   }
 
@@ -99,7 +92,7 @@ public:
     auto bg1 = new BG(chara, m);
     bg1.priority = 256;
     bg1.scroll(-50, -50);
-    root = (bg1);
+    addObject(bg1);
 
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
@@ -109,10 +102,8 @@ public:
     sp.character = 0;
     sp.move(50, 50);
     sp.scale = 1.0;
-    sp.scale.log;
-    //sp.move(13, 14);
     sp.scaleAnimation(2.0,60);
-    root.addObject(sp);
+    addObject(sp);
 
     drawFlag = true;
     SDL_Delay(100);
@@ -121,8 +112,10 @@ public:
   void render(){
     if(drawFlag){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      if (root)
-          root.draw();
+
+      foreach(DrawableObject obj; object){
+        obj.draw;
+      }
       glFinish();
       renderer.SDL_RenderPresent;
       window_.SDL_GL_SwapWindow;
