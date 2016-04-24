@@ -28,6 +28,21 @@ private:
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
 
 public:
+  void addObject(DrawableObject obj)
+  {
+      if (root)
+      {
+          root.addObject(obj);
+      }
+      else
+      {
+          root = obj;
+      }
+  }
+  void clear()
+  {
+      root = null;
+  }
   this(){
   }
   this(float scale){
