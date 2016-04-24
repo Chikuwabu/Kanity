@@ -19,12 +19,12 @@ class Editor : Engine
     {
         super.run("Map editor", 640, 480);
     }
-    protected override UnderLayer createUnderLayer(string title, int width, int height, Renderer renderer, Event event)
+    protected override LowLayer createLowLayer(string title, int width, int height, Renderer renderer, Event event)
     {
-        return new EditorUnderLayer(title, width, height, renderer, event);
+        return new EditorLowLayer(title, width, height, renderer, event);
     }
 }
-class EditorUnderLayer : UnderLayer
+class EditorLowLayer : LowLayer
 {
     this(string title, int width, int height, Renderer renderer, Event event)
     {

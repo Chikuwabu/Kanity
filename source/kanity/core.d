@@ -3,9 +3,9 @@ module kanity.core;
 import kanity.render;
 import kanity.event;
 import kanity.lua;
+import kanity.control;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
-import derelict.opengl3.gl;
 import derelict.opengl3.gl;
 import std.experimental.logger;
 import core.thread;
@@ -14,7 +14,7 @@ class Engine{
   //フィールド
 private:
  public Renderer renderer;
-public  Event event;
+ public  Event event;
 
 public:
   //コンストラクタとデコンストラクタ
@@ -40,25 +40,25 @@ public:
     IMG_Quit();
   }
 
-  protected UnderLayer createUnderLayer(string title, int width, int height, Renderer renderer, Event event)
+  protected LowLayer createLowLayer(string title, int width, int height, Renderer renderer, Event event)
   {
-      return new UnderLayer(title, width, height, renderer, event);
+      return new LowLayer(title, width, height, renderer, event);
   }
   int run(string title, int width, int height){
     //初期化
     renderer = new Renderer(2.0f);
     event = new Event();
 
-    auto TrenderAndEvent = createUnderLayer(title, width, height, renderer, event);
+    auto TrenderAndEvent = createLowLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
-    auto script = new LuaLibrary(this);
-    script.doFile("test.lua");
+
     TrenderAndEvent.join;
     return 0;
   }
 }
 
-class UnderLayer : Thread {
+//低レイヤ処理を行うスレッド
+class LowLayer : Thread {
     private bool running;
     string title;
     int width;
@@ -83,6 +83,8 @@ class UnderLayer : Thread {
 
     void run(){
         init();
+        Control control = new Control();
+        control.run(renderer, event, this);
         auto frame1 = 1000 / 60;
         do
         {
