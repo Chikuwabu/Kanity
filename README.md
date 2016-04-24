@@ -4,9 +4,7 @@ Simple RPG game engine.
 ## How to build
 1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ git clone https://github.com/Chikuwabu/Kanity.git --recursive`
 2. `$ cd Kanity`
-3. `$ git submodule init`
-4. `$ git submodule update`
-5. `$ dub build`
+3. `$ dub build`
 
 ## How to run
 `$ ./bin/kanity`
