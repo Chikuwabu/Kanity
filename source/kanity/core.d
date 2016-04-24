@@ -3,9 +3,9 @@ module kanity.core;
 import kanity.render;
 import kanity.event;
 import kanity.lua;
+import kanity.control;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
-import derelict.opengl3.gl;
 import derelict.opengl3.gl;
 import std.experimental.logger;
 import core.thread;
@@ -48,6 +48,8 @@ public:
     auto TrenderAndEvent = new LowLayer(title, width, height, renderer, event);
     TrenderAndEvent.start;
 
+    Control control = new Control();
+    control.run(renderer, event, TrenderAndEvent);
     TrenderAndEvent.join;
     return 0;
   }

@@ -56,14 +56,20 @@ public:
   auto get(uint a){return characters_[a];}
   auto get(string s){return charactersWithString[s];}
   //要素の追加
-  int add(int x, int y){int chipSize = *(cast(uint*)(SDL_GL_GetCurrentWindow().SDL_GetWindowData("bgChipSize"))); return add(x, y, chipSize, chipSize);}
+  int add(int x, int y){
+      int chipSize = *(cast(uint*)(SDL_GL_GetCurrentWindow().SDL_GetWindowData("bgChipSize")));
+      return add(x, y, chipSize, chipSize);
+  }
   int add(int x, int y, int w, int h){
     SDL_Rect[] rect = new SDL_Rect[1];
     rect[0].x = x; rect[0].y = y; rect[0].w = w; rect[0].h = h;
     characters_ ~= rect;
     return cast(int)characters_.length - 1;
   }
-  void add(string s, int x, int y){int chipSize = *(cast(uint*)(SDL_GL_GetCurrentWindow().SDL_GetWindowData("bgChipSize"))); return add(s, x, y, chipSize, chipSize);}
+  void add(string s, int x, int y){
+      int chipSize = *(cast(uint*)(SDL_GL_GetCurrentWindow().SDL_GetWindowData("bgChipSize")));
+      return add(s, x, y, chipSize, chipSize);
+  }
   void add(string s, int x, int y, int w, int h){
     SDL_Rect rect;
     rect.x = x; rect.y = y; rect.w = w; rect.h = h;
