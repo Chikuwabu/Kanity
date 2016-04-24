@@ -30,6 +30,14 @@ private:
       yAnim.setter = &posY; yAnim.getter = &posY;
       scaleAnim.setter = &scale; scaleAnim.getter = &scale;
     }
+    bool isXAnimationStarted()
+    {
+        return xAnim.isStarted;
+    }
+    bool isYAnimationStarted()
+    {
+        return yAnim.isStarted;
+    }
     void move(int ax, int ay, int frame){
         xAnim.setAnimation(ax + posX, frame);
         yAnim.setAnimation(ay + posY, frame);

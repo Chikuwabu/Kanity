@@ -3,9 +3,12 @@
   "dependencies":{
     "derelict-sdl2":"*",
     "derelict-gl3":"*",
-    "luad": "~master"
+    "kanity:luad": "~master"
   },
   "targetPath":"bin",
   "workingDirectory":"bin",
-  "copyFiles":["resources/*"]
+  "copyFiles":["resources/*"],
+  "subPackages": [
+      "./LuaD/"
+  ]
 }

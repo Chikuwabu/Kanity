@@ -6,19 +6,26 @@ import kanity.sprite;
 import kanity.render;
 import kanity.event;
 import kanity.character;
+import kanity.object;
+import kanity.control;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.string;
 
 class LuaLibrary
 {
-    Sprite newSprite(int no, string texturefile, int width, int height)
+    SDL_Surface* IMG_Load(string file)
     {
-        auto spchip = IMG_Load(texturefile.toStringz);
-        auto testtex = SDL_CreateTextureFromSurface(renderer.SDLRenderer, spchip);
-        auto toriniku = new Character(spchip, width, height, CHARACTER_SCANAXIS.X);
-        auto s = new Sprite(toriniku, 0, 0, 0);
-        //renderer.setSprite(s, no);
+        return derelict.sdl2.image.IMG_Load(file.toStringz);
+    }
+
+    Character newCharacter(SDL_Surface* sf, uint chipWidth, uint chipHeight, CHARACTER_SCANAXIS scan)
+    {
+        return new Character(sf, chipWidth, chipHeight, scan);
+    }
+    Sprite newSprite(Character chara, int x, int y, uint charaNum)
+    {
+        auto s = new Sprite(chara, x, y, charaNum);
         return s;
     }
     void moveSprite(int no, int x, int y)
@@ -42,27 +49,41 @@ class LuaLibrary
 
         event.leftButtonDownEvent.addEventHandler(ev);
     }
+    Control acontrol()
+    {
+        return null;
+    }
     void test()
     {
         event.leftButtonDownEvent();
+    }
+    DrawableObject spriteToDrawableObject(Sprite sp)
+    {
+        return sp;
     }
     Renderer renderer;
     Event event;
     LowLayer lLayer;
     LuaState lua;
-    this(Renderer renderer_, Event event_, LowLayer lLayer_)
+    this(Control control, Renderer renderer_, Event event_, LowLayer lLayer_)
     {
         renderer = renderer_; event = event_; lLayer = lLayer_;
         lua = new LuaState;
         lua.openLibs();
-        lua.registerType!Sprite();
-
+        //lua["Character"] = lua.registerType!Character();
+        lua["Sprite"] = lua.registerType!Sprite();
+        //lua["Control"] = lua.registerType!Control();
+        lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
+        lua["IMG_Load"] = &IMG_Load;
+        lua["newCharacter"] = &newCharacter;
         lua["newSprite"] = &newSprite;
         lua["moveSprite"] = &moveSprite;
         lua["moveSpriteAnimation"] = &moveSpriteAnimation;
         lua["setLeftButtonEvent"] = &setLeftButtonEvent;
 
         lua["test"] = &test;
+        lua["control"] = control;
+        lua["spriteToDrawableObject"] = &spriteToDrawableObject;
 
     }
     void doFile(string name)
