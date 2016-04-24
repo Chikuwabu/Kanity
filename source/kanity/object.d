@@ -20,6 +20,7 @@ protected:
   SDL_Renderer* renderer; //描画に用いるレンダラ
   int drawWidth, drawHeight; //描画領域の幅、高さ
   int texWidth, texHeight; //テクスチャの幅、高さ
+  DrawableObject next;
 
 public:
   this(){
@@ -49,6 +50,21 @@ public:
     glEnd();
     texture_.SDL_GL_UnbindTexture();
     glFlush();
+    if (next)
+    {
+        next.draw();
+    }
+  }
+  
+  void addObject(DrawableObject obj)
+  {
+      auto last = obj;
+      while(last.next)
+      {
+          last = last.next;
+      }
+      last.next = next;
+      next = last;
   }
 
   void move(int x, int y){

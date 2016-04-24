@@ -3,6 +3,7 @@ module kanity.render;
 import kanity.bg;
 import kanity.sprite;
 import kanity.character;
+import kanity.object;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
@@ -18,8 +19,7 @@ private:
   SDL_Renderer* renderer;
   SDL_GLContext context;
 
-  Sprite[] spriteList;
-  BG[] bgList;
+  DrawableObject root;
   bool drawFlag;
   //もろもろの情報
   float renderScale = 1.0f; //拡大率
@@ -74,12 +74,10 @@ public:
     auto bg1 = new BG(chara, m);
     bg1.priority = 256;
     bg1.scroll(-50, -50);
-    bgList = new BG[1];
-    bgList[0] = bg1;
+    root = (bg1);
 
     //spriteList = new Sprite[100];
     auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
-    spriteList = new Sprite[1];
     auto sp = new Sprite(spchip, 50, 50, 0);
     sp.priority = 0;
     sp.character = 0;
@@ -87,7 +85,7 @@ public:
     sp.scale.log;
     //sp.move(13, 14);
     sp.scaleAnimation(2.0,60);
-    spriteList[0] = sp;
+    root.addObject(sp);
 
     drawFlag = true;
     SDL_Delay(100);
@@ -96,15 +94,8 @@ public:
   void render(){
     if(drawFlag){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      foreach(s; spriteList)
-      {
-          if(s)
-              s.draw();
-      }
-      foreach(b; bgList)
-      {
-        b.draw();
-      }
+      if (root)
+          root.draw();
       glFinish();
       renderer.SDL_RenderPresent;
       window_.SDL_GL_SwapWindow;
