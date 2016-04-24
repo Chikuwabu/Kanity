@@ -28,7 +28,7 @@ public:
     window.SDL_GetWindowSize(&w, &h);
     drawWidth = w; drawHeight = h;
 
-    scaleOrigin = *(cast(float*)window.SDL_GetWindowData("renderScale"));
+    scaleOrigin = *cast(float*)kanity.render.Renderer.getData("renderScale");
 
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);

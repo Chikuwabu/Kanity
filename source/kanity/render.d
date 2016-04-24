@@ -26,8 +26,12 @@ private:
   uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
   uint bgSizeWidth = 64; //横方向に配置するチップの数
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
+  static void*[string] data;
 
 public:
+  static void* getData(string s){
+    return data[s];
+  }
   this(){
   }
   this(float scale){
@@ -51,11 +55,10 @@ public:
     if(window_ == null) logf(LogLevel.fatal, "Failed to create window.\n%s", SDL_GetError());
     info("Success to create window.");
 
-    //ウインドウに情報を埋めこむ
-    window_.SDL_SetWindowData("renderScale", &renderScale);
-    window_.SDL_SetWindowData("bgChipSize", &bgChipSize);
-    window_.SDL_SetWindowData("bgSizeWidth", &bgSizeWidth);
-    window_.SDL_SetWindowData("bgSizeHeight", &bgSizeHeight);
+    data["renderScale"] = &renderScale;
+    data["bgChipSize"] = &bgChipSize;
+    data["bgSizeWidth"] = &bgSizeWidth;
+    data["bgSizeHeight"] = &bgSizeHeight;
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.");
