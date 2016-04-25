@@ -21,7 +21,6 @@ private:
   SDL_Renderer* renderer;
   SDL_GLContext context;
 
-  DrawableObject root;
   bool drawFlag;
   static Variant[string] data;
   SList!(DrawableObject) object;
@@ -44,7 +43,7 @@ public:
       object.insertFront(obj);
   }
   void clear(){
-      root = null;
+      object.clear();
   }
 
   this(){
