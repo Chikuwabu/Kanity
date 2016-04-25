@@ -11,24 +11,24 @@ import core.thread;
 
 class Editor : Engine
 {
-    public this()
+    public this(string s)
     {
-        super();
+        super(s);
     }
-    public void run()
+    public override int run()
     {
-        super.run("Map editor", 640, 480);
+        return super.run();
     }
-    protected override LowLayer createLowLayer(string title, int width, int height, Renderer renderer, Event event)
+    protected override LowLayer createLowLayer(Renderer renderer, Event event)
     {
-        return new EditorLowLayer(title, width, height, renderer, event);
+        return new EditorLowLayer(renderer, event);
     }
 }
 class EditorLowLayer : LowLayer
 {
-    this(string title, int width, int height, Renderer renderer, Event event)
+    this(Renderer renderer, Event event)
     {
-        super(title, width, height, renderer, event);
+        super(renderer, event);
     }
 
     override void init()

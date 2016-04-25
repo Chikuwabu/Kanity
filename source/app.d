@@ -3,9 +3,9 @@ import kanity.core;
 import kanity.mapeditor.editor;
 
 void main(){
-    auto editor = new Editor();
+    auto editor = new Editor("kanityconfig.json");
     editor.run();
-	auto engine = new Engine();
-	engine.run("Name of game", 640, 480);
+	auto engine = new Engine("kanityconfig.json");
+	engine.run();
 	return;
 }

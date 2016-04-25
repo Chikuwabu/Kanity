@@ -14,15 +14,13 @@ class Engine{
   //フィールド
 private:
  public Renderer renderer;
- public  Event event;
+ public Event event;
 
 public:
   //コンストラクタとデコンストラクタ
-  this(){
-    info("Load a library \"SDL2\".");
-    DerelictSDL2.load;
-    info("Load a library \"SDL_Image\".");
-    DerelictSDL2Image.load;
+  this(string config){
+    info("Load a library \"SDL2\"."); DerelictSDL2.load;
+    info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
 
     DerelictGL.load;
     DerelictGL3.load;
@@ -33,6 +31,18 @@ public:
     info("Success initalization of \"SDL_Image\"");
 
     SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
+    //初期化
+    renderer = new Renderer();
+    event = new Event();
+
+    import std.file;
+    try{
+      loadConfig(config.readText);
+    }catch{
+      fatal("Failed to configuration");
+    }
+    info("Success to configuration");
+
     return;
   }
   ~this(){
@@ -40,36 +50,89 @@ public:
     IMG_Quit();
   }
 
-  protected LowLayer createLowLayer(string title, int width, int height, Renderer renderer, Event event)
+  protected LowLayer createLowLayer(Renderer renderer, Event event)
   {
-      return new LowLayer(title, width, height, renderer, event);
+      return new LowLayer(renderer, event);
   }
-  int run(string title, int width, int height){
-    //初期化
-    renderer = new Renderer(2.0f);
-    event = new Event();
-
-    auto TrenderAndEvent = createLowLayer(title, width, height, renderer, event);
+  int run(){
+    auto TrenderAndEvent = createLowLayer(renderer, event);
     TrenderAndEvent.start;
 
     TrenderAndEvent.join;
     return 0;
+  }
+  private void loadConfig(string jsonText){
+    import std.json;
+    import std.exception;
+    JSONValue root = parseJSON(jsonText);
+    //ウインドウ関係
+    if("window" in root.object){
+      JSONValue window = root["window"];
+      //幅:整数;
+      if("width" in window.object){
+        enforce(window.object["width"].type == JSON_TYPE.INTEGER);
+        renderer.windowWidth = cast(uint)window.object["width"].integer;
+      }
+      //高さ:整数
+      if("height" in window.object){
+        enforce(window.object["height"].type == JSON_TYPE.INTEGER);
+        renderer.windowHeight = cast(uint)window.object["height"].integer;
+      }
+      //タイトル:文字列
+      if("title" in window.object){
+        enforce(window.object["title"].type == JSON_TYPE.STRING);
+        renderer.title = window.object["title"].str;
+      }
+      //フルスクリーンフラグ:BOOL
+      if("fullscreen" in window.object){
+        enforce(window.object["fullscreen"].type == JSON_TYPE.TRUE || window.object["fullscreen"].type == JSON_TYPE.FALSE);
+        renderer.isFullScreen = window.object["fullscreen"].type == JSON_TYPE.TRUE ? true : false;
+      }
+    }
+    //BG関係
+    if("BG" in root.object){
+      JSONValue bg = root.object["BG"];
+      //幅:整数
+      if("width" in bg.object){
+        enforce(bg.object["width"].type == JSON_TYPE.INTEGER);
+        renderer.bgSizeWidth = cast(uint)bg.object["width"].integer;
+      }
+      //高さ:整数
+      if("height" in bg.object){
+        enforce(bg.object["height"].type == JSON_TYPE.INTEGER);
+        renderer.bgSizeHeight = cast(uint)bg.object["height"].integer;
+      }
+      //チップの大きさ:整数
+      if("chipSize" in bg.object){
+        enforce(bg.object["chipSize"].type == JSON_TYPE.INTEGER);
+        renderer.bgChipSize = cast(uint)bg.object["chipSize"].integer;
+      }
+    }
+    //その他
+    //拡大率:整数,実数
+    if("renderScale" in root.object){
+      switch(root.object["renderScale"].type){
+        case JSON_TYPE.INTEGER:
+          renderer.renderScale = cast(float)root.object["renderScale"].integer;
+          break;
+        case JSON_TYPE.FLOAT:
+          renderer.renderScale = cast(float)root.object["renderScale"].floating;
+          break;
+        default:
+          enforce(0);
+          break;
+      }
+    }
   }
 }
 
 //低レイヤ処理を行うスレッド
 class LowLayer : Thread {
     private bool running;
-    string title;
-    int width;
-    int height;
     Renderer renderer;
     Event event;
-    this(string title, int width, int height, Renderer renderer, Event event){
+    this(Renderer renderer, Event event){
         running = true;
-        this.title = title;
-        this.width = width;
-        this.height = height;
         this.renderer = renderer;
         this.event = event;
         super(&run);
@@ -77,7 +140,7 @@ class LowLayer : Thread {
 
     protected void init()
     {
-        renderer.init(title, width, height);
+        renderer.init();
         event.init();
     }
 

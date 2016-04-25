@@ -1,0 +1,3 @@
+[submodule "LuaD"]
+	path = LuaD
+	url = https://github.com/otya128/LuaD.git

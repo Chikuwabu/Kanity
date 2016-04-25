@@ -4,6 +4,7 @@ import kanity.object;
 import kanity.character;
 import derelict.sdl2.sdl;
 import std.experimental.logger;
+import std.variant;
 
 class BG : DrawableObject{
 private:
@@ -23,9 +24,10 @@ public:
 public:
   this(Character chara){
     super();
-    chipSize = *(cast(uint*)window.SDL_GetWindowData("bgChipSize"));
-    sizeWidth = *(cast(uint*)window.SDL_GetWindowData("bgSizeWidth"));
-    sizeHeight = *(cast(uint*)window.SDL_GetWindowData("bgSizeHeight"));
+    import kanity.render;
+      chipSize = Renderer.getData("bgChipSize").get!uint;
+      sizeWidth = Renderer.getData("bgSizeWidth").get!uint;
+      sizeHeight = Renderer.getData("bgSizeHeight").get!uint;
 
     character = chara;
     mapData.length = sizeWidth * sizeHeight;

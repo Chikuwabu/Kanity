@@ -3,9 +3,14 @@
   "dependencies":{
     "derelict-sdl2":"*",
     "derelict-gl3":"*",
-    "luad": "~master"
+    "kanity:luad": "*"
   },
   "targetPath":"bin",
   "workingDirectory":"bin",
-  "copyFiles":["resources/*"]
+  "copyFiles":["resources/*"],
+  "subPackages": [
+      "./LuaD/"
+  ],
+  "preBuildCommands": [ "git submodule update" ],
+  "license":  "MIT"
 }
