@@ -48,7 +48,7 @@ public:
   }
   this(Character chara, int[] mapData_){
     this(chara);
-    mapData[] = mapData_[];
+    mapData/*[]*/ = mapData_[];
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
@@ -61,12 +61,12 @@ public:
     //yAnim.animation;
     /*if (xAnim.isStarted  || yAnim.isStarted){
         updateFlag = true;
-    }
+    }*/
     //toriaezu
-    /*if(updateFlag){
+    if(updateFlag){
         setTexture();
         updateFlag = false;
-    }*/
+    }
     super.draw();
     return;
   }
@@ -113,6 +113,14 @@ public:
       drawRect = rectD; texRect = rectT;
     }
   }
+
+  void set(int x, int y, int chip)
+  {
+      mapData[x + y * sizeWidth] = chip;
+      //ha??????????
+      //setTexture();
+      updateFlag = true;
+  }
 private:
   void setTexture(){
     //転送
@@ -123,7 +131,7 @@ private:
     }
     for(int x = 0; x < sizeWidth; x++){
       for(int y = 0; y < sizeHeight; y++){
-        rectS = character.get(mapData[x * sizeHeight + y]);
+        rectS = character.get(mapData[x + y * sizeWidth]);
         rectD.x = x * chipSize; rectD.y = y * chipSize;
         SDL_BlitSurface(character.surface, &rectS, bgScreen, &rectD);
       }
