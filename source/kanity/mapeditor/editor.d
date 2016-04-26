@@ -49,7 +49,10 @@ class EditorLowLayer : LowLayer
         auto bg = new BG(chara, m);
         bg.sizeWidth = bgwidth;
         bg.sizeHeight = chara.characters.length / bgwidth;
-        //std.stdio.writeln(chara.characters.length);
+        SDL_Rect rect;
+        rect.w = width;
+        rect.h = 16 * 3;
+        bg.drawRect = rect;
         int chip;
         for (int y = 0;; y++)
         {
@@ -57,7 +60,6 @@ class EditorLowLayer : LowLayer
             for (int x = 0; x < bgwidth; x++)
             {
                 if (chip >= chara.characters.length) break;
-                std.stdio.writeln(x, "\t", y, "\t", chip);
                 bg.set(x, y, chip++);
             }
         }
