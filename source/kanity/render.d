@@ -90,7 +90,7 @@ public:
     m[] = a;
     auto bg1 = new BG(chara, m);
     bg1.priority = 256;
-    bg1.scroll(-50, -50);
+    //bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];

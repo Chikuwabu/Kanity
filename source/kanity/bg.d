@@ -40,6 +40,8 @@ public:
     }
     this.drawRect = rect;
     this.texRect = rect;
+    width = 16 * 6;
+    height = 32;
   }
   this(int x, int y, Character chara){
     this(chara);
