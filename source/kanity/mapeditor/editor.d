@@ -36,6 +36,8 @@ class EditorLowLayer : LowLayer
 
     int width, height;
     int bgwidth, bgheight;
+    BG chipList;
+    BG map;
     override void init()
     {
         super.init();
@@ -62,6 +64,13 @@ class EditorLowLayer : LowLayer
             }
         }
         renderer.addObject(bg);
+        chipList = bg;
+        int mapWidth = 256, mapHeight = 256;
+        int[] mapdata = new int[mapWidth *  mapHeight];
+
+        map = new BG(chara, mapdata);
+        map.posY = -16 * 3;
+        renderer.addObject(map);
     }
 
     override void run()
