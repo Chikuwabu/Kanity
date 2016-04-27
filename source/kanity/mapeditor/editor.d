@@ -40,6 +40,7 @@ class EditorLowLayer : LowLayer
     BG map;
     Sprite chipCursor;
     Sprite mapCursor;
+    Sprite currentCursor;
     override void init()
     {
         super.init();
@@ -81,6 +82,60 @@ class EditorLowLayer : LowLayer
         mapCursor.homeX = 2;
         mapCursor.homeY = -16 * 3;
         renderer.addObject(mapCursor);
+
+        currentCursor = chipCursor;
+        registerEvent();
+    }
+    void rightButton(bool repeat)
+    {
+        if (currentCursor == chipCursor)
+        {
+            chipCursor.move(map.chipSize, 0);
+        }
+        else if (currentCursor == mapCursor)
+        {
+            mapCursor.move(map.chipSize, 0);
+        }
+    }
+    void leftButton(bool repeat)
+    {
+        if (currentCursor == chipCursor)
+        {
+            chipCursor.move(-map.chipSize, 0);
+        }
+        else if (currentCursor == mapCursor)
+        {
+            mapCursor.move(-map.chipSize, 0);
+        }
+    }
+    void upButton(bool repeat)
+    {
+        if (currentCursor == chipCursor)
+        {
+            chipCursor.move(0, -map.chipSize);
+        }
+        else if (currentCursor == mapCursor)
+        {
+            mapCursor.move(0, -map.chipSize);
+        }
+    }
+    void downButton(bool repeat)
+    {
+        if (currentCursor == chipCursor)
+        {
+            chipCursor.move(0, map.chipSize);
+        }
+        else if (currentCursor == mapCursor)
+        {
+            mapCursor.move(0, map.chipSize);
+        }
+    }
+    void registerEvent()
+    {
+        event.rightButtonDownEvent.addEventHandler(&rightButton);
+        event.leftButtonDownEvent.addEventHandler(&leftButton);
+        event.upButtonDownEvent.addEventHandler(&upButton);
+        event.downButtonDownEvent.addEventHandler(&downButton);
     }
 
     override void run()

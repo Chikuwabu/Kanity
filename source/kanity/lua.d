@@ -42,9 +42,9 @@ class LuaLibrary
         import std.algorithm.mutation;
         LuaFunction *temp = new LuaFunction();
         move(luafunc, *temp);
-        auto ev = (()
+        auto ev = ((bool repeat)
         {
-            (*temp)();
+            (*temp)(repeat);
         });
 
         event.leftButtonDownEvent.addEventHandler(ev);
@@ -52,10 +52,6 @@ class LuaLibrary
     Control acontrol()
     {
         return null;
-    }
-    void test()
-    {
-        event.leftButtonDownEvent();
     }
     DrawableObject spriteToDrawableObject(Sprite sp)
     {
@@ -81,7 +77,6 @@ class LuaLibrary
         lua["moveSpriteAnimation"] = &moveSpriteAnimation;
         lua["setLeftButtonEvent"] = &setLeftButtonEvent;
 
-        lua["test"] = &test;
         lua["control"] = control;
         lua["spriteToDrawableObject"] = &spriteToDrawableObject;
 
