@@ -52,7 +52,7 @@ class EditorLowLayer : LowLayer
         SDL_Rect rect;
         rect.w = width;
         rect.h = 16 * 3;
-        bg.drawRect = rect;
+        //bg.drawRect = rect;
         int chip;
         for (int y = 0;; y++)
         {

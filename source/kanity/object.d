@@ -62,6 +62,32 @@ public:
     homeX_ = x; homeY_ = y;
     reloadHome;
   }
+  uint width()
+  {
+      return drawWidth;
+  }
+  uint height()
+  {
+      return drawHeight;
+  }
+  void width(uint a){
+      auto rect = drawRect;
+      rect.w = a;
+      drawRect = rect;
+      auto trect = texRect;
+      trect.w = a;
+      texRect = trect;
+      reloadHome();
+  }
+  void height(uint a){
+      auto rect = drawRect;
+      rect.h = a;
+      drawRect = rect;
+      auto trect = texRect;
+      trect.h = a;
+      texRect = trect;
+      reloadHome();
+  }
 private:
   void reloadHome(){
     hx = +cast(float)(homeX * (scaleOrigin * scale_) / drawWidth * 2);
