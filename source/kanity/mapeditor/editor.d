@@ -49,10 +49,8 @@ class EditorLowLayer : LowLayer
         auto bg = new BG(chara, m);
         bg.sizeWidth = bgwidth;
         bg.sizeHeight = chara.characters.length / bgwidth;
-        SDL_Rect rect;
-        rect.w = width;
-        rect.h = 16 * 3;
-        //bg.drawRect = rect;
+        bg.width = width;
+        bg.height = 16 * 3;
         int chip;
         for (int y = 0;; y++)
         {
