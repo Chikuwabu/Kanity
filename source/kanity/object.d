@@ -126,10 +126,10 @@ private:
       drawRect_ = rect;
       with(rect){
         //座標系の変換
-        x1 = (cast(float)x / drawWidth * 2) - 1;
-        y1 = 1 - (cast(float)y / drawHeight * 2);
-        x2 = (cast(float)(x + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
-        y2 = 1 - (cast(float)(y + h * (scaleOrigin * scale_)) / drawHeight * 2);
+        x1 = (cast(float)x * (scaleOrigin * scale_) / drawWidth * 2) - 1;
+        y1 = 1 - (cast(float)y * (scaleOrigin * scale_) / drawHeight * 2);
+        x2 = (cast(float)(x * (scaleOrigin * scale_) + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
+        y2 = 1 - (cast(float)(y * (scaleOrigin * scale_) + h * (scaleOrigin * scale_)) / drawHeight * 2);
       }
     }
 
