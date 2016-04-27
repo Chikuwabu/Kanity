@@ -38,6 +38,8 @@ class EditorLowLayer : LowLayer
     int bgwidth, bgheight;
     BG chipList;
     BG map;
+    Sprite chipCursor;
+    Sprite mapCursor;
     override void init()
     {
         super.init();
@@ -71,6 +73,14 @@ class EditorLowLayer : LowLayer
         map = new BG(chara, mapdata);
         map.posY = -16 * 3;
         renderer.addObject(map);
+        auto cursor = new Character(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X);
+        chipCursor = new Sprite(cursor, 0, 0, 0);
+        chipCursor.homeX = 2;
+        renderer.addObject(chipCursor);
+        mapCursor = new Sprite(cursor, 0, 0, 1);
+        mapCursor.homeX = 2;
+        mapCursor.homeY = -16 * 3;
+        renderer.addObject(mapCursor);
     }
 
     override void run()
