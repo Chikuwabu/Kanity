@@ -17,6 +17,7 @@ private:
   float scale_ = 1.0f, scaleOrigin;
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;
+  bool m_hide;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -42,6 +43,7 @@ public:
   }
 
   void draw(){
+      if (m_hide) return;
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
@@ -51,6 +53,15 @@ public:
     glEnd();
     texture_.SDL_GL_UnbindTexture();
     glFlush();
+  }
+
+  void show()
+  {
+      m_hide = false;
+  }
+  void hide()
+  {
+      m_hide = true;
   }
 
   void move(int x, int y){
