@@ -12,7 +12,7 @@ class Font
     private Character fontCharacter;
     protected int[dchar] fontTable;
     //fontTable...フォントの並び方
-    //fontTable[4] = "abcdefg"の時、Character42番がabcdefgに割り当てられる
+    //fontTable[42] = "abcdefg"の時、Character42番がabcdefgに割り当てられる
     this(dstring[] fontTable, Character fc)
     {
         fontCharacter = fc;
