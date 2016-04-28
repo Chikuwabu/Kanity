@@ -90,7 +90,7 @@ public:
     m[] = a;
     auto bg1 = new BG(chara, m);
     bg1.priority = 256;
-    bg1.scroll(-50, -50);
+    //bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];
@@ -104,6 +104,21 @@ public:
     sp.scaleAnimation(2.0,60);
     addObject(sp);
 
+    import kanity.text;
+    import std.stdio;
+    import std.conv;
+    auto font_datfile = File("mplus_j10r.dat.txt", "r");
+    dstring[] font_dat = new dstring[0];
+    while(!font_datfile.eof)
+    {
+        auto line = font_datfile.readln();
+        font_dat ~=line.to!dstring;
+    }
+    auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+    auto text = new Text(mplus10font);
+    text.posX = 20;
+    text.text = "こんにちは、世界";
+    addObject(text);
     drawFlag = true;
     SDL_Delay(100);
     glInit;

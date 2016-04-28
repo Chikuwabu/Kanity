@@ -42,6 +42,34 @@ public:
     texture.SDL_DestroyTexture;
   }
 
+  void draw(SDL_Rect drawrect, SDL_Rect texrect){
+      if (m_hide) return;
+      float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
+      float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
+      //共通化すべき...
+      with(drawrect){
+          //座標系の変換
+          x1 = (cast(float)(x + drawRect_.x) * (scaleOrigin * scale_) / drawWidth * 2) - 1;
+          y1 = 1 - (cast(float)(y + drawRect_.y) * (scaleOrigin * scale_) / drawHeight * 2);
+          x2 = (cast(float)((x + drawRect_.x) * (scaleOrigin * scale_) + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
+          y2 = 1 - (cast(float)((y + drawRect_.y) * (scaleOrigin * scale_) + h * (scaleOrigin * scale_)) / drawHeight * 2);
+      }
+      with(texrect){
+          u1 = cast(float)x / texWidth;
+          v1 = cast(float)y / texHeight;
+          u2 = cast(float)(x + w) / texWidth;
+          v2 = cast(float)(y + h) / texHeight;
+      }
+      texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
+      glBegin(GL_QUADS);
+      glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
+      glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(x1 - hx, y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(x2 - hx ,y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(x2 - hx, y1 - hy, z);
+      glEnd();
+      texture_.SDL_GL_UnbindTexture();
+      glFlush();
+  }
   void draw(){
       if (m_hide) return;
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
