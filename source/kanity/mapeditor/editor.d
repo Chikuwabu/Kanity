@@ -50,24 +50,13 @@ class EditorLowLayer : LowLayer
         bgheight = height/ 16;
         bgwidth = width / 16;
         auto chara = new Character(IMG_Load("BGTest2.png"), 16, 16, CHARACTER_SCANAXIS.X);
-        int[] m = new int[chara.characters.length + bgwidth];
+        int[] m = new int[3 * bgwidth];
         auto bg = new BG(chara, m);
         bg.sizeWidth = bgwidth;
-        bg.sizeHeight = chara.characters.length / bgwidth;
-        bg.width = width;
-        bg.height = 16 * 3;
-        int chip;
-        for (int y = 0;; y++)
-        {
-            if (chip >= chara.characters.length) break;
-            for (int x = 0; x < bgwidth; x++)
-            {
-                if (chip >= chara.characters.length) break;
-                bg.set(x, y, chip++);
-            }
-        }
+        bg.sizeHeight = 3;
         renderer.addObject(bg);
         chipList = bg;
+        scrollChipList(0);
         int mapWidth = 256, mapHeight = 256;
         int[] mapdata = new int[mapWidth *  mapHeight];
 
@@ -90,7 +79,15 @@ class EditorLowLayer : LowLayer
     {
         if (currentCursor == chipCursor)
         {
-            chipCursor.move(map.chipSize, 0);
+            if (chipCursor.posX + map.chipSize >= width)
+            {
+                downButton(repeat);
+                chipCursor.posX = 0;
+            }
+            else
+            {
+                chipCursor.move(map.chipSize, 0);
+            }
         }
         else if (currentCursor == mapCursor)
         {
@@ -101,7 +98,15 @@ class EditorLowLayer : LowLayer
     {
         if (currentCursor == chipCursor)
         {
-            chipCursor.move(-map.chipSize, 0);
+            if (chipCursor.posX - cast(int)map.chipSize < 0)
+            {
+                upButton(repeat);
+                chipCursor.posX = width - map.chipSize;
+            }
+            else
+            {
+                chipCursor.move(-map.chipSize, 0);
+            }
         }
         else if (currentCursor == mapCursor)
         {
@@ -112,6 +117,11 @@ class EditorLowLayer : LowLayer
     {
         if (currentCursor == chipCursor)
         {
+            if (chipCursor.posY <= 0)
+            {
+                scrollChipList(-1);
+                return;
+            }
             chipCursor.move(0, -map.chipSize);
         }
         else if (currentCursor == mapCursor)
@@ -119,10 +129,28 @@ class EditorLowLayer : LowLayer
             mapCursor.move(0, -map.chipSize);
         }
     }
+    int  chipListChip;
+    void scrollChipList(int my)
+    {
+       chipListChip += my * bgwidth;
+       int chip  = chipListChip;
+       for (int y = 0; y < 3; y++)
+       {
+           for (int x = 0; x < bgwidth; x++)
+           {
+               chipList.set(x, y, chip++);
+           }
+       }
+    }
     void downButton(bool repeat)
     {
         if (currentCursor == chipCursor)
         {
+            if (chipCursor.posY >= 16 * 2)
+            {
+                scrollChipList(1);
+                return;
+            }
             chipCursor.move(0, map.chipSize);
         }
         else if (currentCursor == mapCursor)

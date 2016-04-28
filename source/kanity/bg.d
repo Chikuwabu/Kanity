@@ -123,6 +123,10 @@ public:
   }
 private:
   void setTexture(){
+      SDL_Rect aw;
+      aw.w = drawWidth;
+      aw.h = drawHeight;
+     bgScreen.SDL_FillRect(&aw, 0);
     //転送
     SDL_Rect rectS, rectD;//source, destnation
     with(rectD){

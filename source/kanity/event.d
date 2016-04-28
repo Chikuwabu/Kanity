@@ -20,6 +20,7 @@ class EventHandler(F)
 }
 
 alias ButtonEventFunction = void delegate(bool);
+alias KeyEventFunction = void delegate(SDL_KeyboardEvent);
 class Event{
 private:
     bool running;
