@@ -41,6 +41,8 @@ class EditorLowLayer : LowLayer
     Sprite chipCursor;
     Sprite mapCursor;
     Sprite currentCursor;
+    int mapCX;
+    int mapCY;
     override void init()
     {
         super.init();
@@ -79,10 +81,12 @@ class EditorLowLayer : LowLayer
     {
         if (currentCursor == chipCursor)
         {
+            selectedChip++;
             if (chipCursor.posX + map.chipSize >= width)
             {
                 downButton(repeat);
                 chipCursor.posX = 0;
+                selectedChip -= bgwidth;
             }
             else
             {
@@ -92,16 +96,19 @@ class EditorLowLayer : LowLayer
         else if (currentCursor == mapCursor)
         {
             mapCursor.move(map.chipSize, 0);
+            mapCX++;
         }
     }
     void leftButton(bool repeat)
     {
         if (currentCursor == chipCursor)
         {
+            selectedChip--;
             if (chipCursor.posX - cast(int)map.chipSize < 0)
             {
                 upButton(repeat);
                 chipCursor.posX = width - map.chipSize;
+                selectedChip += bgwidth;
             }
             else
             {
@@ -111,12 +118,14 @@ class EditorLowLayer : LowLayer
         else if (currentCursor == mapCursor)
         {
             mapCursor.move(-map.chipSize, 0);
+            mapCX--;
         }
     }
     void upButton(bool repeat)
     {
         if (currentCursor == chipCursor)
         {
+            selectedChip -= bgwidth;
             if (chipCursor.posY <= 0)
             {
                 scrollChipList(-1);
@@ -127,6 +136,7 @@ class EditorLowLayer : LowLayer
         else if (currentCursor == mapCursor)
         {
             mapCursor.move(0, -map.chipSize);
+            mapCY--;
         }
     }
     int  chipListChip;
@@ -146,6 +156,7 @@ class EditorLowLayer : LowLayer
     {
         if (currentCursor == chipCursor)
         {
+            selectedChip += bgwidth;
             if (chipCursor.posY >= 16 * 2)
             {
                 scrollChipList(1);
@@ -156,11 +167,18 @@ class EditorLowLayer : LowLayer
         else if (currentCursor == mapCursor)
         {
             mapCursor.move(0, map.chipSize);
+            mapCY++;
         }
     }
+    int selectedChip;
     void keyDownEvent(SDL_KeyboardEvent event)
     {
-        if (event.keysym.sym == SDLK_TAB || event.keysym.sym == SDLK_n || event.keysym.sym == SDLK_BACKSPACE)
+        if (currentCursor == mapCursor && event.keysym.sym == SDLK_RETURN)
+        {
+            map.set(mapCX, mapCY, selectedChip);
+            return;
+        }
+        if (event.keysym.sym == SDLK_TAB || event.keysym.sym == SDLK_n || event.keysym.sym == SDLK_BACKSPACE || event.keysym.sym == SDLK_RETURN)
         {
             if (currentCursor == chipCursor)
             {
