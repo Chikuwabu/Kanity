@@ -8,6 +8,7 @@ import kanity.event;
 import kanity.character;
 import kanity.object;
 import kanity.control;
+import kanity.utils;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.string;

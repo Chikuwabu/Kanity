@@ -39,8 +39,21 @@ public:
   static Variant getData(string s){
     return data[s];
   }
+  
   void addObject(DrawableObject obj){
       object.insertFront(obj);
+  }
+  void removeObject(DrawableObject obj){
+    import std.range;
+    loop: for(auto r = object[]; !r.empty;){
+            if(r.front == obj){
+              r = object.linearRemove(r.take(1));
+              break loop;
+            }else{
+              r.popFront;
+            }
+          }
+    return;
   }
   void clear(){
       object.clear();

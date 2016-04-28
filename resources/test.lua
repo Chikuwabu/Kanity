@@ -1,8 +1,7 @@
-
 local toriniku = newCharacter(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X)
 local testsp = Sprite(toriniku, 0, 0, 0);
 local renderer = control:renderer()
-renderer:clear()
+--renderer:clear()
 renderer:addObject(spriteToDrawableObject(testsp))
 function yopi()
     print("left")

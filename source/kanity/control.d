@@ -11,6 +11,8 @@ private:
     Event m_event;
     LowLayer m_lLayer;
     LuaLibrary m_lua;
+public:
+    string startScript;
 
 public:
 
@@ -32,7 +34,6 @@ public:
     void run(Renderer renderer_, Event event_, LowLayer lLayer_){
         m_renderer = renderer_; m_event = event_; m_lLayer = lLayer_;
         m_lua = new LuaLibrary(this, renderer_, event_, lLayer_);
-        m_lua.doFile("test.lua");
+        //m_lua.doFile(startScript);
     }
-
 }

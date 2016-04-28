@@ -13,8 +13,9 @@ import core.thread;
 class Engine{
   //フィールド
 private:
- public Renderer renderer;
- public Event event;
+ Renderer renderer;
+ Event event;
+ Control control;
 
 public:
   //コンストラクタとデコンストラクタ
@@ -25,15 +26,16 @@ public:
     DerelictGL.load;
     DerelictGL3.load;
 
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
     info("Success initalization of \"SDL2\".");
-    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
+    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%.*s", IMG_GetError());
     info("Success initalization of \"SDL_Image\"");
 
     SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
     //初期化
     renderer = new Renderer();
     event = new Event();
+    control = new Control();
 
     import std.file;
     try{
@@ -53,7 +55,7 @@ public:
   int run(){
     auto TrenderAndEvent = new LowLayer(renderer, event);
     TrenderAndEvent.start;
-
+    control.run(renderer, event, TrenderAndEvent);
     TrenderAndEvent.join;
     return 0;
   }
@@ -119,6 +121,11 @@ public:
           break;
       }
     }
+    //起動時に呼ばれるスクリプト:文字列
+    if("startScript" in root.object){
+      enforce(root.object["startScript"].type == JSON_TYPE.STRING);
+      control.startScript = root.object["startScript"].str;
+    }
   }
 }
 
@@ -134,8 +141,6 @@ class LowLayer : Thread {
   void run(Renderer renderer, Event event){
     renderer.init();
     event.init();
-    Control control = new Control();
-    control.run(renderer, event, this);
     auto frame1 = 1000 / 60;
     do
     {

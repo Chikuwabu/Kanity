@@ -10,5 +10,6 @@
     "width":64,
     "height":64
   },
-  "renderScale":2.0
+  "renderScale":2.0,
+  "startScript":"test.lua"
 }
