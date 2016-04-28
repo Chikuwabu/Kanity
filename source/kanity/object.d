@@ -62,15 +62,15 @@ public:
     homeX_ = x; homeY_ = y;
     reloadHome;
   }
-  uint width()
+  int width()
   {
-      return drawWidth;
+      return drawRect.w;
   }
-  uint height()
+  int height()
   {
-      return drawHeight;
+      return drawRect.h;
   }
-  void width(uint a){
+  void width(int a){
       auto rect = drawRect;
       rect.w = a;
       drawRect = rect;
@@ -79,7 +79,7 @@ public:
       texRect = trect;
       reloadHome();
   }
-  void height(uint a){
+  void height(int a){
       auto rect = drawRect;
       rect.h = a;
       drawRect = rect;
