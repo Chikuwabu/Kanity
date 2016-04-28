@@ -126,7 +126,7 @@ private:
       SDL_Rect aw;
       aw.w = drawWidth;
       aw.h = drawHeight;
-     bgScreen.SDL_FillRect(&aw, 0);
+     bgScreen.SDL_FillRect(&aw, bgScreen.format.SDL_MapRGBA(0, 0, 0, 0));
     //転送
     SDL_Rect rectS, rectD;//source, destnation
     with(rectD){
