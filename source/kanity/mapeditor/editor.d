@@ -158,12 +158,28 @@ class EditorLowLayer : LowLayer
             mapCursor.move(0, map.chipSize);
         }
     }
+    void keyDownEvent(SDL_KeyboardEvent event)
+    {
+        if (event.keysym.sym == SDLK_TAB || event.keysym.sym == SDLK_n || event.keysym.sym == SDLK_BACKSPACE)
+        {
+            if (currentCursor == chipCursor)
+            {
+                currentCursor = mapCursor;
+            }
+            else if (currentCursor == mapCursor)
+            {
+                currentCursor = chipCursor;
+            }
+        }
+    }
     void registerEvent()
     {
         event.rightButtonDownEvent.addEventHandler(&rightButton);
         event.leftButtonDownEvent.addEventHandler(&leftButton);
         event.upButtonDownEvent.addEventHandler(&upButton);
         event.downButtonDownEvent.addEventHandler(&downButton);
+
+        event.keyDownEvent.addEventHandler(&keyDownEvent);
     }
 
     override void run()

@@ -30,6 +30,7 @@ public:
     auto rightButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto upButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto downButtonDownEvent = new EventHandler!ButtonEventFunction;
+    auto keyDownEvent = new EventHandler!KeyEventFunction;
     void init(){
         running = true;
     }
@@ -57,6 +58,7 @@ public:
                         leftButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     default:
+                        keyDownEvent(event.key);
                         break;
                 }
                 break;
