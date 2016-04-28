@@ -52,12 +52,16 @@ class EditorLowLayer : LowLayer
         bgheight = height/ 16;
         bgwidth = width / 16;
         auto chara = new Character(IMG_Load("BGTest2.png"), 16, 16, CHARACTER_SCANAXIS.X);
-        int[] m = new int[3 * bgwidth];
+        int listheight = 3;
+        int[] m = new int[listheight * bgwidth];
         auto bg = new BG(chara, m);
         bg.sizeWidth = bgwidth;
-        bg.sizeHeight = 3;
+        bg.sizeHeight = listheight;
         renderer.addObject(bg);
         chipList = bg;
+        //TODO:初期値おかしい?
+        chipList.width = width;
+        chipList.height = chipList.chipSize * listheight;
         scrollChipList(0);
         int mapWidth = 256, mapHeight = 256;
         int[] mapdata = new int[mapWidth *  mapHeight];
@@ -82,7 +86,7 @@ class EditorLowLayer : LowLayer
         if (currentCursor == chipCursor)
         {
             selectedChip++;
-            if (chipCursor.posX + map.chipSize >= width)
+            if (chipCursor.posX + map.chipSize >= chipList.width)
             {
                 downButton(repeat);
                 chipCursor.posX = 0;
@@ -107,7 +111,7 @@ class EditorLowLayer : LowLayer
             if (chipCursor.posX - cast(int)map.chipSize < 0)
             {
                 upButton(repeat);
-                chipCursor.posX = width - map.chipSize;
+                chipCursor.posX = chipList.width - map.chipSize;
                 selectedChip += bgwidth;
             }
             else
@@ -144,7 +148,7 @@ class EditorLowLayer : LowLayer
     {
        chipListChip += my * bgwidth;
        int chip  = chipListChip;
-       for (int y = 0; y < 3; y++)
+       for (int y = 0; y < chipList.sizeHeight; y++)
        {
            for (int x = 0; x < bgwidth; x++)
            {
@@ -157,7 +161,7 @@ class EditorLowLayer : LowLayer
         if (currentCursor == chipCursor)
         {
             selectedChip += bgwidth;
-            if (chipCursor.posY >= 16 * 2)
+            if (chipCursor.posY >= chipList.height - chipList.chipSize)
             {
                 scrollChipList(1);
                 return;
