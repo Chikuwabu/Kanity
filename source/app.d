@@ -3,7 +3,7 @@ import kanity.core;
 import kanity.mapeditor.editor;
 
 void main(){
-    auto editor = new Editor("kanityconfig.json");
+    auto editor = new Editor("editorconfig.json");
     editor.run();
 	auto engine = new Engine("kanityconfig.json");
 	engine.run();

@@ -43,6 +43,7 @@ class EditorLowLayer : LowLayer
     Sprite currentCursor;
     int mapCX;
     int mapCY;
+    int mapHeight;
     override void init()
     {
         super.init();
@@ -67,7 +68,7 @@ class EditorLowLayer : LowLayer
         int[] mapdata = new int[mapWidth *  mapHeight];
 
         map = new BG(chara, mapdata);
-        map.posY = -16 * 3;
+        map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
         renderer.addObject(map);
         auto cursor = new Character(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X);
         chipCursor = new Sprite(cursor, 0, 0, 0);
@@ -75,10 +76,13 @@ class EditorLowLayer : LowLayer
         renderer.addObject(chipCursor);
         mapCursor = new Sprite(cursor, 0, 0, 1);
         mapCursor.homeX = 2;
-        mapCursor.homeY = -16 * 3;
+        mapCursor.homeY = -16 * 3 - 16;//map.posY;
+        this.mapHeight = height - 16 * 3 - 16;
+        map.height = this.mapHeight;
         renderer.addObject(mapCursor);
 
         currentCursor = chipCursor;
+        mapCursor.hide;
         registerEvent();
     }
     void rightButton(bool repeat)
@@ -99,8 +103,15 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
-            mapCursor.move(map.chipSize, 0);
             mapCX++;
+            if (mapCursor.posX + cast(int)map.chipSize >= width)
+            {
+                map.move(map.chipSize, 0);
+            }
+            else
+            {
+                mapCursor.move(map.chipSize, 0);
+            }
         }
     }
     void leftButton(bool repeat)
@@ -116,12 +127,22 @@ class EditorLowLayer : LowLayer
             }
             else
             {
-                chipCursor.move(-map.chipSize, 0);
+                if (chipCursor.posX - cast(int)map.chipSize < 0)
+                {
+                    chipCursor.move(-map.chipSize, 0);
+                }
             }
         }
         else if (currentCursor == mapCursor)
         {
-            mapCursor.move(-map.chipSize, 0);
+            if (mapCursor.posX - cast(int)map.chipSize < 0)
+            {
+                map.move(-map.chipSize, 0);
+            }
+            else
+            {
+                mapCursor.move(-map.chipSize, 0);
+            }
             mapCX--;
         }
     }
@@ -139,7 +160,14 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
-            mapCursor.move(0, -map.chipSize);
+            if (mapCursor.posY - cast(int)map.chipSize < 0)
+            {
+                map.move(0, -map.chipSize);
+            }
+            else
+            {
+                mapCursor.move(0, -map.chipSize);
+            }
             mapCY--;
         }
     }
@@ -170,7 +198,14 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
-            mapCursor.move(0, map.chipSize);
+            if (mapCursor.posY + cast(int)map.chipSize >= mapHeight)
+            {
+                map.move(0, map.chipSize);
+            }
+            else
+            {
+                mapCursor.move(0, map.chipSize);
+            }
             mapCY++;
         }
     }
@@ -184,6 +219,7 @@ class EditorLowLayer : LowLayer
         }
         if (event.keysym.sym == SDLK_TAB || event.keysym.sym == SDLK_n || event.keysym.sym == SDLK_BACKSPACE || event.keysym.sym == SDLK_RETURN)
         {
+            currentCursor.hide;
             if (currentCursor == chipCursor)
             {
                 currentCursor = mapCursor;
@@ -192,6 +228,7 @@ class EditorLowLayer : LowLayer
             {
                 currentCursor = chipCursor;
             }
+            currentCursor.show;
         }
     }
     void registerEvent()
