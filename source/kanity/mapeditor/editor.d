@@ -7,6 +7,7 @@ import kanity.bg;
 import kanity.sprite;
 import kanity.event;
 import kanity.lua;
+import kanity.object;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
@@ -27,6 +28,11 @@ class Editor : Engine
         return new EditorLowLayer(renderer, event);
     }
 }
+
+class Box : DrawableObject
+{
+}
+
 class EditorLowLayer : LowLayer
 {
     this(Renderer renderer, Event event)
@@ -64,6 +70,7 @@ class EditorLowLayer : LowLayer
         chipList.width = width;
         chipList.height = chipList.chipSize * listheight;
         scrollChipList(0);
+        chipList.priority = 0;
         int mapWidth = 256, mapHeight = 256;
         int[] mapdata = new int[mapWidth *  mapHeight];
 
@@ -80,9 +87,16 @@ class EditorLowLayer : LowLayer
         this.mapHeight = height - 16 * 3 - 16;
         map.height = this.mapHeight;
         renderer.addObject(mapCursor);
+        map.priority = 2;
 
         currentCursor = chipCursor;
         mapCursor.hide;
+
+        auto box = new Box();
+        box.width = width;
+        box.height = -(-16 * 3 - 16);
+        box.priority = map.priority - 1;
+        renderer.addObject(box);
         registerEvent();
     }
     void rightButton(bool repeat)

@@ -35,14 +35,15 @@ public:
     scaleOrigin = kanity.render.Renderer.getData("renderScale").get!float;
 
     renderer = window.SDL_GetRenderer();
-    texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+    //texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
 
     color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
   }
   ~this(){
-    texture.SDL_DestroyTexture;
+    if (texture)
+        texture.SDL_DestroyTexture;
   }
 
   void draw(SDL_Rect drawrect, SDL_Rect texrect){
@@ -77,14 +78,16 @@ public:
   void draw(){
       if (m_hide) return;
       glColor4ub(color_.r, color_.g, color_.b, color_.a);
-    texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
+    if (texture)
+      texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
       glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(x1 - hx, y2 - hy, z);
       glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(x2 - hx ,y2 - hy, z);
       glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(x2 - hx, y1 - hy, z);
     glEnd();
-    texture_.SDL_GL_UnbindTexture();
+    if (texture)
+      texture_.SDL_GL_UnbindTexture();
     glFlush();
   }
 
