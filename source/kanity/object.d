@@ -148,7 +148,7 @@ private:
   public:
   @property{
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
-    float priority(int p_){return z = 1.0 - (p_ / 256);}
+    float priority(int p_){return z = 1.0 - (p_ / 256f);}
 
     //描画される大きさ(倍率)
     float scale(){return scale_;}
