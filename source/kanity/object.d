@@ -17,7 +17,6 @@ private:
   float scale_ = 1.0f, scaleOrigin;
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;
-  bool m_hide;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -43,7 +42,6 @@ public:
   }
 
   void draw(){
-      if (m_hide) return;
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
@@ -55,15 +53,6 @@ public:
     glFlush();
   }
 
-  void show()
-  {
-      m_hide = false;
-  }
-  void hide()
-  {
-      m_hide = true;
-  }
-
   void move(int x, int y){
     auto rect = drawRect;
     rect.x += x; rect.y += y;
@@ -73,32 +62,6 @@ public:
     homeX_ = x; homeY_ = y;
     reloadHome;
   }
-  int width()
-  {
-      return drawRect.w;
-  }
-  int height()
-  {
-      return drawRect.h;
-  }
-  void width(int a){
-      auto rect = drawRect;
-      rect.w = a;
-      drawRect = rect;
-      auto trect = texRect;
-      trect.w = a;
-      texRect = trect;
-      reloadHome();
-  }
-  void height(int a){
-      auto rect = drawRect;
-      rect.h = a;
-      drawRect = rect;
-      auto trect = texRect;
-      trect.h = a;
-      texRect = trect;
-      reloadHome();
-  }
 private:
   void reloadHome(){
     hx = +cast(float)(homeX * (scaleOrigin * scale_) / drawWidth * 2);
@@ -107,7 +70,7 @@ private:
   public:
   @property{
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
-    float priority(int p_){return z = 1.0 - (p_ / 256);}
+    float priority(int p_){return z = 1.0 - (cast(float)p_ / 256);}
 
     //描画される大きさ(倍率)
     float scale(){return scale_;}
@@ -137,10 +100,10 @@ private:
       drawRect_ = rect;
       with(rect){
         //座標系の変換
-        x1 = (cast(float)x * (scaleOrigin * scale_) / drawWidth * 2) - 1;
-        y1 = 1 - (cast(float)y * (scaleOrigin * scale_) / drawHeight * 2);
-        x2 = (cast(float)(x * (scaleOrigin * scale_) + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
-        y2 = 1 - (cast(float)(y * (scaleOrigin * scale_) + h * (scaleOrigin * scale_)) / drawHeight * 2);
+        x1 = (cast(float)x / drawWidth * 2) - 1;
+        y1 = 1 - (cast(float)y / drawHeight * 2);
+        x2 = (cast(float)(x + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
+        y2 = 1 - (cast(float)(y + h * (scaleOrigin * scale_)) / drawHeight * 2);
       }
     }
 

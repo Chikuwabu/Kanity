@@ -9,6 +9,7 @@ import kanity.character;
 import kanity.object;
 import kanity.control;
 import kanity.utils;
+import kanity.type;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import std.string;
@@ -64,11 +65,9 @@ class LuaLibrary
     }
     Renderer renderer;
     Event event;
-    LowLayer lLayer;
     LuaState lua;
-    this(Control control, Renderer renderer_, Event event_, LowLayer lLayer_)
+    this(RenderEventInterface renderEvent)
     {
-        renderer = renderer_; event = event_; lLayer = lLayer_;
         lua = new LuaState;
         lua.openLibs();
         //lua["Character"] = lua.registerType!Character();
@@ -83,8 +82,13 @@ class LuaLibrary
         lua["setLeftButtonEvent"] = &setLeftButtonEvent;
 
         lua["test"] = &test;
-        lua["control"] = control;
+        //lua["control"] = control;
         lua["spriteToDrawableObject"] = &spriteToDrawableObject;
+        EventData e;
+        e.type = EVENT_DATA.STRING;
+        e.event = RENDER_EVENT.TEST;
+        e.str = "Yuuashi is hage";
+        renderEvent.send(e);
 
     }
     void doFile(string name)

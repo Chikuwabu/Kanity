@@ -53,10 +53,22 @@ public:
   }
 
   int run(){
-    auto TrenderAndEvent = new LowLayer(renderer, event);
-    TrenderAndEvent.start;
-    control.run(renderer, event, TrenderAndEvent);
-    TrenderAndEvent.join;
+    renderer.init();
+    event.init();
+    control.run(renderer, event);
+    auto frame1 = 1000 / 60;
+    do
+    {
+      auto start = cast(long)SDL_GetTicks;
+      renderer.render();
+      event.process();
+
+      auto end = cast(long)SDL_GetTicks;
+      if (end - start < frame1)
+      {
+          SDL_Delay(cast(uint)(frame1 - end + start));
+      }
+    } while(event.isRunning);
     return 0;
   }
   private void loadConfig(string jsonText){
@@ -126,37 +138,5 @@ public:
       enforce(root.object["startScript"].type == JSON_TYPE.STRING);
       control.startScript = root.object["startScript"].str;
     }
-  }
-}
-
-//低レイヤ処理を行うスレッド
-class LowLayer : Thread {
-  private bool running;
-
-  this(Renderer renderer, Event event){
-    running = true;
-    super(() => run(renderer, event));
-  }
-
-  void run(Renderer renderer, Event event){
-    renderer.init();
-    event.init();
-    auto frame1 = 1000 / 60;
-    do
-    {
-      auto start = cast(long)SDL_GetTicks;
-      renderer.render();
-      event.process();
-
-      auto end = cast(long)SDL_GetTicks;
-      if (end - start < frame1)
-      {
-          SDL_Delay(cast(uint)(frame1 - end + start));
-      }
-    } while(event.isRunning);
-  }
-
-  void stop(){
-    running = false;
   }
 }

@@ -85,6 +85,7 @@ public:
     override int posX(){ return bg.x; }
     override int posY(){ return bg.y; }
     override void posX(int n){
+      bg.x = n;
       auto rectD = this.drawRect, rectT = this.texRect;
       if(n < 0){
         rectD.x = -n; rectD.w = drawWidth + n;
@@ -99,6 +100,7 @@ public:
       drawRect = rectD; texRect = rectT;
     }
     override void posY(int n){
+      bg.y = n;
       auto rectD = this.drawRect, rectT = this.texRect;
       if(n < 0){
         rectD.y = -n; rectD.h = drawHeight + n;
