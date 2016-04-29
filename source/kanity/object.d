@@ -18,6 +18,7 @@ private:
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;
   bool m_hide;
+  SDL_Color color_;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -35,6 +36,8 @@ public:
 
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+
+    color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
   }
@@ -60,6 +63,7 @@ public:
           u2 = cast(float)(x + w) / texWidth;
           v2 = cast(float)(y + h) / texHeight;
       }
+      glColor4ub(color_.r, color_.g, color_.b, color_.a);
       texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
       glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
@@ -72,6 +76,7 @@ public:
   }
   void draw(){
       if (m_hide) return;
+      glColor4ub(color_.r, color_.g, color_.b, color_.a);
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
@@ -126,6 +131,14 @@ public:
       trect.h = a;
       texRect = trect;
       reloadHome();
+  }
+  void color(SDL_Color c)
+  {
+      color_ = c;
+  }
+  SDL_Color color()
+  {
+      return color_;
   }
 private:
   void reloadHome(){
