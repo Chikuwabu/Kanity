@@ -121,6 +121,16 @@ public:
       //setTexture();
       updateFlag = true;
   }
+
+  auto rawMapData()
+  {
+      return mapData;
+  }
+  void rawMapData(int[] map)
+  {
+      mapData = map;
+      updateFlag = true;
+  }
 private:
   void setTexture(){
       SDL_Rect aw;

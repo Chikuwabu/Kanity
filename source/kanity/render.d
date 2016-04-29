@@ -42,6 +42,11 @@ public:
   void addObject(DrawableObject obj){
       object.insertFront(obj);
   }
+  void removeObject(DrawableObject obj){
+      import std.algorithm;
+      import std.range;
+      this.object.linearRemove(find(this.object[], obj).take(1));
+  }
   void clear(){
       object.clear();
   }

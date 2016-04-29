@@ -8,10 +8,12 @@ import kanity.sprite;
 import kanity.event;
 import kanity.lua;
 import kanity.object;
+import kanity.map;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import core.thread;
+import std.string;
 
 class Editor : Engine
 {
@@ -44,12 +46,15 @@ class EditorLowLayer : LowLayer
     int bgwidth, bgheight;
     BG chipList;
     BG map;
+    BG[] layer;
     Sprite chipCursor;
     Sprite mapCursor;
     Sprite currentCursor;
     int mapCX;
     int mapCY;
     int mapHeight;
+    Character character;
+    string chraracterFile = "BGTest2.png";
     override void init()
     {
         super.init();
@@ -58,7 +63,8 @@ class EditorLowLayer : LowLayer
         height = cast(int)(renderer.windowHeight / renderer.renderScale);
         bgheight = height/ 16;
         bgwidth = width / 16;
-        auto chara = new Character(IMG_Load("BGTest2.png"), 16, 16, CHARACTER_SCANAXIS.X);
+        character = new Character(IMG_Load(chraracterFile.toStringz), 16, 16, CHARACTER_SCANAXIS.X);
+        alias chara = character;
         int listheight = 3;
         int[] m = new int[listheight * bgwidth];
         auto bg = new BG(chara, m);
@@ -75,6 +81,8 @@ class EditorLowLayer : LowLayer
         int[] mapdata = new int[mapWidth *  mapHeight];
 
         map = new BG(chara, mapdata);
+        map.sizeWidth = mapWidth;
+        map.sizeHeight = mapHeight;
         map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
         renderer.addObject(map);
         auto cursor = new Character(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X);
@@ -88,6 +96,8 @@ class EditorLowLayer : LowLayer
         map.height = this.mapHeight;
         renderer.addObject(mapCursor);
         map.priority = 2;
+
+        layer = [map];
 
         currentCursor = chipCursor;
         mapCursor.hide;
@@ -244,7 +254,34 @@ class EditorLowLayer : LowLayer
             }
             currentCursor.show;
         }
+        if (event.keysym.sym == SDLK_s && (event.keysym.mod & KMOD_CTRL))
+        {
+            save();
+        }
+        if (event.keysym.sym == SDLK_o && (event.keysym.mod & KMOD_CTRL))
+        {
+            load();
+        }
     }
+
+    void load()
+    {
+        auto map = new Map();
+        map.load("test");
+        renderer.removeObject(this.map);
+        //That's zatsu
+        this.map = map.bgList[0];
+        renderer.addObject(this.map);
+        std.experimental.logger.info("Success to load");
+    }
+
+    void save()
+    {
+        auto map = new Map(layer, character);
+        map.save(chraracterFile, "test");
+        std.experimental.logger.info("Success to save");
+    }
+
     void registerEvent()
     {
         event.rightButtonDownEvent.addEventHandler(&rightButton);
