@@ -17,6 +17,8 @@ private:
   float scale_ = 1.0f, scaleOrigin;
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;
+  bool m_hide;
+  SDL_Color color_;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -35,13 +37,46 @@ public:
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
 
+    color_ = SDL_Color(255, 255, 255, 255);
+
     this.priority = 0;
   }
   ~this(){
     texture.SDL_DestroyTexture;
   }
 
+  void draw(SDL_Rect drawrect, SDL_Rect texrect){
+      if (m_hide) return;
+      float x1, y1, x2, y2; //(x1, y1)-(x2, y2)までの範囲を描画
+      float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
+      //共通化すべき...
+      with(drawrect){
+          //座標系の変換
+          x1 = (cast(float)(x + drawRect_.x) * (scaleOrigin * scale_) / drawWidth * 2) - 1;
+          y1 = 1 - (cast(float)(y + drawRect_.y) * (scaleOrigin * scale_) / drawHeight * 2);
+          x2 = (cast(float)((x + drawRect_.x) * (scaleOrigin * scale_) + w * (scaleOrigin * scale_)) / drawWidth * 2) - 1;
+          y2 = 1 - (cast(float)((y + drawRect_.y) * (scaleOrigin * scale_) + h * (scaleOrigin * scale_)) / drawHeight * 2);
+      }
+      with(texrect){
+          u1 = cast(float)x / texWidth;
+          v1 = cast(float)y / texHeight;
+          u2 = cast(float)(x + w) / texWidth;
+          v2 = cast(float)(y + h) / texHeight;
+      }
+      glColor4ub(color_.r, color_.g, color_.b, color_.a);
+      texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
+      glBegin(GL_QUADS);
+      glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
+      glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(x1 - hx, y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(x2 - hx ,y2 - hy, z);
+      glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(x2 - hx, y1 - hy, z);
+      glEnd();
+      texture_.SDL_GL_UnbindTexture();
+      glFlush();
+  }
   void draw(){
+    if (m_hide) return;
+    glColor4ub(color_.r, color_.g, color_.b, color_.a);
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
     glBegin(GL_QUADS);
       glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(x1 - hx, y1 - hy, z);
@@ -62,6 +97,40 @@ public:
     homeX_ = x; homeY_ = y;
     reloadHome;
   }
+  int width()
+  {
+      return drawRect.w;
+  }
+  int height()
+  {
+      return drawRect.h;
+  }
+  void width(int a){
+      auto rect = drawRect;
+      rect.w = a;
+      drawRect = rect;
+      auto trect = texRect;
+      trect.w = a;
+      texRect = trect;
+      reloadHome();
+  }
+  void height(int a){
+      auto rect = drawRect;
+      rect.h = a;
+      drawRect = rect;
+      auto trect = texRect;
+      trect.h = a;
+      texRect = trect;
+      reloadHome();
+  }
+  void color(SDL_Color c)
+  {
+      color_ = c;
+  }
+  SDL_Color color()
+  {
+      return color_;
+  }
 private:
   void reloadHome(){
     hx = +cast(float)(homeX * (scaleOrigin * scale_) / drawWidth * 2);
@@ -70,7 +139,7 @@ private:
   public:
   @property{
     int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
-    float priority(int p_){return z = 1.0 - (cast(float)p_ / 256);}
+    float priority(int p_){return z = 1.0 - (cast(float)p_ / 256f);}
 
     //描画される大きさ(倍率)
     float scale(){return scale_;}

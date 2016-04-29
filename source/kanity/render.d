@@ -108,7 +108,7 @@ public:
     map[] = a;
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    bg1.scroll(64*16-320+10, 64*16-240);
+    //bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];
@@ -122,6 +122,21 @@ public:
     sp.scaleAnimation(2.0,60);
     addObject(sp);
 
+    import kanity.text;
+    import std.stdio;
+    import std.conv;
+    auto font_datfile = File("mplus_j10r.dat.txt", "r");
+    dstring[] font_dat = new dstring[0];
+    while(!font_datfile.eof)
+    {
+        auto line = font_datfile.readln();
+        font_dat ~=line.to!dstring;
+    }
+    auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+    auto text = new Text(mplus10font);
+    text.posX = 20;
+    text.text = "こんにちは、世界";
+    addObject(text);
     drawFlag = true;
     SDL_Delay(100);
     glInit;
@@ -179,11 +194,9 @@ private:
 class RenderEvent{
   private Renderer rendrerer;
   EventQueue!int eventQueue;
-  private Mutex mutex;
 public:
   this(Renderer r){
     rendrerer = r;
-    mutex = new Mutex();
   }
   void event(){
     if(eventQueue.length > 0){
@@ -200,15 +213,13 @@ public:
     return;
   }
   @property auto getInterface(){
-    return new RenderEventInterface(this, mutex);
+    return new RenderEventInterface(this);
   }
 }
 class RenderEventInterface{
   private RenderEvent renderEvent;
-  private Mutex mutex;
-  public this(RenderEvent r, Mutex m){
+  public this(RenderEvent r){
     renderEvent = r;
-    mutex = m;
   }
   public void send(EventData e){
     renderEvent.eventQueue.enqueue(e);
