@@ -9,11 +9,15 @@ import kanity.event;
 import kanity.lua;
 import kanity.object;
 import kanity.map;
+import kanity.text;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import core.thread;
 import std.string;
+import std.conv;
+import std.range;
+import std.algorithm;
 
 class Editor : Engine
 {
@@ -31,8 +35,85 @@ class Editor : Engine
     }
 }
 
-class Box : DrawableObject
+class FilledBox : DrawableObject
 {
+}
+
+class Button : DrawableObject
+{
+    DrawableObject background;
+    DrawableObject foreground;
+    void delegate() onClick;
+    Event event;
+    float __foggaf__;
+    this(Event event, Text text, void delegate() onClick)
+    {
+        foreground = text;
+        background = new FilledBox();
+        background.color = SDL_Color(192, 192, 192, 255);
+        super();
+        event.eventHandler.addEventHandler(&checkEvent);
+        this.event = event;
+        this.onClick = onClick;
+        __foggaf__ = kanity.render.Renderer.getData("renderScale").get!float;
+    }
+    override void draw()
+    {
+        foreground.draw();
+        background.draw();
+    }
+    override void posX(int p)
+    {
+        super.posX(p);
+        foreground.posX = p;
+        background.posX = p;
+    }
+    override void posY(int p)
+    {
+        super.posY(p);
+        foreground.posY = p;
+        background.posY = p;
+    }
+    override void width(int p)
+    {
+        super.width(p);
+        foreground.width = p;
+        background.width = p;
+    }
+    override void height(int p)
+    {
+        super.height(p);
+        foreground.height = p;
+        background.height = p;
+    }
+    ~this()
+    {
+        if (event && event.eventHandler)
+        {
+            event.eventHandler.removeEventHandler(&checkEvent);
+        }
+    }
+    void checkEvent(SDL_Event event)
+    {
+        switch(event.type)
+        {
+            case SDL_MOUSEBUTTONDOWN:
+                auto button = event.button;
+                auto x = button.x * __foggaf__;
+                auto y = button.y * __foggaf__;
+                if (button.x >= background.posX && button.x <= background.posX + background.width)
+                {
+                    if (button.y >= background.posY && button.y <= background.posY + background.height)
+                    {
+                        if (onClick)
+                            onClick();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 class EditorLowLayer : LowLayer
@@ -55,6 +136,8 @@ class EditorLowLayer : LowLayer
     int mapHeight;
     Character character;
     string chraracterFile = "BGTest2.png";
+    Button[] buttons;
+
     override void init()
     {
         super.init();
@@ -64,10 +147,9 @@ class EditorLowLayer : LowLayer
         bgheight = height/ 16;
         bgwidth = width / 16;
         character = new Character(IMG_Load(chraracterFile.toStringz), 16, 16, CHARACTER_SCANAXIS.X);
-        alias chara = character;
         int listheight = 3;
         int[] m = new int[listheight * bgwidth];
-        auto bg = new BG(chara, m);
+        auto bg = new BG(character, m);
         bg.sizeWidth = bgwidth;
         bg.sizeHeight = listheight;
         renderer.addObject(bg);
@@ -77,13 +159,8 @@ class EditorLowLayer : LowLayer
         chipList.height = chipList.chipSize * listheight;
         scrollChipList(0);
         chipList.priority = 0;
-        int mapWidth = 256, mapHeight = 256;
-        int[] mapdata = new int[mapWidth *  mapHeight];
-
-        map = new BG(chara, mapdata);
-        map.sizeWidth = mapWidth;
-        map.sizeHeight = mapHeight;
-        map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
+        map = newMapBG();
+        initMapBG(map);
         renderer.addObject(map);
         auto cursor = new Character(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X);
         chipCursor = new Sprite(cursor, 0, 0, 0);
@@ -93,21 +170,77 @@ class EditorLowLayer : LowLayer
         mapCursor.homeX = 2;
         mapCursor.homeY = -16 * 3 - 16;//map.posY;
         this.mapHeight = height - 16 * 3 - 16;
-        map.height = this.mapHeight;
+        //map.height = this.mapHeight;
         renderer.addObject(mapCursor);
-        map.priority = 2;
 
-        layer = [map];
+        layer = new BG[1];
+        layer[0] = map;
 
         currentCursor = chipCursor;
         mapCursor.hide;
 
-        auto box = new Box();
+        auto box = new FilledBox();
         box.width = width;
         box.height = -(-16 * 3 - 16);
         box.priority = map.priority - 1;
         renderer.addObject(box);
+
+        initFont();
+
         registerEvent();
+    }
+    Font font;
+    void addLayerEvent()
+    {
+        auto bg = newMapBG();
+        layer ~= bg;
+        chLayer(layer.length - 1);
+    }
+    Text layerText;
+    void initFont()
+    {
+        import std.stdio;
+        auto font_datfile = File("mplus_j10r.dat.txt", "r");
+        dstring[] font_dat = font_datfile.byLine.map!(x => x.to!dstring).array;
+        auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+        auto text = new Text(mplus10font);
+        text.posY = 16 * 3;
+        text.text = "現在のレイヤ：０";
+        text.color = SDL_Color(0, 0, 0, 255);
+        layerText = text;
+        renderer.addObject(text);
+        font = mplus10font;
+        auto t2 = new Text(font);
+        t2.text = "Ａｄｄ　Ｌａｙｅｒ";
+        auto btn = new Button(event, t2, &addLayerEvent);
+        buttons = [btn];
+        btn.posY = 16 * 3;
+        btn.posX = 90;
+        btn.width = 100;
+        btn.height = 12;
+        renderer.addObject(btn);
+    }
+    void chLayer(int num)
+    {
+        auto table = ['０', '１', '２', '３','４','５','６','７','８','９'];
+        layerText.text = ("現在のレイヤ：" ~ /*goriosi*/num.to!wstring.map!(x => (x >= '0' && x <= '9' ? cast(wchar)table[x - '0'] : cast(wchar)x)).array.to!string);
+    }
+    BG newMapBG()
+    {
+        int mapWidth = 256, mapHeight = 256;
+        int[] mapdata = new int[mapWidth *  mapHeight];
+        mapdata[] = -1;
+
+        auto map = new BG(character, mapdata);
+        map.sizeWidth = mapWidth;
+        map.sizeHeight = mapHeight;
+        map.height = mapHeight * map.chipSize;
+        map.priority = 2;
+        return map;
+    }
+    void initMapBG(BG map)
+    {
+        map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
     }
     void rightButton(bool repeat)
     {
@@ -151,10 +284,7 @@ class EditorLowLayer : LowLayer
             }
             else
             {
-                if (chipCursor.posX - cast(int)map.chipSize < 0)
-                {
-                    chipCursor.move(-map.chipSize, 0);
-                }
+                chipCursor.move(-map.chipSize, 0);
             }
         }
         else if (currentCursor == mapCursor)
@@ -271,6 +401,11 @@ class EditorLowLayer : LowLayer
         renderer.removeObject(this.map);
         //That's zatsu
         this.map = map.bgList[0];
+        initMapBG(map.bgList[0]);
+        mapCX = 0;
+        mapCY = 0;
+        mapCursor.posX = 0;
+        mapCursor.posY = 0;
         renderer.addObject(this.map);
         std.experimental.logger.info("Success to load");
     }

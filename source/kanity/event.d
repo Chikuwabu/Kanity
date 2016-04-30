@@ -7,20 +7,25 @@ import std.experimental.logger;
 
 class EventHandler(F)
 {
-    F event;
+    F[F] event;
     public void addEventHandler(F)(F func)
     {
-        event = func;
+        event[func] = func;
+    }
+    public void removeEventHandler(F)(F func)
+    {
+        event.remove(func);
     }
     public void opCall(Args...)(Args args)
     {
-        if (event)
-            event(args);
+        foreach(e; event)
+            e(args);
     }
 }
 
 alias ButtonEventFunction = void delegate(bool);
 alias KeyEventFunction = void delegate(SDL_KeyboardEvent);
+alias EventFunction = void delegate(SDL_Event);
 class Event{
 private:
     bool running;
@@ -31,6 +36,7 @@ public:
     auto upButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto downButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto keyDownEvent = new EventHandler!KeyEventFunction;
+    auto eventHandler = new EventHandler!EventFunction;
     void init(){
         running = true;
     }
@@ -68,6 +74,7 @@ public:
             default:
                 break;
         }
+        eventHandler(event);
     }
     void stop(){
         running = false;

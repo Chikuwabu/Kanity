@@ -48,7 +48,8 @@ public:
   }
   this(Character chara, int[] mapData_){
     this(chara);
-    mapData/*[]*/ = mapData_[];
+    mapData/*[]*/ = mapData_;
+    updateFlag = true;
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
