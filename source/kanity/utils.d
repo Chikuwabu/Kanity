@@ -62,7 +62,13 @@ class DataTable(TKey, TData){
       data.remove(key);
     }
   }
-  @property auto get(){ return data;};
+  //getして使用が終わったらremoveする
+  public TData get(TKey key){
+    enforce(key in data);
+    count[key]++;
+    return data[key];
+  }
+
   alias this get;
 }
 //イベントキュー
@@ -72,7 +78,7 @@ struct EventQueue(T){
   alias E = EventData;
   private Queue!(DList!E) queue;
   public T data; //適当に情報つっこむ
-  public void delegate() callback;
+  public void delegate() callback = null;
 
   public void enqueue(E a){queue.enqueue(a);}
   public E dequeue(){return queue.dequeue;}
@@ -119,6 +125,9 @@ public:
     void vectorX(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.x = a;}
     void vectorY(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.y = a;}
   }
+  void clear(){
+    type_ = EVENT_DATA.NONE;
+  }
 }
 //Adapters
 import std.range;
@@ -134,10 +143,10 @@ struct Queue(T){
     count++;
   }
   public S dequeue(){
-    enforce(count != 0);
-    auto a = queue.back;
-    queue.removeBack;
     count--;
+    enforce(count > 0);
+    queue.removeBack;
+    auto a = queue.back;
     return a;
   }
   alias init = clear;
@@ -157,8 +166,8 @@ struct Queue(T){
     @property public bool empty(){return q.count==0;}
     @property public S front(){return q.queue.back;}
     public void popFront(){
-      logf("%d,%d",q.count,q.queue[].walkLength);
-      q.dequeue();
+      q.queue.removeBack;
+      q.count--;
     }
   }
 }

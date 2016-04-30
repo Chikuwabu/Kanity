@@ -2,13 +2,13 @@ module kanity.lua;
 import luad.all;
 import kanity.core;
 import kanity.render;
+import kanity.character;
 import kanity.event;
 import kanity.object;
 import kanity.sprite;
 import kanity.utils;
 import kanity.type;
-import derelict.sdl2.sdl;
-import derelict.sdl2.image;
+import std.experimental.logger;
 import std.string;
 import core.thread;
 
@@ -28,13 +28,12 @@ class LuaThread{
     }*/
     void test()
     {
-        event.leftButtonDownEvent();
+        //event.leftButtonDownEvent();
     }
     /*DrawableObject spriteToDrawableObject(Sprite sp)
     {
         return sp;
     }*/
-    Renderer renderer;
     Event event;
     LuaState lua;
     Thread T;
@@ -46,11 +45,24 @@ class LuaThread{
         script = script_;
         lua = new LuaState;
         lua.openLibs();
-        doString("print('Hello Lua World')");
+        //e.event = RENDER_EVENT.NEWOBJECT;
+        //e.type = EVENT_DATA.NUMBER;
+        //e.number
 
         //lua["test"] = &test;
+        lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
         lua["log"] = &lua_log;
         lua["sleep"] = &lua_sleep;
+
+        lua["loadImg"] = &lua_loadImg;
+        lua["unloadImg"] = &lua_unloadImg;
+
+        lua["newCharacter"] = &lua_newCharacter;
+        lua["deleteCharacter"] = &lua_deleteCharacter;
+        lua["setCutRect"] = &lua_character_set_rect;
+        lua["setScanAxis"] = &lua_character_set_scanAxis;
+        lua["cut"] = &lua_character_cut;
+        lua["newSprite"] = &lua_sprite_new;
 
         T = new Thread(() => doString(script));
         T.start;
@@ -75,5 +87,85 @@ class LuaThread{
     void lua_sleep(uint n){
       import std.datetime;
       T.sleep(dur!"msecs"(n));
+    }
+    string lua_loadImg(string name){
+      EventData e;
+      e.event = RENDER_EVENT.SURFACE_LOAD;
+      e.type = EVENT_DATA.STRING;
+      e.str = name;
+      renderEvent.send(e);
+      return name;
+    }
+    void lua_unloadImg(string name){
+      EventData e;
+      e.event = RENDER_EVENT.SURFACE_UNLOAD;
+      e.type = EVENT_DATA.STRING;
+      e.str = name;
+      renderEvent.send(e);
+    }
+    int lua_newCharacter(string surface){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_NEW;
+      e.type = EVENT_DATA.STRING;
+      e.str = surface;
+      renderEvent.send(e);
+      bool flag = true;
+      renderEvent.callback = (){flag=false;};
+      while(flag){}
+      auto n = renderEvent.data;
+      renderEvent.callback = null;
+      return n;
+    }
+    void lua_deleteCharacter(int chara){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_DELETE;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      renderEvent.send(e);
+    }
+    void lua_character_set_rect(int chara, int w, int h){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_SET_RECT;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      renderEvent.send(e);
+      e.clear;
+      e.type = EVENT_DATA.POS;
+      e.posX = w; e.posY = h;
+      renderEvent.send(e);
+    }
+    void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_SET_SCANAXIS;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      renderEvent.send(e);
+      e.clear;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = scan;
+      renderEvent.send(e);
+    }
+    void lua_character_cut(int chara){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_CUT;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      renderEvent.send(e);
+    }
+    int lua_sprite_new(int chara){
+      EventData e;
+      e.event = RENDER_EVENT.OBJECT_NEW;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = OBJECTTYPE.SPRITE;
+      renderEvent.send(e);
+      e.clear;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      renderEvent.send(e);
+      bool flag = true;
+      renderEvent.callback = (){flag = false;};
+      while(flag){}
+      renderEvent.callback = null;
+      return renderEvent.data;
     }
 }

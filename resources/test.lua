@@ -17,6 +17,14 @@ log("Yuuashi must be hage.")
 log("Yuuashi can be hage.")
 log("Yuuashi may be hage.")
 log("Yuuashi might be hage.")
-log("Is Yuuashi hage?")
 sleep(1000);
+local spimg = loadImg("SPTest.png")
+local toriniku = newCharacter(spimg)
+setCutRect(toriniku, 20, 16)
+setScanAxis(toriniku, CHARACTER_SCANAXIS.X)
+cut(toriniku)
+sp = newSprite(toriniku)
+
+log("hage");
+unloadImg(spimg)
 --print('test')
