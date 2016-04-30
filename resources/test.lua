@@ -11,7 +11,7 @@
 	--testsp:move(10, 10, 16)
 --end
 --setLeftButtonEvent(yopi)
-while true do
+for i = 1, 10 do
   log("Yuuashi must be hage.")
   sleep(1000);
   --print('test')
