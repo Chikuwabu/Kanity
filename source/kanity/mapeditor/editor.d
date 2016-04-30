@@ -193,7 +193,9 @@ class EditorLowLayer : LowLayer
     void addLayerEvent()
     {
         auto bg = newMapBG();
+        initMapBG(bg);
         layer ~= bg;
+        renderer.addObject(bg);
         chLayer(layer.length - 1);
     }
     Text layerText;
@@ -222,6 +224,7 @@ class EditorLowLayer : LowLayer
     }
     void chLayer(int num)
     {
+        map = layer[num];
         auto table = ['０', '１', '２', '３','４','５','６','７','８','９'];
         layerText.text = ("現在のレイヤ：" ~ /*goriosi*/num.to!wstring.map!(x => (x >= '0' && x <= '9' ? cast(wchar)table[x - '0'] : cast(wchar)x)).array.to!string);
     }
@@ -241,6 +244,13 @@ class EditorLowLayer : LowLayer
     void initMapBG(BG map)
     {
         map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
+    }
+    void layerMove(int mx, int my)
+    {
+        foreach (i; layer)
+        {
+            i.move(mx, my);
+        }
     }
     void rightButton(bool repeat)
     {
@@ -263,7 +273,7 @@ class EditorLowLayer : LowLayer
             mapCX++;
             if (mapCursor.posX + cast(int)map.chipSize >= width)
             {
-                map.move(map.chipSize, 0);
+                layerMove(map.chipSize, 0);
             }
             else
             {
@@ -291,7 +301,7 @@ class EditorLowLayer : LowLayer
         {
             if (mapCursor.posX - cast(int)map.chipSize < 0)
             {
-                map.move(-map.chipSize, 0);
+                layerMove(-map.chipSize, 0);
             }
             else
             {
@@ -316,7 +326,7 @@ class EditorLowLayer : LowLayer
         {
             if (mapCursor.posY - cast(int)map.chipSize < 0)
             {
-                map.move(0, -map.chipSize);
+                layerMove(0, -map.chipSize);
             }
             else
             {
@@ -354,7 +364,7 @@ class EditorLowLayer : LowLayer
         {
             if (mapCursor.posY + cast(int)map.chipSize >= mapHeight)
             {
-                map.move(0, map.chipSize);
+                layerMove(0, map.chipSize);
             }
             else
             {
@@ -392,6 +402,10 @@ class EditorLowLayer : LowLayer
         {
             load();
         }
+        if (event.keysym.sym >= '0' && event.keysym.sym <= '9')
+        {
+            chLayer(event.keysym.sym - '0');
+        }
     }
 
     void load()
@@ -399,14 +413,17 @@ class EditorLowLayer : LowLayer
         auto map = new Map();
         map.load("test");
         renderer.removeObject(this.map);
-        //That's zatsu
-        this.map = map.bgList[0];
-        initMapBG(map.bgList[0]);
+        this.layer = map.bgList;
+        foreach (i; map.bgList)
+        {
+            initMapBG(i);
+            renderer.addObject(i);
+        }
+        chLayer(0);
         mapCX = 0;
         mapCY = 0;
         mapCursor.posX = 0;
         mapCursor.posY = 0;
-        renderer.addObject(this.map);
         std.experimental.logger.info("Success to load");
     }
 
