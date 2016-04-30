@@ -11,8 +11,12 @@
 	--testsp:move(10, 10, 16)
 --end
 --setLeftButtonEvent(yopi)
-for i = 1, 10 do
-  log("Yuuashi must be hage.")
-  sleep(1000);
-  --print('test')
-end
+--ゆうアシ五段活用
+log("Yuuashi is hage.")
+log("Yuuashi must be hage.")
+log("Yuuashi can be hage.")
+log("Yuuashi may be hage.")
+log("Yuuashi might be hage.")
+log("Is Yuuashi hage?")
+sleep(1000);
+--print('test')

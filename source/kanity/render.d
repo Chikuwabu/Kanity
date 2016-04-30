@@ -200,10 +200,11 @@ public:
   this(Renderer r){
     rendrerer = r;
     funcs[RENDER_EVENT.LOG] = &event_log;
+    eventQueue.init;
   }
   void event(){
-    while(eventQueue.length > 0){
-      auto e = eventQueue.dequeue;
+    if(eventQueue.length == 0) return;
+    foreach(EventData e; eventQueue[]){
       enforce(e.event <= RENDER_EVENT.max);
       funcs[e.event](e);
     }

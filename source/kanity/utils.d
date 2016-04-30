@@ -2,6 +2,7 @@ module kanity.utils;
 import std.container;
 import std.exception;
 import std.range;
+import std.experimental.logger;
 
 //勝手に管理してID振ってくれるやつ
 class IDTable(T){
@@ -77,7 +78,10 @@ struct EventQueue(T){
   public E dequeue(){return queue.dequeue;}
   alias init = clear;
   public void clear(){queue.clear;}
-  public int length(){return queue.length;}
+  @property public uint length(){return queue.length;}
+  auto opSlice(){
+    return queue[];
+  }
 }
 struct Pos{int x; int y;}
 struct Vector{float x; float y;}
@@ -136,11 +140,27 @@ struct Queue(T){
     count--;
     return a;
   }
+  alias init = clear;
   public void clear(){
     queue.clear;
     count = 0;
   }
+  Range opSlice(){
+    return Range(&this);
+  }
   @property public uint length(){return count;}
+  struct Range{
+    this(Queue* queue){
+      q = queue;
+    }
+    private Queue* q;
+    @property public bool empty(){return q.count==0;}
+    @property public S front(){return q.queue.back;}
+    public void popFront(){
+      logf("%d,%d",q.count,q.queue[].walkLength);
+      q.dequeue();
+    }
+  }
 }
 struct Stack(T){
   static if(__traits(compiles, {T a; a.insertFront(1); auto b = a.front; a.removeFront;}) == false) static assert(0);
