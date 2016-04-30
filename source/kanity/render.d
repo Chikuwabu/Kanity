@@ -108,7 +108,7 @@ public:
     map[] = a;
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    //bg1.scroll(-50, -50);
+    bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];
@@ -191,29 +191,34 @@ private:
   }
 }
 
+enum OBJECTTYPE{SPRITE, BG}
 class RenderEvent{
   private Renderer rendrerer;
-  EventQueue!int eventQueue;
+  private void delegate(EventData)[int] funcs;
+  public EventQueue!int eventQueue;
 public:
   this(Renderer r){
     rendrerer = r;
+    funcs[RENDER_EVENT.LOG] = &event_log;
   }
   void event(){
-    if(eventQueue.length > 0){
+    while(eventQueue.length > 0){
       auto e = eventQueue.dequeue;
-      switch(e.event){
-        case RENDER_EVENT.TEST:
-          enforce(e.type == EVENT_DATA.STRING);
-          e.str.log;
-          break;
-        default:
-          break;
-      }
+      enforce(e.event <= RENDER_EVENT.max);
+      funcs[e.event](e);
     }
     return;
   }
   @property auto getInterface(){
     return new RenderEventInterface(this);
+  }
+private:
+  void event_log(EventData e){
+    enforce(e.type == EVENT_DATA.STRING);
+    e.str.log;
+  }
+  void event_newObject(EventData e){
+
   }
 }
 class RenderEventInterface{
@@ -226,5 +231,8 @@ class RenderEventInterface{
   }
   public int data(){
     return renderEvent.eventQueue.data;
+  }
+  public void flush(){
+    renderEvent.event();
   }
 }
