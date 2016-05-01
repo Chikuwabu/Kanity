@@ -200,9 +200,9 @@ private:
 
 enum OBJECTTYPE{SPRITE, BG}
 class RenderEvent{
+  import core.sync.mutex;
   private Renderer renderer;
   private void delegate(EventData)[int] funcs;
-  //TODO:Sharedにしてバグ防止
   public EventQueue!int eventQueue;
 public:
   this(Renderer r){
@@ -219,14 +219,18 @@ public:
     funcs[RENDER_EVENT.CHARACTER_CUT] = &event_character_cut;
 
     funcs[RENDER_EVENT.OBJECT_NEW] = &event_newObject;
+
+    funcs.rehash;
     eventQueue.init;
   }
   void event(){
-    if(eventQueue.length == 0) return;
-    foreach(EventData e; eventQueue[]){
-      enforce(e.event <= RENDER_EVENT.max);
-      funcs[e.event](e);
-      doCallback();
+    {
+      if(eventQueue.length == 0) return;
+      foreach(EventData e; eventQueue[]){
+        enforce(e.event <= RENDER_EVENT.max);
+        funcs[e.event](e);
+        doCallback();
+      }
     }
     return;
   }

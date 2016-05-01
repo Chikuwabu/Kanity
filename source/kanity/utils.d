@@ -76,18 +76,53 @@ class DataTable(TKey, TData){
 import std.variant;
 enum EVENT_DATA{ NONE, NUMBER, STRING, FLOATER, POS, VECTOR}
 struct EventQueue(T){
+  import core.sync.mutex;
   alias E = EventData;
   private Queue!(DList!E) queue;
   public T data; //適当に情報つっこむ
   public void delegate() callback = null;
+  public Mutex mutex; //スレッドを越えた処理のための排他制御
 
-  public void enqueue(E a){queue.enqueue(a);}
-  public E dequeue(){return queue.dequeue;}
-  alias init = clear;
+  public void enqueue(E a){
+    while(!mutex.tryLock){}
+    synchronized(mutex) queue.enqueue(a);
+    mutex.unlock;
+  }
+  public E dequeue(){
+    while(!mutex.tryLock){}
+    auto a = queue.dequeue;
+    mutex.unlock;
+    return a;
+  }
+  public void init(){
+    mutex = new Mutex();
+    this.clear;
+  }
   public void clear(){queue.clear;}
   @property public uint length(){return queue.length;}
   auto opSlice(){
-    return queue[];
+    return Range(&queue, mutex);
+  }
+  struct Range{
+    this(Queue!(DList!E)* queue, Mutex m){
+      q = queue;
+      mutex = m;
+    }
+    private Queue!(DList!E)* q;
+    private Mutex mutex;
+    @property public bool empty(){return q.count==0;}
+    @property public E front(){
+      while(!this.mutex.tryLock){}
+      auto a = q.queue.back;
+      mutex.unlock;
+      return a;
+    }
+    public void popFront(){
+      while(!mutex.tryLock){}
+      q.queue.removeBack;
+      q.count--;
+      mutex.unlock;
+    }
   }
 }
 struct Pos{int x; int y;}
@@ -140,19 +175,15 @@ struct Queue(T){
 
   alias S = ElementType!T;
   public void enqueue(S a){
-    synchronized{
-      queue.insertFront(a);
-      count++;
-    }
+    queue.insertFront(a);
+    count++;
   }
   public S dequeue(){
-    synchronized{
-      count--;
-      enforce(count > 0);
-      queue.removeBack;
-      auto a = queue.back;
-      return a;
-    }
+    enforce(count > 0);
+    count--;
+    queue.removeBack;
+    auto a = queue.back;
+    return a;
   }
   alias init = clear;
   public void clear(){
@@ -171,10 +202,8 @@ struct Queue(T){
     @property public bool empty(){return q.count==0;}
     @property public S front(){return q.queue.back;}
     public void popFront(){
-      synchronized{
-        q.queue.removeBack;
-        q.count--;
-      }
+      q.queue.removeBack;
+      q.count--;
     }
   }
 }
