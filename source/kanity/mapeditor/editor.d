@@ -187,6 +187,8 @@ class EditorLowLayer : LowLayer
 
         initFont();
 
+        initCol();
+
         registerEvent();
     }
     Font font;
@@ -213,7 +215,7 @@ class EditorLowLayer : LowLayer
         renderer.addObject(text);
         font = mplus10font;
         auto t2 = new Text(font);
-        t2.text = "Ａｄｄ　Ｌａｙｅｒ";
+        t2.text = "レイヤを追加";
         auto btn = new Button(event, t2, &addLayerEvent);
         buttons = [btn];
         btn.posY = 16 * 3;
@@ -221,6 +223,41 @@ class EditorLowLayer : LowLayer
         btn.width = 100;
         btn.height = 12;
         renderer.addObject(btn);
+    }
+    BG colBG;
+    bool[] colList;
+    void initCol()
+    {
+        auto t3 = new Text(font);
+        t3.text = "当たり判定設定";
+        auto btn2 = new Button(event, t3, &settingColEvent);
+        btn2.posY = 16 * 3;
+        btn2.posX = 90 + 104;
+        btn2.width = 100;
+        btn2.height = 12;
+        renderer.addObject(btn2);
+        auto colChar = new Character(IMG_Load("mapeditor.png"), 16, 16, CHARACTER_SCANAXIS.X);
+        colBG = new BG(colChar);
+        colBG.posX = chipList.posX;
+        colBG.posY = chipList.posY;
+        colBG.priority = chipList.priority;
+        colBG.hide();
+        renderer.addObject(colBG);
+        colList = new bool[character.characters.length];
+    }
+    bool isSettingColMode;
+    void settingColEvent()
+    {
+        isSettingColMode = !isSettingColMode;
+        if (isSettingColMode)
+        {
+            scrollChipList(0);
+            colBG.show();
+        }
+        else
+        {
+            colBG.hide();
+        }
     }
     void chLayer(int num)
     {
@@ -344,6 +381,10 @@ class EditorLowLayer : LowLayer
        {
            for (int x = 0; x < bgwidth; x++)
            {
+               if (isSettingColMode)
+               {
+                   colBG.set(x, y, colList.length <= chip ? 0 : colList[chip]);
+               }
                chipList.set(x, y, chip++);
            }
        }
@@ -376,10 +417,19 @@ class EditorLowLayer : LowLayer
     int selectedChip;
     void keyDownEvent(SDL_KeyboardEvent event)
     {
-        if (currentCursor == mapCursor && event.keysym.sym == SDLK_RETURN)
+        if (event.keysym.sym == SDLK_RETURN)
         {
-            map.set(mapCX, mapCY, selectedChip);
-            return;
+            if (currentCursor == mapCursor)
+            {
+                map.set(mapCX, mapCY, selectedChip);
+                return;
+            }
+            if (isSettingColMode)
+            {
+                colList[selectedChip] = !colList[selectedChip];
+                scrollChipList(0);
+                return;
+            }
         }
         if (event.keysym.sym == SDLK_TAB || event.keysym.sym == SDLK_n || event.keysym.sym == SDLK_BACKSPACE || event.keysym.sym == SDLK_RETURN)
         {
