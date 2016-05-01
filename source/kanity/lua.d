@@ -1,44 +1,19 @@
 module kanity.lua;
 import luad.all;
 import kanity.core;
-import kanity.bg;
-import kanity.sprite;
 import kanity.render;
-import kanity.event;
 import kanity.character;
+import kanity.event;
 import kanity.object;
-import kanity.control;
+import kanity.sprite;
 import kanity.utils;
 import kanity.type;
-import derelict.sdl2.sdl;
-import derelict.sdl2.image;
+import std.experimental.logger;
 import std.string;
+import core.thread;
 
-class LuaLibrary
-{
-    SDL_Surface* IMG_Load(string file)
-    {
-        return derelict.sdl2.image.IMG_Load(file.toStringz);
-    }
-
-    Character newCharacter(SDL_Surface* sf, uint chipWidth, uint chipHeight, CHARACTER_SCANAXIS scan)
-    {
-        return new Character(sf, chipWidth, chipHeight, scan);
-    }
-    Sprite newSprite(Character chara, int x, int y, uint charaNum)
-    {
-        auto s = new Sprite(chara, x, y, charaNum);
-        return s;
-    }
-    void moveSprite(int no, int x, int y)
-    {
-        //engine.renderer.getSprite(no).move(x, y);
-    }
-    void moveSpriteAnimation(int no, int x, int y, int frame)
-    {
-        //engine.renderer.getSprite(no).move(x, y, frame);
-    }
-    void setLeftButtonEvent(LuaFunction luafunc)
+class LuaThread{
+    /*void setLeftButtonEvent(LuaFunction luafunc)
     {
         //kattenikopi-sitekurenai
         import std.algorithm.mutation;
@@ -50,54 +25,165 @@ class LuaLibrary
         });
 
         event.leftButtonDownEvent.addEventHandler(ev);
-    }
-    Control acontrol()
-    {
-        return null;
-    }
+    }*/
     void test()
     {
-        event.leftButtonDownEvent();
+        //event.leftButtonDownEvent();
     }
-    DrawableObject spriteToDrawableObject(Sprite sp)
+    /*DrawableObject spriteToDrawableObject(Sprite sp)
     {
         return sp;
-    }
-    Renderer renderer;
+    }*/
     Event event;
     LuaState lua;
-    this(RenderEventInterface renderEvent)
-    {
+    Thread T;
+    RenderEventInterface renderEvent;
+    immutable string script;
+
+    this(RenderEventInterface renderEvent_, string script_){
+        renderEvent = renderEvent_;
+        script = script_;
         lua = new LuaState;
         lua.openLibs();
-        //lua["Character"] = lua.registerType!Character();
-        lua["Sprite"] = lua.registerType!Sprite();
-        //lua["Control"] = lua.registerType!Control();
+        //e.event = RENDER_EVENT.NEWOBJECT;
+        //e.type = EVENT_DATA.NUMBER;
+        //e.number
+
+        //lua["test"] = &test;
         lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
-        lua["IMG_Load"] = &IMG_Load;
-        lua["newCharacter"] = &newCharacter;
-        lua["newSprite"] = &newSprite;
-        lua["moveSprite"] = &moveSprite;
-        lua["moveSpriteAnimation"] = &moveSpriteAnimation;
-        lua["setLeftButtonEvent"] = &setLeftButtonEvent;
+        lua["log"] = &lua_log;
+        lua["sleep"] = &lua_sleep;
 
-        lua["test"] = &test;
-        //lua["control"] = control;
-        lua["spriteToDrawableObject"] = &spriteToDrawableObject;
-        EventData e;
-        e.type = EVENT_DATA.STRING;
-        e.event = RENDER_EVENT.TEST;
-        e.str = "Yuuashi is hage";
-        renderEvent.send(e);
+        lua["loadImg"] = &lua_loadImg;
+        lua["unloadImg"] = &lua_unloadImg;
 
+        lua["newCharacter"] = &lua_newCharacter;
+        lua["deleteCharacter"] = &lua_deleteCharacter;
+        lua["setCutRect"] = &lua_character_set_rect;
+        lua["setScanAxis"] = &lua_character_set_scanAxis;
+        lua["cut"] = &lua_character_cut;
+        lua["newSprite"] = &lua_sprite_new;
+
+        T = new Thread(() => doString(script));
+        T.start;
     }
-    void doFile(string name)
-    {
-        lua.doFile(name);
+    void stop(){
+    }
+    void doFile(string name){
+      import std.file;
+      doString(name.readText);
     }
 
-    void doString(string s)
-    {
+    void doString(string s){
         lua.doString(s);
+    }
+    void lua_log(string s){
+      EventData e;
+      e.type = EVENT_DATA.STRING;
+      e.event = RENDER_EVENT.LOG;
+      e.str = s;
+      synchronized{
+        renderEvent.send(e);
+      }
+    }
+    void lua_sleep(uint n){
+      import std.datetime;
+      T.sleep(dur!"msecs"(n));
+    }
+    string lua_loadImg(string name){
+      EventData e;
+      e.event = RENDER_EVENT.SURFACE_LOAD;
+      e.type = EVENT_DATA.STRING;
+      e.str = name;
+      synchronized{
+        renderEvent.send(e);
+      }
+      return name;
+    }
+    void lua_unloadImg(string name){
+      EventData e;
+      e.event = RENDER_EVENT.SURFACE_UNLOAD;
+      e.type = EVENT_DATA.STRING;
+      e.str = name;
+      synchronized{
+        renderEvent.send(e);
+      }
+    }
+    int lua_newCharacter(string surface){
+      bool flag = true;
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_NEW;
+        e.type = EVENT_DATA.STRING;
+        e.str = surface;
+        renderEvent.send(e);
+        renderEvent.callback = (){flag=false;};
+      }
+      while(flag){}
+      auto n = renderEvent.data;
+      renderEvent.callback = null;
+      return n;
+    }
+    void lua_deleteCharacter(int chara){
+      EventData e;
+      e.event = RENDER_EVENT.CHARACTER_DELETE;
+      e.type = EVENT_DATA.NUMBER;
+      e.number = chara;
+      synchronized{
+        renderEvent.send(e);
+      }
+    }
+    void lua_character_set_rect(int chara, int w, int h){
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_SET_RECT;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.POS;
+        e.posX = w; e.posY = h;
+        renderEvent.send(e);
+      }
+    }
+    void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_SET_SCANAXIS;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = scan;
+        renderEvent.send(e);
+      }
+    }
+    void lua_character_cut(int chara){
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_CUT;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+      }
+    }
+    int lua_sprite_new(int chara){
+      bool flag = true;
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.OBJECT_NEW;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = OBJECTTYPE.SPRITE;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        renderEvent.callback = (){flag = false;};
+      }
+      while(flag){}
+      renderEvent.callback = null;
+      return renderEvent.data;
     }
 }

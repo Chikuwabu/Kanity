@@ -2,6 +2,8 @@ module kanity.utils;
 import std.container;
 import std.exception;
 import std.range;
+import std.experimental.logger;
+import core.thread;
 
 //勝手に管理してID振ってくれるやつ
 class IDTable(T){
@@ -61,23 +63,67 @@ class DataTable(TKey, TData){
       data.remove(key);
     }
   }
-  @property auto get(){ return data;};
+  //getして使用が終わったらremoveする
+  public TData get(TKey key){
+    enforce(key in data);
+    count[key]++;
+    return data[key];
+  }
+
   alias this get;
 }
 //イベントキュー
 import std.variant;
 enum EVENT_DATA{ NONE, NUMBER, STRING, FLOATER, POS, VECTOR}
 struct EventQueue(T){
+  import core.sync.mutex;
   alias E = EventData;
   private Queue!(DList!E) queue;
   public T data; //適当に情報つっこむ
-  public void delegate() callback;
+  public void delegate() callback = null;
+  public Mutex mutex; //スレッドを越えた処理のための排他制御
 
-  public void enqueue(E a){queue.enqueue(a);}
-  public E dequeue(){return queue.dequeue;}
-  alias init = clear;
+  public void enqueue(E a){
+    while(!mutex.tryLock){}
+    synchronized(mutex) queue.enqueue(a);
+    mutex.unlock;
+  }
+  public E dequeue(){
+    while(!mutex.tryLock){}
+    auto a = queue.dequeue;
+    mutex.unlock;
+    return a;
+  }
+  public void init(){
+    mutex = new Mutex();
+    this.clear;
+  }
   public void clear(){queue.clear;}
-  public int length(){return queue.length;}
+  @property public uint length(){return queue.length;}
+  auto opSlice(){
+    return Range(&queue, mutex);
+  }
+  struct Range{
+    this(Queue!(DList!E)* queue, Mutex m){
+      q = queue;
+      mutex = m;
+    }
+    private Queue!(DList!E)* q;
+    private Mutex mutex;
+    @property public bool empty(){return q.count==0;}
+    @property public E front(){
+      while(!this.mutex.tryLock){}
+      auto a = q.queue.back;
+      mutex.unlock;
+      return a;
+    }
+    public void popFront(){
+      while(!mutex.tryLock){}
+      q.queue.removeBack;
+      q.count--;
+      mutex.unlock;
+    }
+  }
 }
 struct Pos{int x; int y;}
 struct Vector{float x; float y;}
@@ -115,6 +161,9 @@ public:
     void vectorX(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.x = a;}
     void vectorY(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.y = a;}
   }
+  void clear(){
+    type_ = EVENT_DATA.NONE;
+  }
 }
 //Adapters
 import std.range;
@@ -130,17 +179,33 @@ struct Queue(T){
     count++;
   }
   public S dequeue(){
-    enforce(count != 0);
-    auto a = queue.back;
-    queue.removeBack;
+    enforce(count > 0);
     count--;
+    queue.removeBack;
+    auto a = queue.back;
     return a;
   }
+  alias init = clear;
   public void clear(){
     queue.clear;
     count = 0;
   }
+  Range opSlice(){
+    return Range(&this);
+  }
   @property public uint length(){return count;}
+  struct Range{
+    this(Queue* queue){
+      q = queue;
+    }
+    private Queue* q;
+    @property public bool empty(){return q.count==0;}
+    @property public S front(){return q.queue.back;}
+    public void popFront(){
+      q.queue.removeBack;
+      q.count--;
+    }
+  }
 }
 struct Stack(T){
   static if(__traits(compiles, {T a; a.insertFront(1); auto b = a.front; a.removeFront;}) == false) static assert(0);

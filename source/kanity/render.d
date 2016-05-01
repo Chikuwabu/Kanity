@@ -1,3 +1,4 @@
+
 module kanity.render;
 
 import kanity.bg;
@@ -97,24 +98,22 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    SDL_Rect[] rect; rect.length = 1;
-    with(rect[0]){
-      x = 64; y = 0;
-      w = 16; h = 16;
-    }
-    auto chara = new Character(IMG_Load("BGTest2.png"),rect);
+    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
     auto a = chara.add(64, 0);
     int[64*64] map;
     map[] = a;
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    //bg1.scroll(-50, -50);
+    bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];
-    auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
-    auto sp = new Sprite(spchip, 0, 0, 0);
-    sp.setHome(10, 8);
+    surfaceData.add("SPTest.png",IMG_Load("SPTest.png"));
+    auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
+    spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
+    spchip.cut;
+    auto sp = new Sprite(spchip);
+    //sp.setHome(10, 8);
     sp.priority = 0;
     sp.character = 0;
     sp.move(50, 50);
@@ -132,7 +131,14 @@ public:
         auto line = font_datfile.readln();
         font_dat ~=line.to!dstring;
     }
-    auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+    auto fontChara = new Character(IMG_Load("mplus_j10r.png"),"Font");
+    with(fontChara){
+      chipWidth = 10;
+      chipHeight = 11;
+      scanAxis = CHARACTER_SCANAXIS.X;
+    }
+    fontChara.cut;
+    auto mplus10font = new Font(font_dat,  fontChara);
     auto text = new Text(mplus10font);
     text.posX = 20;
     text.text = "こんにちは、世界";
@@ -179,41 +185,131 @@ private:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
   public IDTable!DrawableObject objectID;
-  public DataTable!(string, Character) charaData;
+  public IDTable!Character charaID;
   public DataTable!(string, SDL_Surface*) surfaceData;
   public RenderEvent renderEvent;
 
   void initRenderEvent(){
     objectID = new IDTable!DrawableObject();
-    charaData = new DataTable!(string, Character)();
+    charaID = new IDTable!Character();
     surfaceData = new DataTable!(string, SDL_Surface*)();
+    surfaceData.deleteFunc = (SDL_Surface* a) => (a.SDL_FreeSurface());
     renderEvent = new RenderEvent(this);
   }
 }
 
+enum OBJECTTYPE{SPRITE, BG}
 class RenderEvent{
-  private Renderer rendrerer;
-  EventQueue!int eventQueue;
+  import core.sync.mutex;
+  private Renderer renderer;
+  private void delegate(EventData)[int] funcs;
+  public EventQueue!int eventQueue;
 public:
   this(Renderer r){
-    rendrerer = r;
+    renderer = r;
+    funcs[RENDER_EVENT.LOG] = &event_log;
+
+    funcs[RENDER_EVENT.SURFACE_LOAD] = &event_loadSurface;
+    funcs[RENDER_EVENT.SURFACE_UNLOAD] = &event_unloadSurface;
+
+    funcs[RENDER_EVENT.CHARACTER_NEW] = &event_newCharacter;
+    funcs[RENDER_EVENT.CHARACTER_DELETE] = &event_deleteCharacter;
+    funcs[RENDER_EVENT.CHARACTER_SET_RECT] = &event_character_set_rect;
+    funcs[RENDER_EVENT.CHARACTER_SET_SCANAXIS] = &event_character_set_scanAxis;
+    funcs[RENDER_EVENT.CHARACTER_CUT] = &event_character_cut;
+
+    funcs[RENDER_EVENT.OBJECT_NEW] = &event_newObject;
+
+    funcs.rehash;
+    eventQueue.init;
   }
   void event(){
-    if(eventQueue.length > 0){
-      auto e = eventQueue.dequeue;
-      switch(e.event){
-        case RENDER_EVENT.TEST:
-          enforce(e.type == EVENT_DATA.STRING);
-          e.str.log;
-          break;
-        default:
-          break;
+    {
+      if(eventQueue.length == 0) return;
+      foreach(EventData e; eventQueue[]){
+        enforce(e.event <= RENDER_EVENT.max);
+        funcs[e.event](e);
+        doCallback();
       }
     }
     return;
   }
   @property auto getInterface(){
     return new RenderEventInterface(this);
+  }
+private:
+  void event_log(EventData e){
+    enforce(e.type == EVENT_DATA.STRING);
+    e.str.log;
+  }
+  void event_loadSurface(EventData e){
+    enforce(e.type == EVENT_DATA.STRING);
+    auto name = e.str;
+    renderer.surfaceData.add(name, IMG_Load(name.toStringz));
+  }
+  void event_unloadSurface(EventData e){
+    enforce(e.type == EVENT_DATA.STRING);
+    renderer.surfaceData.remove(e.str);
+  }
+  void event_newCharacter(EventData e){
+    enforce(e.type == EVENT_DATA.STRING);
+    auto n = renderer.charaID.add(new Character(renderer.surfaceData.get(e.str), e.str));
+    eventQueue.data = n;
+  }
+  void event_deleteCharacter(EventData e){
+    enforce(e.type == EVENT_DATA.NUMBER);
+    auto c = renderer.charaID.get(e.number);
+    renderer.surfaceData.remove(c.surfaceName);
+    renderer.charaID.remove(e.number);
+  }
+  void event_character_set_rect(EventData e){
+    enforce(e.type == EVENT_DATA.NUMBER);
+    auto c = renderer.charaID.get(e.number);
+    e.clear;
+    e = eventQueue.dequeue;
+    enforce(e.type == EVENT_DATA.POS);
+    c.chipWidth = e.posX; c.chipHeight = e.posY;
+  }
+  void event_character_set_scanAxis(EventData e){
+    enforce(e.type == EVENT_DATA.NUMBER);
+    auto c = renderer.charaID.get(e.number);
+    e.clear;
+    e = eventQueue.dequeue;
+    enforce(e.type == EVENT_DATA.NUMBER);
+    c.scanAxis = cast(CHARACTER_SCANAXIS)e.number;
+  }
+  void event_character_cut(EventData e){
+    enforce(e.type == EVENT_DATA.NUMBER);
+    auto c = renderer.charaID.get(e.number);
+    c.cut;
+  }
+  void event_newObject(EventData e){
+    enforce(e.type == EVENT_DATA.NUMBER);
+    DrawableObject obj;
+    switch(e.number){
+      case OBJECTTYPE.SPRITE:
+        "Create Sprite".log;
+        e.clear;
+        e = eventQueue.dequeue;
+        enforce(e.type == EVENT_DATA.NUMBER);
+        auto chara = renderer.charaID.get(e.number);
+        auto sp = new Sprite(chara);
+        renderer.addObject(sp);
+        auto id = renderer.objectID.add(sp);
+        eventQueue.data = id;
+        break;
+      case OBJECTTYPE.BG:
+        "Create BG".log;
+        break;
+      default:
+        enforce(0);
+        break;
+    }
+  }
+  void doCallback(){
+    if(eventQueue.callback != null){
+      eventQueue.callback();
+    }
   }
 }
 class RenderEventInterface{
@@ -225,6 +321,10 @@ class RenderEventInterface{
     renderEvent.eventQueue.enqueue(e);
   }
   public int data(){
-    return renderEvent.eventQueue.data;
+    auto a = renderEvent.eventQueue.data;
+    return a;
+  }
+  @property public void callback(void delegate() f){
+    renderEvent.eventQueue.callback = f;
   }
 }
