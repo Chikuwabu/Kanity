@@ -139,6 +139,34 @@ struct EventData{
     Vector vector_;
   }
 public:
+  this(int e){
+    event = e;
+  }
+  this(int e, int n){
+    this(e);
+    type = EVENT_DATA.NUMBER;
+    number = n;
+  }
+  this(int e, string s){
+    this(e);
+    type = EVENT_DATA.STRING;
+    str = s;
+  }
+  this(int e, float f){
+    this(e);
+    type = EVENT_DATA.FLOATER;
+    floater = f;
+  }
+  this(int e, int x, int y){
+    this(e);
+    type = EVENT_DATA.POS;
+    posX = x; posY = y;
+  }
+  this(int e, float x, float y){
+    this(e);
+    type = EVENT_DATA.VECTOR;
+    vectorX = x; vectorY = y;
+  }
   @property{
     auto type(){return type_;};
     auto type(EVENT_DATA t){

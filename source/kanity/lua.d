@@ -78,112 +78,57 @@ class LuaThread{
         lua.doString(s);
     }
     void lua_log(string s){
-      EventData e;
-      e.type = EVENT_DATA.STRING;
-      e.event = RENDER_EVENT.LOG;
-      e.str = s;
-      synchronized{
-        renderEvent.send(e);
-      }
+      synchronized renderEvent.send(new EventData(RENDER_EVENT.LOG, s));
     }
     void lua_sleep(uint n){
       import std.datetime;
       T.sleep(dur!"msecs"(n));
     }
     string lua_loadImg(string name){
-      EventData e;
-      e.event = RENDER_EVENT.SURFACE_LOAD;
-      e.type = EVENT_DATA.STRING;
-      e.str = name;
-      synchronized{
-        renderEvent.send(e);
-      }
+      synchronized renderEvent.send(new EventData(RENDER_EVENT.SURFACE_LOAD, name));
       return name;
     }
     void lua_unloadImg(string name){
-      EventData e;
-      e.event = RENDER_EVENT.SURFACE_UNLOAD;
-      e.type = EVENT_DATA.STRING;
-      e.str = name;
-      synchronized{
-        renderEvent.send(e);
-      }
+      synchronized renderEvent.send(new EventData(RENDER_EVENT.SURFACE_UNLOAD, name));
     }
     int lua_newCharacter(string surface){
-      bool flag = true;
       synchronized{
-        EventData e;
-        e.event = RENDER_EVENT.CHARACTER_NEW;
-        e.type = EVENT_DATA.STRING;
-        e.str = surface;
-        renderEvent.send(e);
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_NEW, surface));
+        bool flag = true;
         renderEvent.callback = (){flag=false;};
+        while(flag){}
+        renderEvent.callback = null;
       }
-      while(flag){}
       auto n = renderEvent.data;
-      renderEvent.callback = null;
       return n;
     }
     void lua_deleteCharacter(int chara){
-      EventData e;
-      e.event = RENDER_EVENT.CHARACTER_DELETE;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = chara;
-      synchronized{
-        renderEvent.send(e);
-      }
+      synchronized renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_DELETE, chara));
     }
     void lua_character_set_rect(int chara, int w, int h){
       synchronized{
-        EventData e;
-        e.event = RENDER_EVENT.CHARACTER_SET_RECT;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = chara;
-        renderEvent.send(e);
-        e.clear;
-        e.type = EVENT_DATA.POS;
-        e.posX = w; e.posY = h;
-        renderEvent.send(e);
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_RECT, chara));
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_RECT, w, h));
       }
     }
     void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
       synchronized{
-        EventData e;
-        e.event = RENDER_EVENT.CHARACTER_SET_SCANAXIS;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = chara;
-        renderEvent.send(e);
-        e.clear;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = scan;
-        renderEvent.send(e);
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, chara));
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, scan));
       }
     }
     void lua_character_cut(int chara){
-      synchronized{
-        EventData e;
-        e.event = RENDER_EVENT.CHARACTER_CUT;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = chara;
-        renderEvent.send(e);
-      }
+      synchronized renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_CUT, chara));
     }
     int lua_sprite_new(int chara){
-      bool flag = true;
       synchronized{
-        EventData e;
-        e.event = RENDER_EVENT.OBJECT_NEW;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = OBJECTTYPE.SPRITE;
-        renderEvent.send(e);
-        e.clear;
-        e.type = EVENT_DATA.NUMBER;
-        e.number = chara;
-        renderEvent.send(e);
+        renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, OBJECTTYPE.SPRITE));
+        renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, chara));
+        bool flag = true;
         renderEvent.callback = (){flag = false;};
+        while(flag){}
+        renderEvent.callback = null;
       }
-      while(flag){}
-      renderEvent.callback = null;
       return renderEvent.data;
     }
 }

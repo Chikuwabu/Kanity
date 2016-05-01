@@ -113,7 +113,7 @@ public:
     spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
     spchip.cut;
     auto sp = new Sprite(spchip);
-    //sp.setHome(10, 8);
+    sp.setHome(10, 8);
     sp.priority = 0;
     sp.character = 0;
     sp.move(50, 50);
@@ -224,13 +224,11 @@ public:
     eventQueue.init;
   }
   void event(){
-    {
-      if(eventQueue.length == 0) return;
-      foreach(EventData e; eventQueue[]){
-        enforce(e.event <= RENDER_EVENT.max);
-        funcs[e.event](e);
-        doCallback();
-      }
+    if(eventQueue.length == 0) return;
+    foreach(EventData e; eventQueue[]){
+      enforce(e.event <= RENDER_EVENT.max);
+      funcs[e.event](e);
+      doCallback();
     }
     return;
   }
@@ -319,6 +317,9 @@ class RenderEventInterface{
   }
   public void send(EventData e){
     renderEvent.eventQueue.enqueue(e);
+  }
+  public void send(EventData* e){
+    send(*e);
   }
   public int data(){
     auto a = renderEvent.eventQueue.data;
