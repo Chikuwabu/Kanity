@@ -94,10 +94,7 @@ class LuaThread{
     int lua_newCharacter(string surface){
       synchronized{
         renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_NEW, surface));
-        bool flag = true;
-        renderEvent.callback = (){flag=false;};
-        while(flag){}
-        renderEvent.callback = null;
+        renderEvent.flush;
       }
       auto n = renderEvent.data;
       return n;
@@ -124,10 +121,7 @@ class LuaThread{
       synchronized{
         renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, OBJECTTYPE.SPRITE));
         renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, chara));
-        bool flag = true;
-        renderEvent.callback = (){flag = false;};
-        while(flag){}
-        renderEvent.callback = null;
+        renderEvent.flush;
       }
       return renderEvent.data;
     }

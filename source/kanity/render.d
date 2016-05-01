@@ -228,8 +228,8 @@ public:
     foreach(EventData e; eventQueue[]){
       enforce(e.event <= RENDER_EVENT.max);
       funcs[e.event](e);
-      doCallback();
     }
+    doCallback();
     return;
   }
   @property auto getInterface(){
@@ -321,11 +321,17 @@ class RenderEventInterface{
   public void send(EventData* e){
     send(*e);
   }
-  public int data(){
+  public auto data(){
     auto a = renderEvent.eventQueue.data;
     return a;
   }
-  @property public void callback(void delegate() f){
-    renderEvent.eventQueue.callback = f;
+  public void flush(){
+    //実際は作業が完了するのを待つだけ
+    synchronized{
+      bool flag = true;
+      renderEvent.eventQueue.callback = (){flag = false;};
+      while(flag){}
+      renderEvent.eventQueue.callback = null;
+    }
   }
 }
