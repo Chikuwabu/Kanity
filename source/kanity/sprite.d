@@ -23,6 +23,7 @@ private:
       super();
       character_ = chara;
       this.surface = character_.surface;
+      this.character=0;
 
       xAnim.setter = &posX; xAnim.getter = &posX;
       yAnim.setter = &posY; yAnim.getter = &posY;

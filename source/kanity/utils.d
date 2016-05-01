@@ -3,6 +3,7 @@ import std.container;
 import std.exception;
 import std.range;
 import std.experimental.logger;
+import core.thread;
 
 //勝手に管理してID振ってくれるやつ
 class IDTable(T){
@@ -139,15 +140,19 @@ struct Queue(T){
 
   alias S = ElementType!T;
   public void enqueue(S a){
-    queue.insertFront(a);
-    count++;
+    synchronized{
+      queue.insertFront(a);
+      count++;
+    }
   }
   public S dequeue(){
-    count--;
-    enforce(count > 0);
-    queue.removeBack;
-    auto a = queue.back;
-    return a;
+    synchronized{
+      count--;
+      enforce(count > 0);
+      queue.removeBack;
+      auto a = queue.back;
+      return a;
+    }
   }
   alias init = clear;
   public void clear(){
@@ -166,8 +171,10 @@ struct Queue(T){
     @property public bool empty(){return q.count==0;}
     @property public S front(){return q.queue.back;}
     public void popFront(){
-      q.queue.removeBack;
-      q.count--;
+      synchronized{
+        q.queue.removeBack;
+        q.count--;
+      }
     }
   }
 }

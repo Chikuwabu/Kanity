@@ -1,3 +1,4 @@
+
 module kanity.render;
 
 import kanity.bg;
@@ -112,7 +113,7 @@ public:
     spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
     spchip.cut;
     auto sp = new Sprite(spchip);
-    sp.setHome(10, 8);
+    //sp.setHome(10, 8);
     sp.priority = 0;
     sp.character = 0;
     sp.move(50, 50);
@@ -201,7 +202,8 @@ enum OBJECTTYPE{SPRITE, BG}
 class RenderEvent{
   private Renderer renderer;
   private void delegate(EventData)[int] funcs;
-  public shared EventQueue!int eventQueue;
+  //TODO:Sharedにしてバグ防止
+  public EventQueue!int eventQueue;
 public:
   this(Renderer r){
     renderer = r;

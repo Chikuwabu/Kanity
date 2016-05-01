@@ -82,7 +82,9 @@ class LuaThread{
       e.type = EVENT_DATA.STRING;
       e.event = RENDER_EVENT.LOG;
       e.str = s;
-      renderEvent.send(e);
+      synchronized{
+        renderEvent.send(e);
+      }
     }
     void lua_sleep(uint n){
       import std.datetime;
@@ -93,7 +95,9 @@ class LuaThread{
       e.event = RENDER_EVENT.SURFACE_LOAD;
       e.type = EVENT_DATA.STRING;
       e.str = name;
-      renderEvent.send(e);
+      synchronized{
+        renderEvent.send(e);
+      }
       return name;
     }
     void lua_unloadImg(string name){
@@ -101,16 +105,20 @@ class LuaThread{
       e.event = RENDER_EVENT.SURFACE_UNLOAD;
       e.type = EVENT_DATA.STRING;
       e.str = name;
-      renderEvent.send(e);
+      synchronized{
+        renderEvent.send(e);
+      }
     }
     int lua_newCharacter(string surface){
-      EventData e;
-      e.event = RENDER_EVENT.CHARACTER_NEW;
-      e.type = EVENT_DATA.STRING;
-      e.str = surface;
-      renderEvent.send(e);
       bool flag = true;
-      renderEvent.callback = (){flag=false;};
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_NEW;
+        e.type = EVENT_DATA.STRING;
+        e.str = surface;
+        renderEvent.send(e);
+        renderEvent.callback = (){flag=false;};
+      }
       while(flag){}
       auto n = renderEvent.data;
       renderEvent.callback = null;
@@ -121,49 +129,59 @@ class LuaThread{
       e.event = RENDER_EVENT.CHARACTER_DELETE;
       e.type = EVENT_DATA.NUMBER;
       e.number = chara;
-      renderEvent.send(e);
+      synchronized{
+        renderEvent.send(e);
+      }
     }
     void lua_character_set_rect(int chara, int w, int h){
-      EventData e;
-      e.event = RENDER_EVENT.CHARACTER_SET_RECT;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = chara;
-      renderEvent.send(e);
-      e.clear;
-      e.type = EVENT_DATA.POS;
-      e.posX = w; e.posY = h;
-      renderEvent.send(e);
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_SET_RECT;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.POS;
+        e.posX = w; e.posY = h;
+        renderEvent.send(e);
+      }
     }
     void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
-      EventData e;
-      e.event = RENDER_EVENT.CHARACTER_SET_SCANAXIS;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = chara;
-      renderEvent.send(e);
-      e.clear;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = scan;
-      renderEvent.send(e);
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_SET_SCANAXIS;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = scan;
+        renderEvent.send(e);
+      }
     }
     void lua_character_cut(int chara){
-      EventData e;
-      e.event = RENDER_EVENT.CHARACTER_CUT;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = chara;
-      renderEvent.send(e);
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.CHARACTER_CUT;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+      }
     }
     int lua_sprite_new(int chara){
-      EventData e;
-      e.event = RENDER_EVENT.OBJECT_NEW;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = OBJECTTYPE.SPRITE;
-      renderEvent.send(e);
-      e.clear;
-      e.type = EVENT_DATA.NUMBER;
-      e.number = chara;
-      renderEvent.send(e);
       bool flag = true;
-      renderEvent.callback = (){flag = false;};
+      synchronized{
+        EventData e;
+        e.event = RENDER_EVENT.OBJECT_NEW;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = OBJECTTYPE.SPRITE;
+        renderEvent.send(e);
+        e.clear;
+        e.type = EVENT_DATA.NUMBER;
+        e.number = chara;
+        renderEvent.send(e);
+        renderEvent.callback = (){flag = false;};
+      }
       while(flag){}
       renderEvent.callback = null;
       return renderEvent.data;
