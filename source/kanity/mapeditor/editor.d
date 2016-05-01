@@ -462,8 +462,11 @@ class EditorLowLayer : LowLayer
     {
         auto map = new Map();
         map.load("test");
+        this.colList = map.colList;
         renderer.removeObject(this.map);
         this.layer = map.bgList;
+        selectedChip = 0;
+        scrollChipList(0);
         foreach (i; map.bgList)
         {
             initMapBG(i);
@@ -479,7 +482,7 @@ class EditorLowLayer : LowLayer
 
     void save()
     {
-        auto map = new Map(layer, character);
+        auto map = new Map(layer, character, colList);
         map.save(chraracterFile, "test");
         std.experimental.logger.info("Success to save");
     }

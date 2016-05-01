@@ -11,10 +11,12 @@ class Map
 {
     BG[] bgList;
     Character character;
-    this(BG[] bg, Character c)
+    bool[] colList;
+    this(BG[] bg, Character c, bool[] colLIst)
     {
         bgList = bg;
         character = c;
+        colList = colLIst;
     }
 
     this()
@@ -58,8 +60,8 @@ class Map
         file.rawRead(characters);
         character = new Character(IMG_Load(characterFileName.toStringz), characters);
         //当たり判定
-        int[] ATARI = new int[characters.length];
-        file.rawRead(ATARI);
+        colList = new bool[characters.length];
+        file.rawRead(colList);
         for (int i = 0; i < bgList.length; i++)
         {
             auto bg = new BG(character);
@@ -92,8 +94,7 @@ class Map
         file.rawWrite(characterFileName);
         file.rawWrite(characters);
         //当たり判定
-        int[] ATARI = new int[characters.length];
-        file.rawWrite(ATARI);
+        file.rawWrite(colList);
         
     }
 }
