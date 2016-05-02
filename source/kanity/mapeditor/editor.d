@@ -321,6 +321,7 @@ class EditorLowLayer : LowLayer
         {
             i.move(mx, my);
         }
+        updateSelectBox();
     }
     void rightButton(bool repeat)
     {
@@ -475,8 +476,8 @@ class EditorLowLayer : LowLayer
             selectStart.y = mapCY;
             selectEnd.x = mapCX;
             selectEnd.y = mapCY;
-            updateSelectBox();
             isSelectMode = true;
+            updateSelectBox();
         }
         else
         {
@@ -487,10 +488,19 @@ class EditorLowLayer : LowLayer
     }
     void updateSelectBox()
     {
-        selectBox.posX = selectStart.x.min(selectEnd.x) * map.chipSize-map.posX;
-        selectBox.posY = selectStart.y.min(selectEnd.y) * map.chipSize-map.posY;
+        if (!isSelectMode)
+        {
+            return;
+        }
+        selectBox.posX = selectStart.x.min(selectEnd.x) * map.chipSize - map.posX;
+        selectBox.posY = selectStart.y.min(selectEnd.y) * map.chipSize - map.posY;
         selectBox.width = (selectStart.x.max(selectEnd.x + 1) - selectStart.x.min(selectEnd.x + 1)) * map.chipSize;
         selectBox.height = (selectStart.y.max(selectEnd.y + 1) - selectStart.y.min(selectEnd.y + 1)) * map.chipSize;
+    }
+    void unselect()
+    {
+        isSelectMode = false;
+        selectBox.hide();
     }
     int selectedChip;
     bool isPressedEnter;
@@ -501,6 +511,27 @@ class EditorLowLayer : LowLayer
             isPressedEnter = false;
         }
     }
+    void setMapChip(int chip)
+    {
+        if (isSelectMode)
+        {
+            int x1 = selectStart.x.min(selectEnd.x);
+            int x2 = selectStart.x.max(selectEnd.x);
+            int y1 = selectStart.y.min(selectEnd.y);
+            int y2 = selectStart.y.max(selectEnd.y);
+            for (int y = y1; y <= y2; y++)
+            {
+                for (int x = x1; x <= x2; x++)
+                {
+                    map.set(x, y, chip);
+                }
+            }
+        }
+        else
+        {
+            map.set(mapCX, mapCY, chip);
+        }
+    }
     void keyDownEvent(SDL_KeyboardEvent event)
     {
         if (event.keysym.sym == SDLK_RETURN || isPressedEnter)
@@ -508,7 +539,7 @@ class EditorLowLayer : LowLayer
             isPressedEnter = true;
             if (currentCursor == mapCursor)
             {
-                map.set(mapCX, mapCY, selectedChip);
+                setMapChip(selectedChip);
                 return;
             }
             if (isSettingColMode)
@@ -530,6 +561,10 @@ class EditorLowLayer : LowLayer
                 currentCursor = chipCursor;
             }
             currentCursor.show;
+        }
+        if (event.keysym.sym == SDLK_ESCAPE)
+        {
+            unselect();
         }
         if (event.keysym.sym == SDLK_s && (event.keysym.mod & KMOD_CTRL))
         {
