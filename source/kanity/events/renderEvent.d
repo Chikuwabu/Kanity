@@ -53,6 +53,7 @@ enum OBJECTTYPE{SPRITE, BG}
 class RenderEvent{
   import core.sync.mutex;
   private Renderer renderer;
+  private int callbackData;
   private void delegate(EventData)[int] funcs;
   public EventQueue!int eventQueue;
 public:
@@ -80,7 +81,9 @@ public:
       enforce(e.event <= RENDER_EVENT.max);
       //funcs[e.event](e);
       e.func();
-      if(e.callback != null) e.callback();
+      if(e.callback != null){
+        e.callback(callbackData);
+      }
     }
     if(eventQueue.callback != null) eventQueue.callback();
     return;
@@ -89,6 +92,7 @@ public:
     return new RenderEventInterface(this);
   }
 private:
+  void callbackData()
   void event_log(string s){
     s.log;
   }
