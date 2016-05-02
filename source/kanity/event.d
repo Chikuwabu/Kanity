@@ -35,7 +35,14 @@ public:
     auto rightButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto upButtonDownEvent = new EventHandler!ButtonEventFunction;
     auto downButtonDownEvent = new EventHandler!ButtonEventFunction;
+
+    auto leftButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto rightButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto upButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto downButtonUpEvent = new EventHandler!ButtonEventFunction;
+
     auto keyDownEvent = new EventHandler!KeyEventFunction;
+    auto keyUpEvent = new EventHandler!KeyEventFunction;
     auto eventHandler = new EventHandler!EventFunction;
     void init(){
         running = true;
@@ -64,9 +71,12 @@ public:
                         leftButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     default:
-                        keyDownEvent(event.key);
                         break;
                 }
+                keyDownEvent(event.key);
+                break;
+            case SDL_KEYUP:
+                keyUpEvent(event.key);
                 break;
             case SDL_QUIT:
                 this.stop;

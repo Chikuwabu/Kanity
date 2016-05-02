@@ -39,6 +39,34 @@ class FilledBox : DrawableObject
 {
 }
 
+class Box : DrawableObject
+{
+    override void draw()
+    {
+        SDL_Rect dRect;
+        dRect.x = 0;
+        dRect.y = 0;
+        dRect.w = 1;
+        dRect.h = height;
+        super.draw(dRect, texRect);
+        dRect.x = 0;
+        dRect.y = 0;
+        dRect.w = width;
+        dRect.h = 1;
+        super.draw(dRect, texRect);
+        dRect.x = width - 1;
+        dRect.y = 0;
+        dRect.w = 1;
+        dRect.h = height;
+        super.draw(dRect, texRect);
+        dRect.x = 0;
+        dRect.y = height - 1;
+        dRect.w = width;
+        dRect.h = 1;
+        super.draw(dRect, texRect);
+    }
+}
+
 class Button : DrawableObject
 {
     DrawableObject background;
@@ -189,9 +217,14 @@ class EditorLowLayer : LowLayer
 
         initCol();
 
+        selectBox = new Box();
+        selectBox.hide();
+        renderer.addObject(selectBox);
+
         registerEvent();
     }
     Font font;
+    Box selectBox;
     void addLayerEvent()
     {
         auto bg = newMapBG();
@@ -316,6 +349,10 @@ class EditorLowLayer : LowLayer
             {
                 mapCursor.move(map.chipSize, 0);
             }
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                selectMap();
+            }
         }
     }
     void leftButton(bool repeat)
@@ -345,6 +382,10 @@ class EditorLowLayer : LowLayer
                 mapCursor.move(-map.chipSize, 0);
             }
             mapCX--;
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                selectMap();
+            }
         }
     }
     void upButton(bool repeat)
@@ -370,6 +411,10 @@ class EditorLowLayer : LowLayer
                 mapCursor.move(0, -map.chipSize);
             }
             mapCY--;
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                selectMap();
+            }
         }
     }
     int  chipListChip;
@@ -412,13 +457,55 @@ class EditorLowLayer : LowLayer
                 mapCursor.move(0, map.chipSize);
             }
             mapCY++;
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                selectMap();
+            }
         }
     }
+    bool isSelectMode;
+    SDL_Point selectStart;
+    SDL_Point selectEnd;
+    void selectMap()
+    {
+        if (!isSelectMode)
+        {
+            selectBox.show();
+            selectStart.x = mapCX;
+            selectStart.y = mapCY;
+            selectEnd.x = mapCX;
+            selectEnd.y = mapCY;
+            updateSelectBox();
+            isSelectMode = true;
+        }
+        else
+        {
+            selectEnd.x = mapCX;
+            selectEnd.y = mapCY;
+            updateSelectBox();
+        }
+    }
+    void updateSelectBox()
+    {
+        selectBox.posX = selectStart.x.min(selectEnd.x) * map.chipSize-map.posX;
+        selectBox.posY = selectStart.y.min(selectEnd.y) * map.chipSize-map.posY;
+        selectBox.width = (selectStart.x.max(selectEnd.x + 1) - selectStart.x.min(selectEnd.x + 1)) * map.chipSize;
+        selectBox.height = (selectStart.y.max(selectEnd.y + 1) - selectStart.y.min(selectEnd.y + 1)) * map.chipSize;
+    }
     int selectedChip;
-    void keyDownEvent(SDL_KeyboardEvent event)
+    bool isPressedEnter;
+    void keyUpEvent(SDL_KeyboardEvent event)
     {
         if (event.keysym.sym == SDLK_RETURN)
         {
+            isPressedEnter = false;
+        }
+    }
+    void keyDownEvent(SDL_KeyboardEvent event)
+    {
+        if (event.keysym.sym == SDLK_RETURN || isPressedEnter)
+        {
+            isPressedEnter = true;
             if (currentCursor == mapCursor)
             {
                 map.set(mapCX, mapCY, selectedChip);
@@ -495,6 +582,7 @@ class EditorLowLayer : LowLayer
         event.downButtonDownEvent.addEventHandler(&downButton);
 
         event.keyDownEvent.addEventHandler(&keyDownEvent);
+        event.keyUpEvent.addEventHandler(&keyUpEvent);
     }
 
     override void run()
