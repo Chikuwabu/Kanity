@@ -1,9 +1,10 @@
 module kanity.bg;
 
-import kanity.object;
-import kanity.character;
+public import kanity.object;
+public import kanity.character;
+import kanity.imports;
+
 import derelict.sdl2.sdl;
-import std.experimental.logger;
 import std.variant;
 
 class BG : DrawableObject{

@@ -1,16 +1,14 @@
 module kanity.lua;
-import luad.all;
+import kanity.imports;
 import kanity.core;
 import kanity.render;
 import kanity.character;
 import kanity.event;
 import kanity.object;
 import kanity.sprite;
-import kanity.utils;
-import kanity.type;
-import std.experimental.logger;
-import std.string;
 import core.thread;
+
+import luad.all;
 
 class LuaThread{
     /*void setLeftButtonEvent(LuaFunction luafunc)
@@ -45,9 +43,6 @@ class LuaThread{
         script = script_;
         lua = new LuaState;
         lua.openLibs();
-        //e.event = RENDER_EVENT.NEWOBJECT;
-        //e.type = EVENT_DATA.NUMBER;
-        //e.number
 
         //lua["test"] = &test;
         lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
@@ -104,8 +99,8 @@ class LuaThread{
     }
     void lua_character_set_rect(int chara, int w, int h){
       synchronized{
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_RECT, chara));
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_RECT, w, h));
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, chara));
+        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, w, h));
       }
     }
     void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
