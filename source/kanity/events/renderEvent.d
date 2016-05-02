@@ -5,21 +5,35 @@ import kanity.render;
 import kanity.sprite;
 
 class RenderEventInterface{
+  import std.container;
   private RenderEvent renderEvent;
-  public this(RenderEvent r){
+  private Queue!(DList!(EventData*)) tempQueue; //まとめて送る前に貯めておく
+public:
+  this(RenderEvent r){
     renderEvent = r;
+    tempQueue.init;
   }
-  public void send(EventData e){
-    renderEvent.eventQueue.enqueue(e);
+  void add(EventData* e){
+    tempQueue.enqueue(e);
   }
-  public void send(EventData* e){
-    send(*e);
+  void send(EventData* e){
+    synchronized renderEvent.eventQueue.enqueue(*e);
   }
-  public auto data(){
+  void send(EventData e){
+    send(&e);
+  }
+  auto data(){
     auto a = renderEvent.eventQueue.data;
     return a;
   }
-  public void flush(){
+  void send(){
+    synchronized{
+      foreach(EventData* e; tempQueue){
+        renderEvent.eventQueue.enqueue(*e);
+      }
+    }
+  }
+  void flush(){
     //実際は作業が完了するのを待つだけ
     synchronized{
       bool flag = true;
@@ -27,6 +41,11 @@ class RenderEventInterface{
       while(flag){}
       renderEvent.eventQueue.callback = null;
     }
+  }
+  void event_log(string s){
+    EventData e;
+    e.func = (){renderEvent.event_log(s);};
+    send(e);
   }
 }
 
@@ -39,7 +58,7 @@ class RenderEvent{
 public:
   this(Renderer r){
     renderer = r;
-    funcs[RENDER_EVENT.LOG] = &event_log;
+    /*funcs[RENDER_EVENT.LOG] = &event_log;
 
     funcs[RENDER_EVENT.SURFACE_LOAD] = &event_loadSurface;
     funcs[RENDER_EVENT.SURFACE_UNLOAD] = &event_unloadSurface;
@@ -50,7 +69,7 @@ public:
     funcs[RENDER_EVENT.CHARACTER_SET_SCANAXIS] = &event_character_set_scanAxis;
     funcs[RENDER_EVENT.CHARACTER_CUT] = &event_character_cut;
 
-    funcs[RENDER_EVENT.OBJECT_NEW] = &event_object_new;
+    funcs[RENDER_EVENT.OBJECT_NEW] = &event_object_new;*/
 
     funcs.rehash;
     eventQueue.init;
@@ -59,16 +78,21 @@ public:
     if(eventQueue.length == 0) return;
     foreach(EventData e; eventQueue[]){
       enforce(e.event <= RENDER_EVENT.max);
-      funcs[e.event](e);
+      //funcs[e.event](e);
+      e.func();
+      if(e.callback != null) e.callback();
     }
-    doCallback();
+    if(eventQueue.callback != null) eventQueue.callback();
     return;
   }
   @property auto getInterface(){
     return new RenderEventInterface(this);
   }
 private:
-  void event_log(EventData e){
+  void event_log(string s){
+    s.log;
+  }
+  /*void event_log(EventData e){
     enforce(e.type == EVENT_DATA.STRING);
     e.str.log;
   }
@@ -137,7 +161,7 @@ private:
         enforce(0);
         break;
     }
-  }
+  }*/
   void doCallback(){
     if(eventQueue.callback != null){
       eventQueue.callback();

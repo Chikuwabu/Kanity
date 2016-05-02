@@ -61,6 +61,8 @@ struct EventData{
   int event;
   //alias this event;
   private EVENT_DATA type_ = EVENT_DATA.NONE;
+  public void delegate(int) callback = null;
+  public void delegate() func = null;
   private union{
     int number_;
     string str_;

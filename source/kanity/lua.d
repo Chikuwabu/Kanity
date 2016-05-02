@@ -43,13 +43,13 @@ class LuaThread{
         script = script_;
         lua = new LuaState;
         lua.openLibs();
-
+        lua.setPanicHandler(&panic);
         //lua["test"] = &test;
         lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
         lua["log"] = &lua_log;
         lua["sleep"] = &lua_sleep;
 
-        lua["loadImg"] = &lua_loadImg;
+        /*lua["loadImg"] = &lua_loadImg;
         lua["unloadImg"] = &lua_unloadImg;
 
         lua["newCharacter"] = &lua_newCharacter;
@@ -57,10 +57,18 @@ class LuaThread{
         lua["setCutRect"] = &lua_character_set_rect;
         lua["setScanAxis"] = &lua_character_set_scanAxis;
         lua["cut"] = &lua_character_cut;
-        lua["newSprite"] = &lua_sprite_new;
+        lua["newSprite"] = &lua_sprite_new;*/
 
-        T = new Thread(() => doString(script));
+        T = new Thread(() => run(script));
         T.start;
+    }
+    static void panic(LuaState ls, in char[] error){
+      fatal(error);
+    }
+    void run(string script){
+      lua.doString(script);
+      auto init = lua.get!LuaFunction("init");
+      auto initResult = init.call!int(0);
     }
     void stop(){
     }
@@ -72,19 +80,24 @@ class LuaThread{
     void doString(string s){
         lua.doString(s);
     }
-    void lua_log(string s){
-      synchronized renderEvent.send(new EventData(RENDER_EVENT.LOG, s));
+    void lua_log(LuaObject[] params...){
+      if(params.length > 0){
+        import std.algorithm, std.string;
+        string s = params.map!((LuaObject a) => (a.toString())).join("");
+        //renderEvent.send(new EventData(RENDER_EVENT.LOG, s));
+        renderEvent.event_log(s);
+      }
     }
     void lua_sleep(uint n){
       import std.datetime;
       T.sleep(dur!"msecs"(n));
     }
-    string lua_loadImg(string name){
-      synchronized renderEvent.send(new EventData(RENDER_EVENT.SURFACE_LOAD, name));
+    /*string lua_loadImg(string name){
+      renderEvent.send(new EventData(RENDER_EVENT.SURFACE_LOAD, name));
       return name;
     }
     void lua_unloadImg(string name){
-      synchronized renderEvent.send(new EventData(RENDER_EVENT.SURFACE_UNLOAD, name));
+      renderEvent.send(new EventData(RENDER_EVENT.SURFACE_UNLOAD, name));
     }
     int lua_newCharacter(string surface){
       synchronized{
@@ -95,29 +108,34 @@ class LuaThread{
       return n;
     }
     void lua_deleteCharacter(int chara){
-      synchronized renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_DELETE, chara));
+      renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_DELETE, chara));
     }
     void lua_character_set_rect(int chara, int w, int h){
-      synchronized{
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, chara));
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, w, h));
+      with(renderEvent){
+        add(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, chara));
+        add(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, w, h));
+        send;
       }
     }
     void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
-      synchronized{
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, chara));
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, scan));
+      with(renderEvent){
+        add(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, chara));
+        add(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, scan));
+        send;
       }
     }
     void lua_character_cut(int chara){
-      synchronized renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_CUT, chara));
+      renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_CUT, chara));
     }
     int lua_sprite_new(int chara){
-      synchronized{
-        renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, OBJECTTYPE.SPRITE));
-        renderEvent.send(new EventData(RENDER_EVENT.OBJECT_NEW, chara));
-        renderEvent.flush;
+      with(renderEvent){
+        add(new EventData(RENDER_EVENT.OBJECT_NEW, OBJECTTYPE.SPRITE));
+        add(new EventData(RENDER_EVENT.OBJECT_NEW, chara));
+        synchronized{
+          send;
+          flush;
+        }
+        return data;
       }
-      return renderEvent.data;
-    }
+    }*/
 }
