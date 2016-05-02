@@ -534,6 +534,14 @@ class EditorLowLayer : LowLayer
     }
     void keyDownEvent(SDL_KeyboardEvent event)
     {
+        if (event.keysym.sym == SDLK_DELETE)
+        {
+            if (currentCursor == mapCursor)
+            {
+                setMapChip(-1);
+                return;
+            }
+        }
         if (event.keysym.sym == SDLK_RETURN || isPressedEnter)
         {
             isPressedEnter = true;
