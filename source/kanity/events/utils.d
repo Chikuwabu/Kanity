@@ -55,73 +55,15 @@ struct EventQueue(T){
     }
   }
 }
-struct Pos{int x; int y;}
-struct Vector{float x; float y;}
 struct EventData{
-  int event;
-  //alias this event;
-  private EVENT_DATA type_ = EVENT_DATA.NONE;
-  public void delegate(int) callback = null;
-  public void delegate() func = null;
-  private union{
-    int number_;
-    string str_;
-    float floater_;
-    Pos pos_;
-    Vector vector_;
-  }
 public:
-  this(int e){
-    event = e;
+  void delegate(int) callback = null;
+  void delegate() func = null;
+  this(void delegate() func_){
+    func = func_;
   }
-  this(int e, int n){
-    this(e);
-    type = EVENT_DATA.NUMBER;
-    number = n;
-  }
-  this(int e, string s){
-    this(e);
-    type = EVENT_DATA.STRING;
-    str = s;
-  }
-  this(int e, float f){
-    this(e);
-    type = EVENT_DATA.FLOATER;
-    floater = f;
-  }
-  this(int e, int x, int y){
-    this(e);
-    type = EVENT_DATA.POS;
-    posX = x; posY = y;
-  }
-  this(int e, float x, float y){
-    this(e);
-    type = EVENT_DATA.VECTOR;
-    vectorX = x; vectorY = y;
-  }
-  @property{
-    auto type(){return type_;};
-    auto type(EVENT_DATA t){
-      enforce(type_ == EVENT_DATA.NONE);
-      type_ = t;
-    }
-    auto number(){ enforce(type_ == EVENT_DATA.NUMBER); return number_;}
-    auto str(){ enforce(type_ == EVENT_DATA.STRING); return str_;}
-    auto floater(){ enforce(type_ == EVENT_DATA.FLOATER); return floater_;}
-    auto posX(){ enforce(type_ == EVENT_DATA.POS); return pos_.x;}
-    auto posY(){ enforce(type_ == EVENT_DATA.POS); return pos_.y;}
-    auto vectorX(){ enforce(type_ == EVENT_DATA.VECTOR); return vector_.x;}
-    auto vectorY(){ enforce(type_ == EVENT_DATA.VECTOR); return vector_.y;}
-
-    void number(int a){enforce(type_ == EVENT_DATA.NUMBER); number_ = a;}
-    void str(string a){enforce(type_ == EVENT_DATA.STRING); str_ = a;}
-    void floater(float a){enforce(type_ == EVENT_DATA.FLOATER); floater_ = a;}
-    void posX(int a){enforce(type_ == EVENT_DATA.POS); pos_.x = a;}
-    void posY(int a){enforce(type_ == EVENT_DATA.POS); pos_.y = a;}
-    void vectorX(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.x = a;}
-    void vectorY(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.y = a;}
-  }
-  void clear(){
-    type_ = EVENT_DATA.NONE;
+  this(void delegate() func_, void delegate(int) callback_){
+    func = func_;
+    callback = callback_;
   }
 }

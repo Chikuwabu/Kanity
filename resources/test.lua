@@ -15,14 +15,18 @@ function init()
   log("Yuuashi may be hage.")
   log("Yuuashi might be hage.")
   sleep(1000);
-  --[[local spimg = loadImg("SPTest.png")
+  local spimg = loadImg("SPTest.png")
+  log("load img:",spimg)
   local toriniku = newCharacter(spimg)
+  log("Character's ID:",toriniku)
   setCutRect(toriniku, 20, 16)
   setScanAxis(toriniku, CHARACTER_SCANAXIS.X)
   cut(toriniku)
   local sp = newSprite(toriniku)
-  log("SPID is", sp)
+  log("Sprite'sID:", sp)
+  --deleteCharacter(toriniku)
 
-  unloadImg(spimg)--]]
+  unloadImg(spimg)
+  log("Unload img:", spimg)
   return 1
 end

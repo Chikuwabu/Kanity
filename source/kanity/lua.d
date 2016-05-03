@@ -49,15 +49,15 @@ class LuaThread{
         lua["log"] = &lua_log;
         lua["sleep"] = &lua_sleep;
 
-        /*lua["loadImg"] = &lua_loadImg;
+        lua["loadImg"] = &lua_loadImg;
         lua["unloadImg"] = &lua_unloadImg;
 
         lua["newCharacter"] = &lua_newCharacter;
         lua["deleteCharacter"] = &lua_deleteCharacter;
-        lua["setCutRect"] = &lua_character_set_rect;
+        lua["setCutRect"] = &lua_character_set_cutRect;
         lua["setScanAxis"] = &lua_character_set_scanAxis;
         lua["cut"] = &lua_character_cut;
-        lua["newSprite"] = &lua_sprite_new;*/
+        lua["newSprite"] = &lua_sprite_new;
 
         T = new Thread(() => run(script));
         T.start;
@@ -84,7 +84,6 @@ class LuaThread{
       if(params.length > 0){
         import std.algorithm, std.string;
         string s = params.map!((LuaObject a) => (a.toString())).join("");
-        //renderEvent.send(new EventData(RENDER_EVENT.LOG, s));
         renderEvent.event_log(s);
       }
     }
@@ -92,50 +91,35 @@ class LuaThread{
       import std.datetime;
       T.sleep(dur!"msecs"(n));
     }
-    /*string lua_loadImg(string name){
-      renderEvent.send(new EventData(RENDER_EVENT.SURFACE_LOAD, name));
+    string lua_loadImg(string name){
+      renderEvent.event_surface_load(name);
       return name;
     }
     void lua_unloadImg(string name){
-      renderEvent.send(new EventData(RENDER_EVENT.SURFACE_UNLOAD, name));
+      renderEvent.event_surface_unload(name);
     }
     int lua_newCharacter(string surface){
-      synchronized{
-        renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_NEW, surface));
-        renderEvent.flush;
-      }
-      auto n = renderEvent.data;
-      return n;
+      int id;
+      renderEvent.event_character_new(surface, (int a){id = a;});
+      renderEvent.flush;
+      return id;
     }
     void lua_deleteCharacter(int chara){
-      renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_DELETE, chara));
+      renderEvent.event_character_delete(chara);
     }
-    void lua_character_set_rect(int chara, int w, int h){
-      with(renderEvent){
-        add(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, chara));
-        add(new EventData(RENDER_EVENT.CHARACTER_SET_CUTRECT, w, h));
-        send;
-      }
+    void lua_character_set_cutRect(int chara, int w, int h){
+      renderEvent.event_character_set_cutRect(chara, w, h);
     }
     void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
-      with(renderEvent){
-        add(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, chara));
-        add(new EventData(RENDER_EVENT.CHARACTER_SET_SCANAXIS, scan));
-        send;
-      }
+      renderEvent.event_character_set_scanAxis(chara, scan);
     }
     void lua_character_cut(int chara){
-      renderEvent.send(new EventData(RENDER_EVENT.CHARACTER_CUT, chara));
+      renderEvent.event_character_cut(chara);
     }
     int lua_sprite_new(int chara){
-      with(renderEvent){
-        add(new EventData(RENDER_EVENT.OBJECT_NEW, OBJECTTYPE.SPRITE));
-        add(new EventData(RENDER_EVENT.OBJECT_NEW, chara));
-        synchronized{
-          send;
-          flush;
-        }
-        return data;
-      }
-    }*/
+      int id;
+      renderEvent.event_object_new(OBJECTTYPE.SPRITE, chara, (int a){id = a;});
+      renderEvent.flush;
+      return id;
+    }
 }

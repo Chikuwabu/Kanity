@@ -46,15 +46,9 @@ public:
       object.insertFront(obj);
   }
   void removeObject(DrawableObject obj){
+    import std.algorithm;
     import std.range;
-    loop: for(auto r = object[]; !r.empty;){
-            if(r.front == obj){
-              r = object.linearRemove(r.take(1));
-              break loop;
-            }else{
-              r.popFront;
-            }
-          }
+    this.object.linearRemove(find(this.object[], obj).take(1));
     return;
   }
   void clear(){
@@ -106,7 +100,7 @@ public:
     addObject(bg1);
 
     //spriteList = new Sprite[100];
-    surfaceData.add("SPTest.png",IMG_Load("SPTest.png"));
+    surfaceData.add("SPTest.png",() => IMG_Load("SPTest.png"));
     auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
     spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
     spchip.cut;
