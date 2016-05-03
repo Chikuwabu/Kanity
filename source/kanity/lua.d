@@ -83,7 +83,7 @@ class LuaThread{
     void lua_log(LuaObject[] params...){
       if(params.length > 0){
         import std.algorithm, std.string;
-        string s = params.map!((LuaObject a) => (a.toString())).join("");
+        string s = "[Lua]"~params.map!((LuaObject a) => (a.toString())).join("");
         renderEvent.event_log(s);
       }
     }

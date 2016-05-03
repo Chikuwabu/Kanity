@@ -8,6 +8,7 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import std.experimental.logger;
+import kanity.logger;
 //import core.thread;
 
 class Engine{
@@ -20,6 +21,9 @@ private:
 public:
   //コンストラクタとデコンストラクタ
   this(string config){
+    import std.stdio;
+    sharedLog = new KaniLogger(stderr);
+
     info("Load a library \"SDL2\"."); DerelictSDL2.load;
     info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
 

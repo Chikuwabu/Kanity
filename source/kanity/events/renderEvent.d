@@ -82,7 +82,7 @@ public:
     return new RenderEventInterface(this);
   }
   void event_log(string s){
-    s.log;
+    s.trace;
   }
   void event_surface_load(string name){
     import std.string, derelict.sdl2.image, derelict.sdl2.sdl;

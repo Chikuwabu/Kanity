@@ -23,7 +23,7 @@ function init()
   setScanAxis(toriniku, CHARACTER_SCANAXIS.X)
   cut(toriniku)
   local sp = newSprite(toriniku)
-  log("Sprite'sID:", sp)
+  log("Sprite's ID:", sp)
   --deleteCharacter(toriniku)
 
   unloadImg(spimg)
