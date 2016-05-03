@@ -8,8 +8,9 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import std.experimental.logger;
+import std.stdio;
+import std.file;
 import kanity.logger;
-//import core.thread;
 
 class Engine{
   //フィールド
@@ -17,12 +18,33 @@ private:
  Renderer renderer;
  Event event;
  Control control;
+ MultiLogger logger;
 
 public:
   //コンストラクタとデコンストラクタ
-  this(string config){
-    import std.stdio;
-    sharedLog = new KaniLogger(stderr);
+  this(string config, string logfile){
+    //Loggerの初期化
+    logger = new MultiLogger();
+    sharedLog = logger;
+    //デバッグモードならば標準エラー出力にログを出力する
+    debug{
+      logger.insertLogger("debug", new KaniLogger(stderr));
+    }
+    if(logfile != ""){
+      auto f = File(logfile, "w");
+      logger.insertLogger("log", new KaniLogger(f, LogLevel.trace));
+    }
+    //初期化
+    renderer = new Renderer();
+    event = new Event();
+    control = new Control();
+
+    try{
+      loadConfig(config.readText);
+    }catch{
+      fatal("Failed to configuration");
+    }
+    info("Success to configuration");
 
     info("Load a library \"SDL2\"."); DerelictSDL2.load;
     info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
@@ -36,18 +58,7 @@ public:
     info("Success initalization of \"SDL_Image\"");
 
     SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
-    //初期化
-    renderer = new Renderer();
-    event = new Event();
-    control = new Control();
-
-    import std.file;
-    try{
-      loadConfig(config.readText);
-    }catch{
-      fatal("Failed to configuration");
-    }
-    info("Success to configuration");
+    "hogehogepiyopiyo".log;
 
     return;
   }
@@ -141,6 +152,18 @@ public:
     if("startScript" in root.object){
       enforce(root.object["startScript"].type == JSON_TYPE.STRING);
       control.startScript = root.object["startScript"].str;
+    }
+    //デバッグモード:BOOL
+    if("debugMode" in root.object){
+      enforce(root.object["debugMode"].type == JSON_TYPE.TRUE || root.object["debugMode"].type == JSON_TYPE.FALSE);
+      if(root.object["debugMode"].type == JSON_TYPE.TRUE){
+        bool flag = true;
+        debug{flag = false;}
+        if(flag){
+          import std.stdio;
+          logger.insertLogger("debug", new KaniLogger(stderr, LogLevel.trace));
+        }
+      }
     }
   }
 }

@@ -19,6 +19,12 @@ public:
         break;
       case LogLevel.trace:
         break;
+      case LogLevel.fatal:
+        lt.put("[FATAL]");
+        break;
+      case LogLevel.error:
+        lt.put("[ERROR]");
+        break;
       default:
         super.beginLogMsg(file, line, funcName, prettyFuncName, moduleName, logLevel, threadId, timestamp, logger);
         break;

@@ -100,7 +100,7 @@ public:
     addObject(bg1);
 
     //spriteList = new Sprite[100];
-    surfaceData.add("SPTest.png",() => IMG_Load("SPTest.png"));
+    surfaceData.add("SPTest.png", IMG_Load("SPTest.png"));
     auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
     spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
     spchip.cut;

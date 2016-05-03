@@ -63,7 +63,8 @@ class LuaThread{
         T.start;
     }
     static void panic(LuaState ls, in char[] error){
-      fatal(error);
+      import std.conv;
+      log(LogLevel.error, "[Lua]"~(error.to!string));
     }
     void run(string script){
       lua.doString(script);

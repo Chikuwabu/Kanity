@@ -50,8 +50,8 @@ class DataTable(TKey, TData){
     deleteFunc = (TData a) => (delete a);
   }
   alias LoadFunc = TData delegate();
-  public void add(TKey key, TData delegate() load){
-    if(key !in data) data[key] = load();
+  public void add(TKey key, lazy TData load){
+    if(key !in data) data[key] = load;
     count[key]++;
   }
   public void remove(TKey key){
