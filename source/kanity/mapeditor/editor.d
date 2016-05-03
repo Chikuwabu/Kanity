@@ -494,8 +494,22 @@ class EditorLowLayer : LowLayer
         }
         selectBox.posX = selectStart.x.min(selectEnd.x) * map.chipSize - map.posX;
         selectBox.posY = selectStart.y.min(selectEnd.y) * map.chipSize - map.posY;
-        selectBox.width = (selectStart.x.max(selectEnd.x + 1) - selectStart.x.min(selectEnd.x + 1)) * map.chipSize;
-        selectBox.height = (selectStart.y.max(selectEnd.y + 1) - selectStart.y.min(selectEnd.y + 1)) * map.chipSize;
+        if (selectStart.x < selectEnd.x + 1)
+        {
+            selectBox.width = (selectStart.x.max(selectEnd.x + 1) - selectStart.x.min(selectEnd.x + 1)) * map.chipSize;
+        }
+        else
+        {
+            selectBox.width = (selectStart.x.max(selectEnd.x + 1) - selectStart.x.min(selectEnd.x - 1)) * map.chipSize;
+        }
+        if (selectStart.y < selectEnd.y + 1)
+        {
+            selectBox.height = (selectStart.y.max(selectEnd.y + 1) - selectStart.y.min(selectEnd.y + 1)) * map.chipSize;
+        }
+        else
+        {
+            selectBox.height = (selectStart.y.max(selectEnd.y + 1) - selectStart.y.min(selectEnd.y - 1)) * map.chipSize;
+        }
     }
     void unselect()
     {
