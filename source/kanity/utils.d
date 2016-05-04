@@ -1,9 +1,7 @@
 module kanity.utils;
+import kanity.imports;
 import std.container;
-import std.exception;
 import std.range;
-import std.experimental.logger;
-import core.thread;
 
 //勝手に管理してID振ってくれるやつ
 class IDTable(T){
@@ -51,8 +49,9 @@ class DataTable(TKey, TData){
   this(){
     deleteFunc = (TData a) => (delete a);
   }
-  public void add(TKey key, TData data_){
-    if(key !in data) data[key] = data_;
+  alias LoadFunc = TData delegate();
+  public void add(TKey key, lazy TData load){
+    if(key !in data) data[key] = load;
     count[key]++;
   }
   public void remove(TKey key){
@@ -71,99 +70,6 @@ class DataTable(TKey, TData){
   }
 
   alias this get;
-}
-//イベントキュー
-import std.variant;
-enum EVENT_DATA{ NONE, NUMBER, STRING, FLOATER, POS, VECTOR}
-struct EventQueue(T){
-  import core.sync.mutex;
-  alias E = EventData;
-  private Queue!(DList!E) queue;
-  public T data; //適当に情報つっこむ
-  public void delegate() callback = null;
-  public Mutex mutex; //スレッドを越えた処理のための排他制御
-
-  public void enqueue(E a){
-    while(!mutex.tryLock){}
-    synchronized(mutex) queue.enqueue(a);
-    mutex.unlock;
-  }
-  public E dequeue(){
-    while(!mutex.tryLock){}
-    auto a = queue.dequeue;
-    mutex.unlock;
-    return a;
-  }
-  public void init(){
-    mutex = new Mutex();
-    this.clear;
-  }
-  public void clear(){queue.clear;}
-  @property public uint length(){return queue.length;}
-  auto opSlice(){
-    return Range(&queue, mutex);
-  }
-  struct Range{
-    this(Queue!(DList!E)* queue, Mutex m){
-      q = queue;
-      mutex = m;
-    }
-    private Queue!(DList!E)* q;
-    private Mutex mutex;
-    @property public bool empty(){return q.count==0;}
-    @property public E front(){
-      while(!this.mutex.tryLock){}
-      auto a = q.queue.back;
-      mutex.unlock;
-      return a;
-    }
-    public void popFront(){
-      while(!mutex.tryLock){}
-      q.queue.removeBack;
-      q.count--;
-      mutex.unlock;
-    }
-  }
-}
-struct Pos{int x; int y;}
-struct Vector{float x; float y;}
-struct EventData{
-  int event;
-  //alias this event;
-  private EVENT_DATA type_ = EVENT_DATA.NONE;
-  private union{
-    int number_;
-    string str_;
-    float floater_;
-    Pos pos_;
-    Vector vector_;
-  }
-public:
-  @property{
-    auto type(){return type_;};
-    auto type(EVENT_DATA t){
-      enforce(type_ == EVENT_DATA.NONE);
-      type_ = t;
-    }
-    auto number(){ enforce(type_ == EVENT_DATA.NUMBER); return number_;}
-    auto str(){ enforce(type_ == EVENT_DATA.STRING); return str_;}
-    auto floater(){ enforce(type_ == EVENT_DATA.FLOATER); return floater_;}
-    auto posX(){ enforce(type_ == EVENT_DATA.POS); return pos_.x;}
-    auto posY(){ enforce(type_ == EVENT_DATA.POS); return pos_.y;}
-    auto vectorX(){ enforce(type_ == EVENT_DATA.VECTOR); return vector_.x;}
-    auto vectorY(){ enforce(type_ == EVENT_DATA.VECTOR); return vector_.y;}
-
-    void number(int a){enforce(type_ == EVENT_DATA.NUMBER); number_ = a;}
-    void str(string a){enforce(type_ == EVENT_DATA.STRING); str_ = a;}
-    void floater(float a){enforce(type_ == EVENT_DATA.FLOATER); floater_ = a;}
-    void posX(int a){enforce(type_ == EVENT_DATA.POS); pos_.x = a;}
-    void posY(int a){enforce(type_ == EVENT_DATA.POS); pos_.y = a;}
-    void vectorX(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.x = a;}
-    void vectorY(float a){enforce(type_ == EVENT_DATA.VECTOR); vector_.y = a;}
-  }
-  void clear(){
-    type_ = EVENT_DATA.NONE;
-  }
 }
 //Adapters
 import std.range;

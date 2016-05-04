@@ -1,4 +1,4 @@
-module kanity.type;
+module kanity.types;
 
 enum RENDER_EVENT{
   SURFACE_LOAD,
@@ -6,7 +6,7 @@ enum RENDER_EVENT{
 
   CHARACTER_NEW,
   CHARACTER_DELETE,
-  CHARACTER_SET_RECT,
+  CHARACTER_SET_CUTRECT,
   CHARACTER_SET_SCANAXIS,
   CHARACTER_CUT,
 
