@@ -28,10 +28,6 @@ class LuaThread{
     {
         //event.leftButtonDownEvent();
     }
-    /*DrawableObject spriteToDrawableObject(Sprite sp)
-    {
-        return sp;
-    }*/
     Event event;
     LuaState lua;
     Thread T;
@@ -48,16 +44,15 @@ class LuaThread{
         lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
         lua["log"] = &lua_log;
         lua["sleep"] = &lua_sleep;
+        lua["flush"] = &lua_flush;
+        lua["Character"] = lua.registerType!Lua_Character();
+        lua["newCharacter"] = &lua_newCharacter;
 
         lua["loadImg"] = &lua_loadImg;
         lua["unloadImg"] = &lua_unloadImg;
 
-        lua["newCharacter"] = &lua_newCharacter;
-        lua["deleteCharacter"] = &lua_deleteCharacter;
-        lua["setCutRect"] = &lua_character_set_cutRect;
-        lua["setScanAxis"] = &lua_character_set_scanAxis;
-        lua["cut"] = &lua_character_cut;
-        lua["newSprite"] = &lua_sprite_new;
+        lua["Sprite"] = lua.registerType!Lua_Sprite();
+        lua["newSprite"] = &lua_newSprite;
 
         T = new Thread(() => run(script));
         T.start;
@@ -92,6 +87,9 @@ class LuaThread{
       import std.datetime;
       T.sleep(dur!"msecs"(n));
     }
+    void lua_flush(){
+      renderEvent.flush;
+    }
     string lua_loadImg(string name){
       renderEvent.event_surface_load(name);
       return name;
@@ -99,28 +97,65 @@ class LuaThread{
     void lua_unloadImg(string name){
       renderEvent.event_surface_unload(name);
     }
-    int lua_newCharacter(string surface){
-      int id;
-      renderEvent.event_character_new(surface, (int a){id = a;});
-      renderEvent.flush;
-      return id;
+    Lua_Character lua_newCharacter(string surface){
+      return new Lua_Character(renderEvent, surface);
     }
-    void lua_deleteCharacter(int chara){
-      renderEvent.event_character_delete(chara);
+    Lua_Sprite lua_newSprite(Lua_Character c){
+      return new Lua_Sprite(renderEvent, c);
     }
-    void lua_character_set_cutRect(int chara, int w, int h){
-      renderEvent.event_character_set_cutRect(chara, w, h);
+}
+class Lua_Character : Lua_RenderObject{
+public:
+  this(RenderEventInterface renderEvent_, string surface){
+    super(renderEvent_);
+    renderEvent.event_character_new(surface, super.setId);
+  }
+  void free(){
+    renderEvent.event_character_delete(id);
+  }
+  void setCutRect(int w, int h){
+    renderEvent.event_character_set_cutRect(id, w, h);
+  }
+  void setCutAxis(CHARACTER_SCANAXIS scan){
+    renderEvent.event_character_set_scanAxis(id, scan);
+  }
+  void cut(){
+    renderEvent.event_character_cut(id);
+  }
+}
+class Lua_Sprite : Lua_DrawableObject{
+public:
+  this(RenderEventInterface renderEventInterface, Lua_Character character){
+    super(renderEventInterface, OBJECTTYPE.SPRITE, character);
+  }
+}
+abstract class Lua_DrawableObject : Lua_RenderObject{
+protected{
+  this(RenderEventInterface renderEventInterface, OBJECTTYPE type, Lua_Character character){
+    super(renderEventInterface);
+    renderEvent.event_object_new(type, character.id, super.setId);
+  }
+}
+}
+abstract class Lua_RenderObject{
+  private int id_;
+  private bool isAvailable = false;
+  protected RenderEventInterface renderEvent;
+protected:
+  this(RenderEventInterface renderEventInterface){
+    renderEvent = renderEventInterface;
+  }
+  @property{
+    public int id(){
+      if(isAvailable){
+        return id_;
+      }else{
+        error("[Lua]Not initialized");
+        return -1;
+      }
     }
-    void lua_character_set_scanAxis(int chara, CHARACTER_SCANAXIS scan){
-      renderEvent.event_character_set_scanAxis(chara, scan);
+    void delegate(int) setId(){
+      return (int a){id_ = a; isAvailable = true;};
     }
-    void lua_character_cut(int chara){
-      renderEvent.event_character_cut(chara);
-    }
-    int lua_sprite_new(int chara){
-      int id;
-      renderEvent.event_object_new(OBJECTTYPE.SPRITE, chara, (int a){id = a;});
-      renderEvent.flush;
-      return id;
-    }
+  }
 }

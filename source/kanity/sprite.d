@@ -2,7 +2,7 @@ module kanity.sprite;
 
 import derelict.sdl2.sdl;
 import kanity.animation;
-import std.experimental.logger;
+import kanity.imports;
 
 public import kanity.object;
 public import kanity.character;
