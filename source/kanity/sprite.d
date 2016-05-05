@@ -30,15 +30,6 @@ private:
       yAnim.setter = &posY; yAnim.getter = &posY;
       scaleAnim.setter = &scale; scaleAnim.getter = &scale;
     }
-    /*this(Character chara, int x, int y, int home_x, int home_y, uint charaNum){
-      this(chara, x, y, charaNum);
-      this.setHome(home_x, home_y);
-    }*/
-    override void move(int x, int y){ super.move(x, y);}
-    void move(int ax, int ay, int frame){
-        xAnim.setAnimation(ax + posX, frame);
-        yAnim.setAnimation(ay + posY, frame);
-    }
     void scaleAnimation(float as, int frame){
       scaleAnim.setAnimation(as + scale, frame);
     }

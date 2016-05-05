@@ -32,7 +32,7 @@ public:
   uint windowHeight = 480;
   string title = "Kanity"; //ウインドウタイトル
   bool isFullScreen = false; //フルスクリーンにするかどうか
-  float renderScale = 1.0f; //拡大率
+  real renderScale = 1.0; //拡大率
   uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
   uint bgSizeWidth = 64; //横方向に配置するチップの数
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
@@ -90,29 +90,17 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
-    auto a = chara.add(64, 0);
+    auto chara = new Character(IMG_Load("BGTest.png"),"BG");
+    auto a = chara.add(0, 0);
     int[64*64] map;
     map[] = a;
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    bg1.scroll(-50, -50);
+    bg1.scroll(0, 0);
     bg1.scale = 1.0;
+    bg1.angleDeg = -40;
+    bg1.show;
     addObject(bg1);
-
-    //spriteList = new Sprite[100];
-    surfaceData.add("SPTest.png", IMG_Load("SPTest.png"));
-    auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
-    spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
-    spchip.cut;
-    auto sp = new Sprite(spchip);
-    sp.setHome(10, 8);
-    sp.priority = 0;
-    sp.character = 0;
-    sp.move(50, 50);
-    sp.scale = 4.0;
-    sp.angleDeg = 60;
-    addObject(sp);
 
     import kanity.text;
     import std.stdio;
@@ -135,6 +123,7 @@ public:
     auto text = new Text(mplus10font);
     text.posX = 20;
     text.text = "こんにちは、世界";
+    text.show;
     addObject(text);
 
     drawFlag = true;

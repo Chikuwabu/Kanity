@@ -24,10 +24,6 @@ class LuaThread{
 
         event.leftButtonDownEvent.addEventHandler(ev);
     }*/
-    void test()
-    {
-        //event.leftButtonDownEvent();
-    }
     Event event;
     LuaState lua;
     Thread T;
@@ -123,19 +119,46 @@ public:
     renderEvent.event_character_cut(id);
   }
 }
-class Lua_Sprite : Lua_DrawableObject{
+class Lua_Sprite : Lua_RenderObject{
 public:
   this(RenderEventInterface renderEventInterface, Lua_Character character){
-    super(renderEventInterface, OBJECTTYPE.SPRITE, character);
+    super(renderEventInterface);
+    create(OBJECTTYPE.SPRITE, character);
+  }
+  mixin Lua_DrawableObject;
+
+  void setCharacterNum(int chara){
+    renderEvent.event_sprite_setCharacterNum(id, chara);
+  }
+  void setCharacterStr(string chara){
+    renderEvent.event_sprite_setCharacterStr(id, chara);
   }
 }
-abstract class Lua_DrawableObject : Lua_RenderObject{
-protected{
-  this(RenderEventInterface renderEventInterface, OBJECTTYPE type, Lua_Character character){
-    super(renderEventInterface);
+template Lua_DrawableObject(){
+  void create(OBJECTTYPE type, Lua_Character character){
     renderEvent.event_object_new(type, character.id, super.setId);
   }
-}
+  void show(){
+    renderEvent.event_object_show(id);
+  }
+  void hide(){
+    renderEvent.event_object_hide(id);
+  }
+  void move(int x, int y){
+    renderEvent.event_object_move(id, x, y);
+  }
+  void setHome(int x, int y){
+    renderEvent.event_object_setHome(id, x, y);
+  }
+  void setScale(real scale){
+    renderEvent.event_object_setScale(id, scale);
+  }
+  void setAngleDeg(real deg){
+    renderEvent.event_object_setAngleDeg(id, deg);
+  }
+  void setAngleRad(real rad){
+    renderEvent.event_object_setAngleRad(id, rad);
+  }
 }
 abstract class Lua_RenderObject{
   private int id_;

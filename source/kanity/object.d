@@ -35,7 +35,7 @@ public:
     static import kanity.render;
     drawWidth = kanity.render.Renderer.getData("windowWidth").get!uint;
     drawHeight = kanity.render.Renderer.getData("windowHeight").get!uint;
-    scaleOrigin = kanity.render.Renderer.getData("renderScale").get!float;
+    scaleOrigin = kanity.render.Renderer.getData("renderScale").get!real;
 
     renderer = window.SDL_GetRenderer();
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
@@ -44,6 +44,7 @@ public:
     color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
+    m_hide = true;
   }
   ~this(){
     texture.SDL_DestroyTexture;
@@ -83,7 +84,7 @@ public:
 
   void move(int x, int y){
     auto rect = drawRect;
-    rect.x += x; rect.y += y;
+    rect.x = x; rect.y = y;
     drawRect = rect;
   }
   void setHome(int x, int y){
@@ -96,8 +97,7 @@ public:
   void hide(){
     m_hide = true;
   }
-private:
-  void reloadHome(){
+  protected void reloadHome(){
     hx = +(cast(float)homeX / drawWidth * 2);
     hy = -(cast(float)homeY / drawWidth * 2);
   }
