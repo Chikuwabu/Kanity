@@ -56,21 +56,6 @@ public:
   }
 
   bool updateFlag;
-  //functions
-  override void draw(){
-    //xAnim.animation;
-    //yAnim.animation;
-    /*if (xAnim.isStarted  || yAnim.isStarted){
-        updateFlag = true;
-    }
-    //toriaezu
-    /*if(updateFlag){
-        setTexture();
-        updateFlag = false;
-    }*/
-    super.draw();
-    return;
-  }
 
   alias scroll = move;
   override void move(int x, int y){

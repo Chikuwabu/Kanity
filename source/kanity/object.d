@@ -68,7 +68,7 @@ public:
     glTranslated(x * scaleOrigin - 1 , 1 - y * scaleOrigin, 0); //5.描画先座標へ移動
     glScaled(1, aspect, 1);                                     //4.アスペクト比を調節
     glScaled(l_scale, l_scale, 1);                              //3.拡大
-    glRotated(angle_, 0, 0, z);                                 //2.回転
+    glRotated(angle_, 0, 0, 1);                                 //2.回転
     glTranslated(-hx, -hy, 0);                                  //1.原点を移動
 
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);

@@ -90,15 +90,15 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto chara = new Character(IMG_Load("BGTest.png"),"BG");
+    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
     auto a = chara.add(0, 0);
     int[64*64] map;
     map[] = a;
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    bg1.scroll(0, 0);
+    bg1.scroll(-50, -50);
     bg1.scale = 1.0;
-    bg1.angleDeg = -40;
+    bg1.angleDeg = 30;
     bg1.show;
     addObject(bg1);
 
