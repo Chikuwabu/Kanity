@@ -97,6 +97,7 @@ public:
     auto bg1 = new BG(chara, map);
     bg1.priority = 256;
     bg1.scroll(-50, -50);
+    bg1.scale = 1.0;
     addObject(bg1);
 
     //spriteList = new Sprite[100];
@@ -109,8 +110,8 @@ public:
     sp.priority = 0;
     sp.character = 0;
     sp.move(50, 50);
-    sp.scale = 1.0;
-    sp.scaleAnimation(2.0,60);
+    sp.scale = 4.0;
+    sp.angleDeg = 60;
     addObject(sp);
 
     import kanity.text;
@@ -135,6 +136,7 @@ public:
     text.posX = 20;
     text.text = "こんにちは、世界";
     addObject(text);
+
     drawFlag = true;
     SDL_Delay(100);
     glInit;

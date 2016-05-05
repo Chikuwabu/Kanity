@@ -1,5 +1,6 @@
 module kanity.text;
 
+import kanity.imports;
 import kanity.object;
 import kanity.character;
 import std.conv;
@@ -59,18 +60,19 @@ class Text : DrawableObject
     override void draw()
     {
         auto chr = font.character;
-        SDL_Rect drawRect, texRect = void;
+        SDL_Rect drawrect, texrect = void;
         int x, y;
         foreach(c; dtext)
         {
             auto num = font.getCharacterNumber(c);
-            texRect = chr.get(num);
-            drawRect.x = x;
-            drawRect.y = y;
-            drawRect.w = texRect.w;
-            drawRect.h = texRect.h;
-            x += texRect.w;
-            super.draw(drawRect, texRect);
+            texrect = chr.get(num);
+            drawrect.x = x;
+            drawrect.y = y;
+            drawrect.w = texrect.w;
+            drawrect.h = texrect.h;
+            x += texrect.w;
+            super.drawRect = drawrect; super.texRect = texrect;
+            super.draw();
         }
     }
 }
