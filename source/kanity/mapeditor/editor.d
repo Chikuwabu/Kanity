@@ -187,8 +187,10 @@ class EditorLowLayer : LowLayer
 
     class SelectMapOperation : Operation
     {
-        this(int x1, int y1, int x2, int y2, int chip, int layer, BG bg)
+        this(int cx, int cy, int x1, int y1, int x2, int y2, int chip, int layer, BG bg)
         {
+            this.cx = cx;
+            this.cy = cy;
             this.x1 = x1;
             this.y1 = y1;
             this.x2 = x2;
@@ -206,6 +208,8 @@ class EditorLowLayer : LowLayer
                 }
             }
         }
+        private int cx;
+        private int cy;
         private int x1;
         private int y1;
         private int x2;
@@ -216,7 +220,7 @@ class EditorLowLayer : LowLayer
         private int layer;
         override void undo()
         {
-            setMapCursor(x1, y1);
+            setMapCursor(cx, cy);
             chLayer(layer);
             int i;
             for (int y = y1; y <= y2; y++)
@@ -229,7 +233,7 @@ class EditorLowLayer : LowLayer
         }
         override void redo()
         {
-            setMapCursor(x1, y1);
+            setMapCursor(cx, cy);
             chLayer(layer);
             for (int y = y1; y <= y2; y++)
             {
@@ -269,6 +273,8 @@ class EditorLowLayer : LowLayer
             layerMove(0, y * map.chipSize + cast(int)mapCursor.homeY - map.posY);
             mapCursor.posY = 0;
         }
+        mapCX = x;
+        mapCY = y;
     }
     /**
     lawyerMoveTo("Tokyo");
@@ -496,6 +502,10 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                startSelectMap();
+            }
             mapCX++;
             if (mapCursor.posX + cast(int)map.chipSize >= width)
             {
@@ -529,6 +539,10 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                startSelectMap();
+            }
             if (mapCursor.posX - cast(int)map.chipSize < 0)
             {
                 layerMove(-map.chipSize, 0);
@@ -558,6 +572,10 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                startSelectMap();
+            }
             if (mapCursor.posY - cast(int)map.chipSize < 0)
             {
                 layerMove(0, -map.chipSize);
@@ -604,6 +622,10 @@ class EditorLowLayer : LowLayer
         }
         else if (currentCursor == mapCursor)
         {
+            if (SDL_GetModState() & KMOD_SHIFT)
+            {
+                startSelectMap();
+            }
             if (mapCursor.posY + cast(int)map.chipSize >= mapHeight)
             {
                 layerMove(0, map.chipSize);
@@ -622,7 +644,7 @@ class EditorLowLayer : LowLayer
     bool isSelectMode;
     SDL_Point selectStart;
     SDL_Point selectEnd;
-    void selectMap()
+    void startSelectMap()
     {
         if (!isSelectMode)
         {
@@ -634,7 +656,10 @@ class EditorLowLayer : LowLayer
             isSelectMode = true;
             updateSelectBox();
         }
-        else
+    }
+    void selectMap()
+    {
+        if (isSelectMode)
         {
             selectEnd.x = mapCX;
             selectEnd.y = mapCY;
@@ -688,7 +713,7 @@ class EditorLowLayer : LowLayer
             int x2 = selectStart.x.max(selectEnd.x);
             int y1 = selectStart.y.min(selectEnd.y);
             int y2 = selectStart.y.max(selectEnd.y);
-            auto op = new SelectMapOperation(x1, y1, x2, y2, chip ,layerNumber, map);
+            auto op = new SelectMapOperation(mapCX, mapCY, x1, y1, x2, y2, chip ,layerNumber, map);
             addOperation(op);
             op.redo();
         }
