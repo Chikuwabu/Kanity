@@ -10,13 +10,11 @@ Simple RPG game engine.
 `$ ./bin/kanity`
 or
 `$ dub run`
+
 ## Build dependencies
 - git
 - dub
 - dmd(Other compilers are not supported)
-- SDL 2.0 (sdl2)
-- SDL_image 2.0 (sdl2_image)
-- OpenGL3
 
 ## Run dependencies
 - SDL 2.0 (sdl2)
