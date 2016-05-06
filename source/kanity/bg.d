@@ -67,6 +67,10 @@ public:
       //xAnim.setAnimation(x, frame);
       //yAnim.setAnimation(y, frame);
   }
+  override void reloadHome(){
+    hx = +(cast(real)(homeX - texRect.x) / drawWidth * 2);
+    hy = -(cast(real)(homeY - texRect.y) / drawWidth * 2);
+  }
   @property{
     override int posX(){ return bg.x; }
     override int posY(){ return bg.y; }

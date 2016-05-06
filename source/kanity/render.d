@@ -95,7 +95,7 @@ public:
     int[64*64] map;
     map[] = a;
     auto bg1 = new BG(chara, map);
-    bg1.priority = 256;
+    bg1.priority = -1;
     bg1.scroll(-50, -50);
     bg1.scale = 1.0;
     bg1.angleDeg = 30;

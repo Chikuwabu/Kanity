@@ -8,7 +8,7 @@ import std.stdio;
 import std.math;
 
 abstract class DrawableObject{
-private:
+protected:
   real x, y, w, h;//座標
   real z;//Z座標(描画優先度)
   real u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
@@ -98,14 +98,14 @@ public:
     m_hide = true;
   }
   protected void reloadHome(){
-    hx = +(cast(float)homeX / drawWidth * 2);
-    hy = -(cast(float)homeY / drawWidth * 2);
+    hx = +(cast(real)homeX / drawWidth * 2);
+    hy = -(cast(real)homeY / drawWidth * 2);
   }
   public:
   @property{
     //描画優先度
-    int priority(){return cast(int)((1.0 - z) * 256);} //描画優先度のZ座標に対する倍率は暫定
-    float priority(int p_){return z = 1.0 - (cast(real)p_ / 256.0);}
+    int priority(){return cast(int)(z * 256);} //描画優先度のZ座標に対する倍率は暫定
+    float priority(int p_){return z = cast(real)p_ / 256.0;}
     //見えているか
     bool isVisible(){
       return !m_hide;

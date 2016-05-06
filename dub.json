@@ -1,16 +1,23 @@
 {
   "name":"kanity",
+  "description":"A Simple Game Engine",
+  "license":"MIT",
+  "authors":[
+    "Tosuke",
+    "otya128",
+    "atnanasi",
+    "Citringo"
+  ],
   "dependencies":{
     "derelict-sdl2":"*",
     "derelict-gl3":"*",
-    "kanity:luad": "*"
+    "kanity:luad": "*",
   },
+  "preBuildCommands": [ "git submodule update" ],
   "targetPath":"bin",
   "workingDirectory":"bin",
   "copyFiles":["resources/*"],
   "subPackages": [
       "./LuaD/"
   ],
-  "preBuildCommands": [ "git submodule update" ],
-  "license":  "MIT",
 }
