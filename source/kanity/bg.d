@@ -117,10 +117,15 @@ public:
 
   void set(int x, int y, int chip)
   {
-      mapData[x + y * sizeWidth] = chip;
+      mapData[x * sizeHeight + y] = chip;
       //ha??????????
       //setTexture();
       updateFlag = true;
+  }
+
+  int get(int x, int y)
+  {
+      return mapData[x * sizeHeight + y];
   }
 
   auto rawMapData()
@@ -135,8 +140,8 @@ public:
 private:
   void setTexture(){
       SDL_Rect aw;
-      aw.w = drawWidth;
-      aw.h = drawHeight;
+      aw.w = sizeWidth * chipSize;
+      aw.h = sizeHeight * chipSize;
      bgScreen.SDL_FillRect(&aw, bgScreen.format.SDL_MapRGBA(0, 0, 0, 0));
     //転送
     SDL_Rect rectS, rectD;//source, destnation
@@ -146,7 +151,7 @@ private:
     }
     for(int x = 0; x < sizeWidth; x++){
       for(int y = 0; y < sizeHeight; y++){
-        rectS = character.get(mapData[x + y * sizeWidth]);
+        rectS = character.get(mapData[x * sizeHeight + y]);
         rectD.x = x * chipSize; rectD.y = y * chipSize;
         SDL_BlitSurface(character.surface, &rectS, bgScreen, &rectD);
       }

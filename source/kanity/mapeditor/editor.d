@@ -18,6 +18,7 @@ import std.string;
 import std.conv;
 import std.range;
 import std.algorithm;
+import std.experimental.logger;
 
 class Editor : Engine
 {
@@ -144,13 +145,75 @@ class Button : DrawableObject
     }
 }
 
+
 class EditorLowLayer : LowLayer
 {
+    abstract class Operation
+    {
+        abstract void undo();
+        abstract void redo();
+    }
+
+    class MapOperation : Operation
+    {
+        this(int x, int y, int chip, int layer, BG bg)
+        {
+            this.x = x;
+            this.y = y;
+            this.chip = chip;
+            this.layer = layer;
+            this.bg = bg;
+            this.oldchip = bg.get(x, y);
+        }
+        private int x;
+        private int y;
+        private int chip;
+        private int oldchip;
+        private BG bg;
+        private int layer;
+        override void undo()
+        {
+            chLayer(layer);
+            bg.set(x, y, oldchip);
+        }
+        override void redo()
+        {
+            chLayer(layer);
+            bg.set(x, y, chip);
+        }
+    }
     this(Renderer renderer, Event event)
     {
         super(renderer, event);
     }
 
+    Operation[] operationList;
+    int operationIndex;
+    void addOperation(Operation op)
+    {
+        operationList.length = ++operationIndex;
+        operationList[operationIndex - 1] = op;
+    }
+    void undo()
+    {
+        if (!operationIndex)
+        {
+            info("Could not undo");
+            return;
+        }
+        operationList[operationIndex - 1].undo();
+        operationIndex--;
+    }
+    void redo()
+    {
+        if (operationIndex >= operationList.length)
+        {
+            info("Could not redo");
+            return;
+        }
+        operationIndex++;
+        operationList[operationIndex - 1].redo();
+    }
     int width, height;
     int bgwidth, bgheight;
     BG chipList;
@@ -221,6 +284,7 @@ class EditorLowLayer : LowLayer
         selectBox.hide();
         renderer.addObject(selectBox);
 
+        operationList = new Operation[0];
         registerEvent();
     }
     Font font;
@@ -292,9 +356,11 @@ class EditorLowLayer : LowLayer
             colBG.hide();
         }
     }
+    int layerNumber;
     void chLayer(int num)
     {
         map = layer[num];
+        layerNumber = num;
         auto table = ['０', '１', '２', '３','４','５','６','７','８','９'];
         layerText.text = ("現在のレイヤ：" ~ /*goriosi*/num.to!wstring.map!(x => (x >= '0' && x <= '9' ? cast(wchar)table[x - '0'] : cast(wchar)x)).array.to!string);
     }
@@ -543,6 +609,8 @@ class EditorLowLayer : LowLayer
         }
         else
         {
+            auto op = new MapOperation(mapCX, mapCY, chip, layerNumber, map);
+            addOperation(op);
             map.set(mapCX, mapCY, chip);
         }
     }
@@ -596,6 +664,14 @@ class EditorLowLayer : LowLayer
         {
             load();
         }
+        if (event.keysym.sym == SDLK_z && (event.keysym.mod & KMOD_CTRL))
+        {
+            undo();
+        }
+        if (event.keysym.sym == SDLK_y && (event.keysym.mod & KMOD_CTRL))
+        {
+            redo();
+        }
         if (event.keysym.sym >= '0' && event.keysym.sym <= '9')
         {
             chLayer(event.keysym.sym - '0');
@@ -621,7 +697,7 @@ class EditorLowLayer : LowLayer
         mapCY = 0;
         mapCursor.posX = 0;
         mapCursor.posY = 0;
-        std.experimental.logger.info("Success to load");
+        info("Success to load");
     }
 
     void save()
