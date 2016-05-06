@@ -173,11 +173,13 @@ class EditorLowLayer : LowLayer
         private int layer;
         override void undo()
         {
+            setMapCursor(x, y);
             chLayer(layer);
             bg.set(x, y, oldchip);
         }
         override void redo()
         {
+            setMapCursor(x, y);
             chLayer(layer);
             bg.set(x, y, chip);
         }
@@ -187,6 +189,36 @@ class EditorLowLayer : LowLayer
         super(renderer, event);
     }
 
+    void setMapCursor(int x, int y)
+    {
+        //画面範囲内か
+        int mx = cast(int)map.posX / cast(int)map.chipSize;
+        int my = (cast(int)map.posY - cast(int)mapCursor.homeY) / cast(int)map.chipSize;
+        if (mx <= x && mx + bgwidth > x)
+        {
+            mapCursor.posX = (x - mx) * cast(int)map.chipSize;
+        }
+        else
+        {
+            layerMove(x * map.chipSize - map.posX, 0);
+            mapCursor.posX = 0;
+        }
+        if (my <= y && my + mapHeight / cast(int)map.chipSize > y)
+        {
+            mapCursor.posY = (y - my) * cast(int)map.chipSize;
+        }
+        else
+        {
+            layerMove(0, y * map.chipSize + cast(int)mapCursor.homeY - map.posY);
+            mapCursor.posY = 0;
+        }
+    }
+    /**
+    lawyerMoveTo("Tokyo");
+    */
+    void lawyerMoveTo(string place)
+    {
+    }
     Operation[] operationList;
     int operationIndex;
     void addOperation(Operation op)
