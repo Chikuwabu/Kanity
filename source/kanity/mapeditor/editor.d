@@ -792,7 +792,7 @@ class EditorLowLayer : LowLayer
     {
         auto map = new Map();
         map.load("test");
-        this.colList = map.colList;
+        this.colList = map.mapChip.colList;
         renderer.removeObject(this.map);
         this.layer = map.bgList;
         selectedChip = 0;
@@ -812,8 +812,9 @@ class EditorLowLayer : LowLayer
 
     void save()
     {
-        auto map = new Map(layer, character, colList);
-        map.save(chraracterFile, "test");
+        auto map = new Map(layer, new MapChip(character, colList));
+        map.save("test", "test");
+        map.mapChip.save("test");
         std.experimental.logger.info("Success to save");
     }
 
