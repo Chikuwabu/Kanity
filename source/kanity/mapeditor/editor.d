@@ -184,6 +184,63 @@ class EditorLowLayer : LowLayer
             bg.set(x, y, chip);
         }
     }
+
+    class SelectMapOperation : Operation
+    {
+        this(int x1, int y1, int x2, int y2, int chip, int layer, BG bg)
+        {
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
+            this.chip = chip;
+            this.layer = layer;
+            this.bg = bg;
+            oldchip = new int[(x2 - x1 + 1) * (y2 - y1 + 1)];
+            int i;
+            for (int y = y1; y <= y2; y++)
+            {
+                for (int x = x1; x <= x2; x++)
+                {
+                    oldchip[i++] = map.get(x, y);
+                }
+            }
+        }
+        private int x1;
+        private int y1;
+        private int x2;
+        private int y2;
+        private int chip;
+        private int[] oldchip;
+        private BG bg;
+        private int layer;
+        override void undo()
+        {
+            setMapCursor(x1, y1);
+            chLayer(layer);
+            int i;
+            for (int y = y1; y <= y2; y++)
+            {
+                for (int x = x1; x <= x2; x++)
+                {
+                    map.set(x, y, oldchip[i++]);
+                }
+            }
+        }
+        override void redo()
+        {
+            setMapCursor(x1, y1);
+            chLayer(layer);
+            for (int y = y1; y <= y2; y++)
+            {
+                for (int x = x1; x <= x2; x++)
+                {
+                    map.set(x, y, chip);
+                }
+            }
+        }
+    }
+
     this(Renderer renderer, Event event)
     {
         super(renderer, event);
@@ -631,19 +688,15 @@ class EditorLowLayer : LowLayer
             int x2 = selectStart.x.max(selectEnd.x);
             int y1 = selectStart.y.min(selectEnd.y);
             int y2 = selectStart.y.max(selectEnd.y);
-            for (int y = y1; y <= y2; y++)
-            {
-                for (int x = x1; x <= x2; x++)
-                {
-                    map.set(x, y, chip);
-                }
-            }
+            auto op = new SelectMapOperation(x1, y1, x2, y2, chip ,layerNumber, map);
+            addOperation(op);
+            op.redo();
         }
         else
         {
             auto op = new MapOperation(mapCX, mapCY, chip, layerNumber, map);
             addOperation(op);
-            map.set(mapCX, mapCY, chip);
+            op.redo();
         }
     }
     void keyDownEvent(SDL_KeyboardEvent event)
