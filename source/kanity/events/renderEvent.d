@@ -29,9 +29,8 @@ public:
   void flush(){
     //実際は作業が完了するのを待つだけ
     bool flag = true;
-    renderEvent.eventQueue.callback = (){flag = false;};
+    this.event_flush((){flag = false;});
     while(flag){}
-    renderEvent.eventQueue.callback = null;
   }
   //ラッパー関数を自動で生成する
   mixin(wrapperGenerator!RenderEvent());
@@ -71,6 +70,9 @@ public:
   }
   @property auto getInterface(){
     return new RenderEventInterface(this);
+  }
+  void event_flush(void delegate() callback){
+    callback();
   }
   void event_log(string s){
     s.trace;

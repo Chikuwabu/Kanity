@@ -92,9 +92,17 @@ public:
 
     auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
     auto a = chara.add(0, 0);
-    int[64*64] map;
-    map[] = a;
-    auto bg1 = new BG(chara, map);
+
+    import std.algorithm;
+    int[][] map;
+    map.length = 64;
+    for(int i = 0; i < 64; i++){
+      map[i].length = 64;
+      map[i][] = a;
+    }
+
+    auto bg1 = new BG(chara);
+    bg1.mapData = map;
     bg1.priority = -1;
     bg1.scroll(-50, -50);
     bg1.scale = 1.0;

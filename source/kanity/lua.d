@@ -11,6 +11,7 @@ import core.thread;
 import std.container;
 
 import luad.all;
+import luad.c.all;
 
 class LuaThread{
     /*void setLeftButtonEvent(LuaFunction luafunc)
@@ -179,8 +180,10 @@ protected:
       if(isAvailable){
         return id_;
       }else{
-        error("[Lua]Not initialized");
-        return -1;
+        //どうしても必要なら強制的に取得する
+        "flush".log;
+        renderEvent.flush;
+        return id_;
       }
     }
     void delegate(int) setId(){
