@@ -43,9 +43,9 @@ public:
     }
   }
   //ラッパー関数を自動で生成する
-  mixin(lapperGenerator!RenderEvent());
+  mixin(wrapperGenerator!RenderEvent());
 
-  private static string lapperGenerator(T)(){
+  private static string wrapperGenerator(T)(){
     import std.string;
     string o;
     foreach(i; __traits(allMembers, T)){
