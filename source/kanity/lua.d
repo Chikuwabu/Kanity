@@ -1,4 +1,5 @@
 module kanity.lua;
+
 import kanity.imports;
 import kanity.core;
 import kanity.render;
@@ -7,6 +8,7 @@ import kanity.event;
 import kanity.object;
 import kanity.sprite;
 import core.thread;
+import std.container;
 
 import luad.all;
 
@@ -33,7 +35,7 @@ class LuaThread{
     this(RenderEventInterface renderEvent_, string script_){
         renderEvent = renderEvent_;
         script = script_;
-        lua = new LuaState;
+        lua = new LuaState();
         lua.openLibs();
         lua.setPanicHandler(&panic);
         //lua["test"] = &test;
@@ -107,16 +109,16 @@ public:
     renderEvent.event_character_new(surface, super.setId);
   }
   void free(){
-    renderEvent.event_character_delete(id);
+    exec((){renderEvent.event_character_delete(id);});
   }
   void setCutRect(int w, int h){
-    renderEvent.event_character_set_cutRect(id, w, h);
+    exec((){renderEvent.event_character_set_cutRect(id, w, h);});
   }
   void setCutAxis(CHARACTER_SCANAXIS scan){
-    renderEvent.event_character_set_scanAxis(id, scan);
+    exec((){renderEvent.event_character_set_scanAxis(id, scan);});
   }
   void cut(){
-    renderEvent.event_character_cut(id);
+    exec((){renderEvent.event_character_cut(id);});
   }
 }
 class Lua_Sprite : Lua_RenderObject{
@@ -128,10 +130,10 @@ public:
   mixin Lua_DrawableObject;
 
   void setCharacterNum(int chara){
-    renderEvent.event_sprite_setCharacterNum(id, chara);
+    exec((){renderEvent.event_sprite_setCharacterNum(id, chara);});
   }
   void setCharacterStr(string chara){
-    renderEvent.event_sprite_setCharacterStr(id, chara);
+    exec((){renderEvent.event_sprite_setCharacterStr(id, chara);});
   }
 }
 template Lua_DrawableObject(){
@@ -139,31 +141,35 @@ template Lua_DrawableObject(){
     renderEvent.event_object_new(type, character.id, super.setId);
   }
   void show(){
-    renderEvent.event_object_show(id);
+    exec((){renderEvent.event_object_show(id);});
   }
   void hide(){
-    renderEvent.event_object_hide(id);
+    exec((){renderEvent.event_object_hide(id);});
   }
   void move(int x, int y){
-    renderEvent.event_object_move(id, x, y);
+    exec((){renderEvent.event_object_move(id, x, y);});
   }
   void setHome(int x, int y){
-    renderEvent.event_object_setHome(id, x, y);
+    exec((){renderEvent.event_object_setHome(id, x, y);});
   }
   void setScale(real scale){
-    renderEvent.event_object_setScale(id, scale);
+    exec((){renderEvent.event_object_setScale(id, scale);});
   }
   void setAngleDeg(real deg){
-    renderEvent.event_object_setAngleDeg(id, deg);
+    exec((){renderEvent.event_object_setAngleDeg(id, deg);});
   }
   void setAngleRad(real rad){
-    renderEvent.event_object_setAngleRad(id, rad);
+    exec((){renderEvent.event_object_setAngleRad(id, rad);});
+  }
+  void setPriority(int p){
+    exec((){renderEvent.event_object_setPriority(id, p);});
   }
 }
 abstract class Lua_RenderObject{
   private int id_;
   private bool isAvailable = false;
   protected RenderEventInterface renderEvent;
+  private Queue!(DList!(void delegate())) queue;
 protected:
   this(RenderEventInterface renderEventInterface){
     renderEvent = renderEventInterface;
@@ -178,7 +184,19 @@ protected:
       }
     }
     void delegate(int) setId(){
-      return (int a){id_ = a; isAvailable = true;};
+      return (int a){id_ = a; isAvailable = true; execQueue();};
+    }
+    void exec(void delegate() f){
+      if(isAvailable){
+        f();
+      }else{
+        queue.enqueue(f);
+      }
+    }
+    private void execQueue(){
+      foreach(a; queue[]){
+        a();
+      }
     }
   }
 }

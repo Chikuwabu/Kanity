@@ -18,12 +18,11 @@ function init()
   local spimg = loadImg("SPTest.png")
   log("load img:",spimg)
   local tori = newCharacter(spimg)
-  flush()
   tori:setCutRect(20, 16)
   tori:setCutAxis(CHARACTER_SCANAXIS.Y)
   tori:cut()
+  flush()
   local sp = newSprite(tori)
-  flush();
   sp:setCharacterNum(1)
   sp:move(50, 50);
   sp:setHome(10, 8)

@@ -139,6 +139,9 @@ public:
   void event_object_setAngleRad(int id, real rad){
     renderer.objectID.get(id).angleRad = rad;
   }
+  void event_object_setPriority(int id, int p){
+    renderer.objectID.get(id).priority = p;
+  }
   void event_sprite_setCharacterNum(int id, int chara){
     auto s = cast(Sprite)(renderer.objectID.get(id));
     s.character = chara;
