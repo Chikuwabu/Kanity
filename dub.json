@@ -13,6 +13,7 @@
     "derelict-gl3":"*",
     "kanity:luad": "*",
   },
+  "targetType":"executable",
   "preBuildCommands": [ "git submodule update" ],
   "targetPath":"bin",
   "workingDirectory":"bin",
