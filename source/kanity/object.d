@@ -203,3 +203,17 @@ public:
     }
   }
 }
+
+class Surface : DrawableObject{
+  this(SDL_Surface* sf){
+    super();
+    this.surface = sf;
+    SDL_Rect rect;
+    with(rect){
+      x = 0; y = 0;
+      w = sf.w; h = sf.h;
+    }
+    this.drawRect = rect;
+    this.texRect = rect;
+  }
+}

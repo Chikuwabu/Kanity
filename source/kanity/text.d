@@ -2,77 +2,53 @@ module kanity.text;
 
 import kanity.imports;
 import kanity.object;
-import kanity.character;
-import std.conv;
 import derelict.sdl2.sdl;
-import derelict.opengl3.gl;
-import derelict.opengl3.gl3;
+import derelict.sdl2.ttf;
 
-class Font
-{
-    private Character fontCharacter;
-    protected int[dchar] fontTable;
-    //fontTable...フォントの並び方
-    //fontTable[42] = "abcdefg"の時、Character42番がabcdefgに割り当てられる
-    this(dstring[] fontTable, Character fc)
-    {
-        fontCharacter = fc;
-        foreach(int i, c; fontTable)
-        {
-            foreach(d; c)
-            {
-                this.fontTable[d] = i;
-            }
-        }
+class Text : DrawableObject{
+private TTF_Font* font_;
+private string text_ = "";
+private SDL_Color color;
+  this(TTF_Font* f){
+    super();
+    with(color){
+      r = 255; g =255; b = 255; a = 255;
     }
-    Character character()
-    {
-        return fontCharacter;
+    font_ = f;
+    render();
+  }
+  private void render(){
+    import std.string;
+    if(text_ == "") return;
+    
+    auto sf = TTF_RenderUTF8_Solid(font_, text_.toStringz, color);
+    scope(exit) sf.SDL_FreeSurface();
+    this.surface = sf; //TODO:適当実装なのでなんとかしたい
+    SDL_Rect rect;
+    with(rect){
+      x = 0; y = 0;
+      w = sf.w; h = sf.h;
     }
-    int getCharacterNumber(dchar i)
-    {
-        return fontTable[i];
+    this.drawRect = rect;
+    this.texRect = rect;
+  }
+  @property{
+    TTF_Font* font(){return font_;}
+    void font(TTF_Font* f){
+      font_ = f;
+      render();
     }
-}
-
-class Text : DrawableObject
-{
-    Font font;
-    protected dstring dtext;
-    void text(string t)
-    {
-        dtext = t.to!dstring;
+    int hinting(){
+      return font_.TTF_GetFontHinting();
     }
-
-    string text()
-    {
-        return dtext.to!string;
+    void hinting(int hint){
+      font_.TTF_SetFontHinting(hint);
+      render();
     }
-
-    this(Font f)
-    {
-        super();
-        font = f;
-        this.posX = 0; this.posY = 0;
-        surface = font.character.surface;
+    string text(){return text_;}
+    void text(string t){
+      text_ = t;
+      render();
     }
-
-    override void draw()
-    {
-        auto chr = font.character;
-        SDL_Rect drawrect, texrect = void;
-        int x, y;
-        foreach(c; dtext)
-        {
-            auto num = font.getCharacterNumber(c);
-            texrect = chr.get(num);
-            drawrect.x = x;
-            drawrect.y = y;
-            drawrect.w = texrect.w;
-            drawrect.h = texrect.h;
-            x += texrect.w;
-            super.drawRect = drawrect; super.texRect = texrect;
-            super.draw();
-        }
-    }
+  }
 }

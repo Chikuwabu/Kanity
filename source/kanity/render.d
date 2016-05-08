@@ -11,6 +11,7 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
+import derelict.sdl2.ttf;
 
 import std.string;
 import std.variant;
@@ -111,27 +112,11 @@ public:
     bg1.show;
     addObject(bg1);
 
+    auto font = TTF_OpenFont("PixelMplus10-Regular.ttf", 10);
     import kanity.text;
-    import std.stdio;
-    import std.conv;
-    auto font_datfile = File("mplus_j10r.dat.txt", "r");
-    dstring[] font_dat = new dstring[0];
-    while(!font_datfile.eof)
-    {
-        auto line = font_datfile.readln();
-        font_dat ~=line.to!dstring;
-    }
-    auto fontChara = new Character(IMG_Load("mplus_j10r.png"),"Font");
-    with(fontChara){
-      chipWidth = 10;
-      chipHeight = 11;
-      scanAxis = CHARACTER_SCANAXIS.X;
-    }
-    fontChara.cut;
-    auto mplus10font = new Font(font_dat,  fontChara);
-    auto text = new Text(mplus10font);
-    text.posX = 20;
-    text.text = "こんにちは、世界";
+    auto text = new Text(font);
+    text.hinting = TTF_HINTING_NONE;
+    text.text = "こんにちは、世界 ゆうあしは、ハゲ";
     text.show;
     addObject(text);
 

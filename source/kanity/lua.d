@@ -182,12 +182,16 @@ protected:
       }else{
         //どうしても必要なら強制的に取得する
         "flush".log;
-        renderEvent.flush;
+        while(!isAvailable){}
         return id_;
       }
     }
     void delegate(int) setId(){
-      return (int a){id_ = a; isAvailable = true; execQueue();};
+      return (int a){
+        id_ = a;
+        isAvailable = true;
+        synchronized execQueue();
+      };
     }
     void exec(void delegate() f){
       if(isAvailable){

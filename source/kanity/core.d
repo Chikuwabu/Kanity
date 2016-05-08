@@ -6,6 +6,7 @@ import kanity.lua;
 import kanity.control;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import derelict.sdl2.ttf;
 import derelict.opengl3.gl;
 import std.experimental.logger;
 import std.stdio;
@@ -46,19 +47,23 @@ public:
     }
     info("Success to configuration");
 
-    info("Load a library \"SDL2\"."); DerelictSDL2.load;
-    info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
+    info("Load the library \"SDL2\"."); DerelictSDL2.load;
+    info("Load the library \"SDL_Image\"."); DerelictSDL2Image.load;
+    info("Load the library \"SDL_ttf\"."); DerelictSDL2ttf.load;
 
-    info("Load a library \"OpenGL\"."); DerelictGL.load;
-    info("Load a library \"OpenGL3\"."); DerelictGL3.load;
+    info("Load the library \"OpenGL\"."); DerelictGL.load;
+    info("Load the library \"OpenGL3\"."); DerelictGL3.load;
 
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
+    const int sdlInitFlag = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    const int sdlImageInitFlag = IMG_INIT_PNG | IMG_INIT_JPG;
+    if(SDL_Init(sdlInitFlag) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
     info("Success initalization of \"SDL2\".");
-    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%.*s", IMG_GetError());
+    if(IMG_Init(sdlImageInitFlag) != sdlImageInitFlag) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%.*s", IMG_GetError());
     info("Success initalization of \"SDL_Image\"");
+    if(TTF_Init() != 0) logf(LogLevel.fatal, "Failed initalization of \"SDL_ttf\".\n%.*s", TTF_GetError());
+    info("Success initalization of \"SDL_ttf\"");
 
     SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
-    "hogehogepiyopiyo".log;
 
     return;
   }
