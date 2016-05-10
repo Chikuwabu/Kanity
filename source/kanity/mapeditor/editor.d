@@ -20,22 +20,6 @@ import std.range;
 import std.algorithm;
 import std.experimental.logger;
 
-class Editor : Engine
-{
-    public this(string s)
-    {
-        super(s);
-    }
-    public override int run()
-    {
-        return super.run();
-    }
-    protected override LowLayer createLowLayer(Renderer renderer, Event event)
-    {
-        return new EditorLowLayer(renderer, event);
-    }
-}
-
 class FilledBox : DrawableObject
 {
 }
@@ -206,8 +190,12 @@ class Button : DrawableObject
 }
 
 
-class EditorLowLayer : LowLayer
+class Editor : Engine
 {
+    public this(string s, string s2)
+    {
+        super(s, s2);
+    }
     abstract class Operation
     {
         abstract void undo();
@@ -305,11 +293,6 @@ class EditorLowLayer : LowLayer
         }
     }
 
-    this(Renderer renderer, Event event)
-    {
-        super(renderer, event);
-    }
-
     void setMapCursor(int x, int y)
     {
         //画面範囲内か
@@ -392,7 +375,8 @@ class EditorLowLayer : LowLayer
         height = cast(int)(renderer.windowHeight / renderer.renderScale);
         bgheight = height/ 16;
         bgwidth = width / 16;
-        character = new Character(IMG_Load(chraracterFile.toStringz), 16, 16, CHARACTER_SCANAXIS.X);
+        character = new Character(IMG_Load(chraracterFile.toStringz));
+        character.cut(16, 16, CHARACTER_SCANAXIS.X);
         int listheight = 3;
         int[] m = new int[listheight * bgwidth];
         auto bg = new BG(character, m);
@@ -408,11 +392,13 @@ class EditorLowLayer : LowLayer
         map = newMapBG();
         initMapBG(map);
         renderer.addObject(map);
-        auto cursor = new Character(IMG_Load("SPTest.png"), 20, 16, CHARACTER_SCANAXIS.X);
-        chipCursor = new Sprite(cursor, 0, 0, 0);
+        auto cursor = new Character(IMG_Load("SPTest.png"));
+        cursor.cut(20, 16, CHARACTER_SCANAXIS.X);
+        chipCursor = new Sprite(cursor);
         chipCursor.homeX = 2;
         renderer.addObject(chipCursor);
-        mapCursor = new Sprite(cursor, 0, 0, 1);
+        mapCursor = new Sprite(cursor);
+        mapCursor.character = 1;
         mapCursor.homeX = 2;
         mapCursor.homeY = -16 * 3 - 16;//map.posY;
         this.mapHeight = height - 16 * 3 - 16;
@@ -460,7 +446,9 @@ class EditorLowLayer : LowLayer
         import std.stdio;
         auto font_datfile = File("mplus_j10r.dat.txt", "r");
         dstring[] font_dat = font_datfile.byLine.map!(x => x.to!dstring).array;
-        auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+        auto hage = new Character(IMG_Load("mplus_j10r.png"));
+        hage.cut(10, 11, CHARACTER_SCANAXIS.X);
+        auto mplus10font = new Font(font_dat, hage);
         auto text = new Text(mplus10font);
         text.posY = 16 * 3;
         text.text = "現在のレイヤ：０";
@@ -531,7 +519,8 @@ class EditorLowLayer : LowLayer
         btn2.width = 100;
         btn2.height = 12;
         renderer.addObject(btn2);
-        auto colChar = new Character(IMG_Load("mapeditor.png"), 16, 16, CHARACTER_SCANAXIS.X);
+        auto colChar = new Character(IMG_Load("mapeditor.png"));
+        colChar.cut(16, 16, CHARACTER_SCANAXIS.X);
         colBG = new BG(colChar);
         colBG.posX = chipList.posX;
         colBG.posY = chipList.posY;
@@ -932,8 +921,4 @@ class EditorLowLayer : LowLayer
         event.keyUpEvent.addEventHandler(&keyUpEvent);
     }
 
-    override void run()
-    {
-        super.run();
-    }
 }

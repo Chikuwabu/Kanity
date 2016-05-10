@@ -1,10 +1,11 @@
 module kanity.sprite;
 
 import derelict.sdl2.sdl;
-import kanity.object;
-import kanity.character;
 import kanity.animation;
-import std.experimental.logger;
+import kanity.imports;
+
+public import kanity.object;
+public import kanity.character;
 
 class Sprite : DrawableObject{
 private:
@@ -19,12 +20,11 @@ private:
     int characterNumber;
 
   public:
-    this(Character chara, int x, int y, uint charaNum){
+    this(Character chara){
       super();
       character_ = chara;
       this.surface = character_.surface;
-      this.posX = x; this.posY = y;
-      this.character = charaNum;
+      this.character=0;
 
       xAnim.setter = &posX; xAnim.getter = &posX;
       yAnim.setter = &posY; yAnim.getter = &posY;

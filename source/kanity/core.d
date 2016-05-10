@@ -8,40 +8,57 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import std.experimental.logger;
-import core.thread;
+import std.stdio;
+import std.file;
+import kanity.logger;
 
 class Engine{
   //フィールド
-private:
- public Renderer renderer;
- public Event event;
+protected:
+ Renderer renderer;
+ Event event;
+ Control control;
+ MultiLogger logger;
 
 public:
   //コンストラクタとデコンストラクタ
-  this(string config){
-    info("Load a library \"SDL2\"."); DerelictSDL2.load;
-    info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
-
-    DerelictGL.load;
-    DerelictGL3.load;
-
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError());
-    info("Success initalization of \"SDL2\".");
-    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError());
-    info("Success initalization of \"SDL_Image\"");
-
-    SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
+  this(string config, string logfile){
+    //Loggerの初期化
+    logger = new MultiLogger();
+    sharedLog = logger;
+    //デバッグモードならば標準エラー出力にログを出力する
+    debug{
+      logger.insertLogger("debug", new KaniLogger(stderr));
+    }
+    if(logfile != ""){
+      auto f = File(logfile, "w");
+      logger.insertLogger("log", new KaniLogger(f, LogLevel.trace));
+    }
     //初期化
     renderer = new Renderer();
     event = new Event();
+    control = new Control();
 
-    import std.file;
     try{
       loadConfig(config.readText);
     }catch{
       fatal("Failed to configuration");
     }
     info("Success to configuration");
+
+    info("Load a library \"SDL2\"."); DerelictSDL2.load;
+    info("Load a library \"SDL_Image\"."); DerelictSDL2Image.load;
+
+    info("Load a library \"OpenGL\"."); DerelictGL.load;
+    info("Load a library \"OpenGL3\"."); DerelictGL3.load;
+
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
+    info("Success initalization of \"SDL2\".");
+    if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%.*s", IMG_GetError());
+    info("Success initalization of \"SDL_Image\"");
+
+    SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
+    "hogehogepiyopiyo".log;
 
     return;
   }
@@ -50,16 +67,29 @@ public:
     IMG_Quit();
   }
 
-  protected LowLayer createLowLayer(Renderer renderer, Event event)
+  protected void init()
   {
-      return new LowLayer(renderer, event);
+    renderer.init();
+    event.init();
   }
-  int run(){
-    auto TrenderAndEvent = createLowLayer(renderer, event);
-    TrenderAndEvent.start;
 
-    TrenderAndEvent.join;
-    return 0;
+  int run(){
+      init();
+      control.run(renderer, event);
+      auto frame1 = 1000 / 60;
+      do
+      {
+          auto start = cast(long)SDL_GetTicks;
+          renderer.render();
+          event.process();
+
+          auto end = cast(long)SDL_GetTicks;
+          if (end - start < frame1)
+          {
+              SDL_Delay(cast(uint)(frame1 - end + start));
+          }
+      } while(event.isRunning);
+      return 0;
   }
   private void loadConfig(string jsonText){
     import std.json;
@@ -123,46 +153,22 @@ public:
           break;
       }
     }
+    //起動時に呼ばれるスクリプト:文字列
+    if("startScript" in root.object){
+      enforce(root.object["startScript"].type == JSON_TYPE.STRING);
+      control.startScript = root.object["startScript"].str;
+    }
+    //デバッグモード:BOOL
+    if("debugMode" in root.object){
+      enforce(root.object["debugMode"].type == JSON_TYPE.TRUE || root.object["debugMode"].type == JSON_TYPE.FALSE);
+      if(root.object["debugMode"].type == JSON_TYPE.TRUE){
+        bool flag = true;
+        debug{flag = false;}
+        if(flag){
+          import std.stdio;
+          logger.insertLogger("debug", new KaniLogger(stderr, LogLevel.trace));
+        }
+      }
+    }
   }
-}
-
-//低レイヤ処理を行うスレッド
-class LowLayer : Thread {
-    private bool running;
-    Renderer renderer;
-    Event event;
-    this(Renderer renderer, Event event){
-        running = true;
-        this.renderer = renderer;
-        this.event = event;
-        super(&run);
-    }
-
-    protected void init()
-    {
-        renderer.init();
-        event.init();
-    }
-
-    void run(){
-        init();
-        Control control = new Control();
-        control.run(renderer, event, this);
-        auto frame1 = 1000 / 60;
-        do
-        {
-            auto start = cast(long)SDL_GetTicks;
-            renderer.render();
-            event.process();
-            auto end = cast(long)SDL_GetTicks;
-            if (end - start < frame1)
-            {
-                SDL_Delay(cast(uint)(frame1 - end + start));
-            }
-        } while(event.isRunning);
-    }
-
-    void stop(){
-        running = false;
-    }
 }

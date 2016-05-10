@@ -1,15 +1,17 @@
+
 module kanity.render;
 
+import kanity.imports;
 import kanity.bg;
 import kanity.sprite;
-import kanity.character;
-import kanity.object;
+
+public import kanity.events.render;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
-import std.experimental.logger;
+
 import std.string;
 import std.variant;
 import std.container;
@@ -39,13 +41,15 @@ public:
   static Variant getData(string s){
     return data[s];
   }
+
   void addObject(DrawableObject obj){
       object.insertFront(obj);
   }
   void removeObject(DrawableObject obj){
-      import std.algorithm;
-      import std.range;
-      this.object.linearRemove(find(this.object[], obj).take(1));
+    import std.algorithm;
+    import std.range;
+    this.object.linearRemove(find(this.object[], obj).take(1));
+    return;
   }
   void clear(){
       object.clear();
@@ -65,6 +69,8 @@ public:
     public SDL_Renderer* SDLRenderer(){return renderer;}
   }
   void init(){
+    initRenderEvent;
+
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
     SDL_GL_DOUBLEBUFFER.SDL_GL_SetAttribute(true);
 
@@ -84,23 +90,21 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    SDL_Rect[] rect; rect.length = 1;
-    with(rect[0]){
-      x = 64; y = 0;
-      w = 16; h = 16;
-    }
-    auto chara = new Character(IMG_Load("BGTest2.png"),rect);
+    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
     auto a = chara.add(64, 0);
-    int[64*64] m;
-    m[] = a;
-    auto bg1 = new BG(chara, m);
+    int[64*64] map;
+    map[] = a;
+    auto bg1 = new BG(chara, map);
     bg1.priority = 256;
-    //bg1.scroll(-50, -50);
+    bg1.scroll(-50, -50);
     addObject(bg1);
 
     //spriteList = new Sprite[100];
-    auto spchip = new Character(IMG_Load("SPTest.png"),20, 16, CHARACTER_SCANAXIS.Y);
-    auto sp = new Sprite(spchip, 0, 0, 0);
+    surfaceData.add("SPTest.png", IMG_Load("SPTest.png"));
+    auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
+    spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
+    spchip.cut;
+    auto sp = new Sprite(spchip);
     sp.setHome(10, 8);
     sp.priority = 0;
     sp.character = 0;
@@ -119,7 +123,14 @@ public:
         auto line = font_datfile.readln();
         font_dat ~=line.to!dstring;
     }
-    auto mplus10font = new Font(font_dat,  new Character(IMG_Load("mplus_j10r.png"), 10, 11, CHARACTER_SCANAXIS.X));
+    auto fontChara = new Character(IMG_Load("mplus_j10r.png"),"Font");
+    with(fontChara){
+      chipWidth = 10;
+      chipHeight = 11;
+      scanAxis = CHARACTER_SCANAXIS.X;
+    }
+    fontChara.cut;
+    auto mplus10font = new Font(font_dat,  fontChara);
     auto text = new Text(mplus10font);
     text.posX = 20;
     text.text = "こんにちは、世界";
@@ -138,8 +149,8 @@ public:
       glFinish();
       renderer.SDL_RenderPresent;
       window_.SDL_GL_SwapWindow;
-      //drawFlag = false;
     }
+    renderEvent.event;
   }
 
   void draw(){
@@ -164,6 +175,17 @@ private:
     glAlphaFunc(GL_GEQUAL, 0.1f);
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+  public IDTable!DrawableObject objectID;
+  public IDTable!Character charaID;
+  public DataTable!(string, SDL_Surface*) surfaceData;
+  public RenderEvent renderEvent;
 
+  void initRenderEvent(){
+    objectID = new IDTable!DrawableObject();
+    charaID = new IDTable!Character();
+    surfaceData = new DataTable!(string, SDL_Surface*)();
+    surfaceData.deleteFunc = (SDL_Surface* a) => (a.SDL_FreeSurface());
+    renderEvent = new RenderEvent(this);
   }
 }

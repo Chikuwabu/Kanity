@@ -115,7 +115,8 @@ class MapChip
         file.rawRead(characterFileName);
         SDL_Rect[] characters = new SDL_Rect[chrlen[0]];
         file.rawRead(characters);
-        character = new Character(IMG_Load(characterFileName.toStringz), characters);
+        character = new Character(IMG_Load(characterFileName.toStringz), "hage");
+        character.characters = characters;
         //当たり判定
         colList = new bool[characters.length];
         file.rawRead(colList);

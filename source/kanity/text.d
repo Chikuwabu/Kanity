@@ -17,7 +17,7 @@ class Font
     this(dstring[] fontTable, Character fc)
     {
         fontCharacter = fc;
-        foreach(i, c; fontTable)
+        foreach(int i, c; fontTable)
         {
             foreach(d; c)
             {

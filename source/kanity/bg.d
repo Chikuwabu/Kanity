@@ -1,9 +1,10 @@
 module kanity.bg;
 
-import kanity.object;
-import kanity.character;
+public import kanity.object;
+public import kanity.character;
+import kanity.imports;
+
 import derelict.sdl2.sdl;
-import std.experimental.logger;
 import std.variant;
 
 class BG : DrawableObject{
@@ -86,6 +87,7 @@ public:
     override int posX(){ return bg.x; }
     override int posY(){ return bg.y; }
     override void posX(int n){
+      bg.x = n;
       auto rectD = this.drawRect, rectT = this.texRect;
       if(n < 0){
         rectD.x = -n; rectD.w = drawWidth + n;
@@ -100,6 +102,7 @@ public:
       drawRect = rectD; texRect = rectT;
     }
     override void posY(int n){
+      bg.y = n;
       auto rectD = this.drawRect, rectT = this.texRect;
       if(n < 0){
         rectD.y = -n; rectD.h = drawHeight + n;

@@ -2,7 +2,7 @@
 Simple RPG game engine.
 
 ## How to build
-1. `$ git clone git@github.com:Chikuwabu/Kanity.git` or `$ git clone https://github.com/Chikuwabu/Kanity.git --recursive`
+1. `$ git clone git@github.com:Chikuwabu/Kanity.git --recursive` or `$ git clone https://github.com/Chikuwabu/Kanity.git --recursive`
 2. `$ cd Kanity`
 3. `$ dub build`
 
@@ -10,13 +10,11 @@ Simple RPG game engine.
 `$ ./bin/kanity`
 or
 `$ dub run`
+
 ## Build dependencies
 - git
 - dub
 - dmd(Other compilers are not supported)
-- SDL 2.0 (sdl2)
-- SDL_image 2.0 (sdl2_image)
-- OpenGL3
 
 ## Run dependencies
 - SDL 2.0 (sdl2)
