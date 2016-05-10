@@ -121,17 +121,17 @@ class MapChip
         file.rawRead(colList);
     }
 
-    void save(string filename)
+    void save(string filename, string characterFileName)
     {
         File file = File(filename ~ ".kanitychip", "wb");
         file.write("KANITYCHIP");
         //character
         auto characters = character.characters;
-        int[] chrdata = [cast(int)filename.length];
+        int[] chrdata = [cast(int)characterFileName.length];
         int[] chrlen = [cast(int)characters.length];
         file.rawWrite(chrdata);
         file.rawWrite(chrlen);
-        file.rawWrite(filename);
+        file.rawWrite(characterFileName);
         file.rawWrite(characters);
         //当たり判定
         file.rawWrite(colList);

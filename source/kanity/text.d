@@ -11,6 +11,7 @@ class Font
 {
     private Character fontCharacter;
     protected int[dchar] fontTable;
+    int defaultCharacter;
     //fontTable...フォントの並び方
     //fontTable[42] = "abcdefg"の時、Character42番がabcdefgに割り当てられる
     this(dstring[] fontTable, Character fc)
@@ -23,6 +24,7 @@ class Font
                 this.fontTable[d] = i;
             }
         }
+        defaultCharacter = this.fontTable.get('?', this.fontTable.get('？', -1));
     }
     Character character()
     {
@@ -30,7 +32,7 @@ class Font
     }
     int getCharacterNumber(dchar i)
     {
-        return fontTable[i];
+        return fontTable.get(i, defaultCharacter);
     }
 }
 
@@ -54,6 +56,7 @@ class Text : DrawableObject
         font = f;
         this.posX = 0; this.posY = 0;
         surface = font.character.surface;
+        dtext = "";
     }
 
     override void draw()

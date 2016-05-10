@@ -68,6 +68,66 @@ class Box : DrawableObject
     }
 }
 
+class TextBox : DrawableObject
+{
+    Text text;
+    float __foggaf__;
+    this(Event event, Text text)
+    {
+        this.text = text;
+        __foggaf__ = kanity.render.Renderer.getData("renderScale").get!float;
+        event.eventHandler.addEventHandler(&eventHandler);
+    }
+
+    override void draw()
+    {
+        with(text)
+        {
+            posX = this.posX;
+            posY = this.posY;
+            width = this.width;
+            height = this.height;
+            draw();
+        }
+        super.draw();
+    }
+
+    bool isActive;
+
+    void eventHandler(SDL_Event event)
+    {
+        switch(event.type)
+        {
+            case SDL_MOUSEBUTTONDOWN:
+                auto button = event.button;
+                auto x = button.x * __foggaf__;
+                auto y = button.y * __foggaf__;
+                if (button.x >= posX && button.x <= posX + width)
+                {
+                    if (button.y >= posY && button.y <= posY + height)
+                    {
+                        isActive = true;
+                        return;
+                    }
+                }
+                isActive = !true;
+                break;
+            case SDL_TEXTINPUT:
+                if (!isActive)
+                {
+                    return;
+                }
+                auto len = event.text.text.indexOf('\0');
+                auto text = event.text.text[0..len].to!string;
+                std.stdio.writeln(text);
+                this.text.text = this.text.text ~ text;
+                break;
+            default:
+        }
+    }
+    
+}
+
 class Button : DrawableObject
 {
     DrawableObject background;
@@ -375,6 +435,8 @@ class EditorLowLayer : LowLayer
 
         initCol();
 
+        //initFileTextBox();
+
         selectBox = new Box();
         selectBox.hide();
         renderer.addObject(selectBox);
@@ -416,6 +478,47 @@ class EditorLowLayer : LowLayer
         btn.height = 12;
         renderer.addObject(btn);
     }
+
+    void initFileTextBox()
+    {
+        auto textBoxText = new Text(font);
+        textBoxText.color = SDL_Color(0, 0, 0, 255);
+        auto label = new Text(font);
+        label.color = SDL_Color(0, 0, 0, 255);
+        label.text = "マップのファイル名";
+        label.posY = 16 * 3 + 1;
+        label.posX = 300;
+        label.width = 100;
+        label.height = 12;
+        renderer.addObject(label);
+
+        auto textboxBox = new Box();
+        auto filenameTextbox = new TextBox(event, textBoxText);
+        filenameTextbox.posY = 16 * 3 + 1;
+        filenameTextbox.posX = 400;
+        filenameTextbox.width = 100;
+        filenameTextbox.height = 12;
+        textboxBox.posY = 16 * 3;
+        textboxBox.posX = 400;
+        textboxBox.width = 100;
+        textboxBox.height = 14;
+        textboxBox.color = SDL_Color(0, 0, 0, 255);
+
+        renderer.addObject(filenameTextbox);
+        renderer.addObject(textboxBox);
+    }
+
+    void showFileDialog()
+    {
+        int padding = 32;
+        auto back = new FilledBox();
+        back.color = SDL_Color(152, 152, 152, 255);
+        back.posX = padding;
+        back.posY = padding;
+        back.width = width - padding;
+        back.height = height - padding;
+    }
+
     BG colBG;
     bool[] colList;
     void initCol()
@@ -814,7 +917,7 @@ class EditorLowLayer : LowLayer
     {
         auto map = new Map(layer, new MapChip(character, colList));
         map.save("test", "test");
-        map.mapChip.save("test");
+        map.mapChip.save("test", chraracterFile);
         std.experimental.logger.info("Success to save");
     }
 
