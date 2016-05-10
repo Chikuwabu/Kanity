@@ -19,6 +19,7 @@ or
 ## Run dependencies
 - SDL 2.0 (sdl2)
 - SDL_image 2.0 (sdl2_image)
+- SDL_ttf 2.0 (sdl2_ttf)
 - OpenGL3
 
 ## License
