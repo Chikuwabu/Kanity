@@ -18,16 +18,37 @@ private SDL_Color color;
     render();
   }
   private void render(){
-    import std.string;
-    if(text_ == "") return;
-    
-    auto sf = TTF_RenderUTF8_Solid(font_, text_.toStringz, color);
+    import std.string, std.utf, std.algorithm, std.array, std.conv;
+    if(text == "") return;
+
+    auto tempText = text.split("\n").map!(a => cast(ushort*)(a.toUTF16z)).array;
+    auto width = tempText.map!((a){
+      int w, h;
+      TTF_SizeUNICODE(font, a, &w, &h);
+      return w;
+    }).minCount!"a > b"()[0];
+    auto height = tempText.length.to!int * font.TTF_FontHeight;
+
+    SDL_Surface* tempSurface = SDL_CreateRGBSurface(0, width, height, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    scope(exit) tempSurface.SDL_FreeSurface();
+    SDL_Surface* sf;
     scope(exit) sf.SDL_FreeSurface();
-    this.surface = sf; //TODO:適当実装なのでなんとかしたい
+    foreach(int i, a; tempText){
+      sf = font.TTF_RenderUNICODE_Solid(a, SDL_Color(255, 255, 255));
+      SDL_Rect rect;
+      with(rect){
+        x = 0; y = i * font.TTF_FontHeight;
+        y.log;
+        w = sf.w; h = sf.h;
+      }
+      SDL_BlitSurface(sf, cast(SDL_Rect*)null, tempSurface, &rect);
+    }
+
+    this.surface = tempSurface;
     SDL_Rect rect;
     with(rect){
       x = 0; y = 0;
-      w = sf.w; h = sf.h;
+      w = tempSurface.w; h = tempSurface.h;
     }
     this.drawRect = rect;
     this.texRect = rect;

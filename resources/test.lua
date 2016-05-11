@@ -25,7 +25,7 @@ function init()
   sp:setCharacterNum(1)
   sp:move(50, 50);
   sp:setHome(10, 8)
-  sp:setScale(4.0)
+  sp:setScale(2.0)
   sp:setAngleDeg(60)
   sp:show()
   --deleteCharacter(toriniku)

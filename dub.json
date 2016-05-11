@@ -9,9 +9,9 @@
     "Citringo"
   ],
   "dependencies":{
-    "derelict-sdl2":"*",
-    "derelict-gl3":"*",
-    "kanity:luad": "*",
+    "derelict-sdl2":"~master",
+    "derelict-gl3":"~master",
+    "kanity:luad": "~master",
   },
   "targetType":"executable",
   "preBuildCommands": [ "git submodule update" ],

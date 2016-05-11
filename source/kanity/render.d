@@ -116,7 +116,7 @@ public:
     import kanity.text;
     auto text = new Text(font);
     text.hinting = TTF_HINTING_NONE;
-    text.text = "こんにちは、世界 ゆうあしは、ハゲ";
+    text.text = "こんにちは、世界\nゆうあしは、ハゲ";
     text.show;
     addObject(text);
 
