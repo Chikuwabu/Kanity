@@ -91,7 +91,7 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
+    auto chara = new Character(IMG_Load_RW(FileSystem.loadRWops("BGTest2.png"), 1),"BG");
     auto a = chara.add(0, 0);
 
     import std.algorithm;
@@ -112,7 +112,7 @@ public:
     bg1.show;
     addObject(bg1);
 
-    auto font = TTF_OpenFont("PixelMplus10-Regular.ttf", 10);
+    auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
     import kanity.text;
     auto text = new Text(font);
     text.hinting = TTF_HINTING_NONE;

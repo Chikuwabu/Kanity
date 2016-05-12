@@ -1,14 +1,15 @@
 module kanity.core;
 
+import kanity.imports;
 import kanity.render;
 import kanity.event;
 import kanity.lua;
 import kanity.control;
+import kanity.file;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.sdl2.ttf;
 import derelict.opengl3.gl;
-import std.experimental.logger;
 import std.stdio;
 import std.file;
 import kanity.logger;
@@ -35,13 +36,16 @@ public:
       auto f = File(logfile, "w");
       logger.insertLogger("log", new KaniLogger(f, LogLevel.trace));
     }
+    //ファイルシステムの初期化
+    FileSystem = new FileFileObject("resources");
+
     //初期化
     renderer = new Renderer();
     event = new Event();
     control = new Control();
 
     try{
-      loadConfig(config.readText);
+      loadConfig(FileSystem.loadString(config));
     }catch{
       fatal("Failed to configuration");
     }

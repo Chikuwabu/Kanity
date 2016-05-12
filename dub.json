@@ -17,7 +17,7 @@
   "preBuildCommands": [ "git submodule update" ],
   "targetPath":"bin",
   "workingDirectory":"bin",
-  "copyFiles":["resources/*"],
+  "copyFiles":["resources"],
   "subPackages": [
       "./LuaD/"
   ],

@@ -1,5 +1,6 @@
 module kanity.control;
 
+import kanity.imports;
 import kanity.render;
 import kanity.event;
 import kanity.core;
@@ -27,8 +28,7 @@ public:
 
     void run(Renderer renderer_, Event event_){
         m_renderer = renderer_; m_event = event_;
-        import std.file;
-        auto lua = new LuaThread(m_renderer.renderEvent.getInterface, startScript.readText);
+        auto lua = new LuaThread(m_renderer.renderEvent.getInterface, FileSystem.loadString(startScript));
         //lua.stop;
     }
 }

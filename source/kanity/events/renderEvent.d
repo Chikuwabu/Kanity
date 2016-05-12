@@ -78,8 +78,8 @@ public:
     s.trace;
   }
   void event_surface_load(string name){
-    import std.string, derelict.sdl2.image, derelict.sdl2.sdl;
-    renderer.surfaceData.add(name, IMG_Load(name.toStringz));
+    import derelict.sdl2.image, derelict.sdl2.sdl;
+    renderer.surfaceData.add(name, IMG_Load_RW(FileSystem.loadRW(name), 1));
   }
   void event_surface_unload(string name){
     renderer.surfaceData.remove(name);
