@@ -11,6 +11,5 @@
   "subPackages": [
       "./LuaD/"
   ],
-  "preBuildCommands": [ "git submodule update" ],
   "license":  "MIT",
 }
