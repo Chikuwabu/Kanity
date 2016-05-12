@@ -14,7 +14,7 @@ or
 ## Build dependencies
 - git
 - dub
-- dmd(Other compilers are not supported)
+- dmd >= 2.071([Other compilers](https://github.com/Chikuwabu/Kanity/wiki/Build-on-non-supported-compiler(ja)))
 
 ## Run dependencies
 - SDL 2.0 (sdl2)
