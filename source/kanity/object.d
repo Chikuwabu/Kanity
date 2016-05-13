@@ -188,18 +188,18 @@ public:
         v2 = cast(real)(y + h) / texHeight;
       }
     }
-    SDL_Surface* surface(SDL_Surface* surface){
+    void surface(SDL_Surface* surface){
+      auto tRect = texRect; auto dRect = drawRect;
       texture.SDL_DestroyTexture;
       texture = renderer.SDL_CreateTextureFromSurface(surface);
       texWidth = surface.w; texHeight = surface.h;
-      return surface;
+      texRect = tRect; drawRect = dRect;
     }
     SDL_Texture* texture(){return texture_;}
-    SDL_Texture* texture(SDL_Texture* tex){
+    void texture(SDL_Texture* tex){
       uint f; int a;
       tex.SDL_QueryTexture(&f, &a, &texWidth, &texHeight);
       texture_ = tex;
-      return tex;
     }
   }
 }

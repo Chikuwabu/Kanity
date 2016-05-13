@@ -85,32 +85,12 @@ public:
     data["bgChipSize"] = bgChipSize;
     data["bgSizeWidth"] = bgSizeWidth;
     data["bgSizeHeight"] = bgSizeHeight;
+    data.rehash;
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.");
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
-
-    auto chara = new Character(IMG_Load_RW(FileSystem.loadRWops("BGTest2.png"), 1),"BG");
-    auto a = chara.add(0, 0);
-
-    import std.algorithm;
-    int[][] map;
-    map.length = 64;
-    for(int i = 0; i < 64; i++){
-      map[i].length = 64;
-      map[i][] = a;
-    }
-
-    auto bg1 = new BG(chara);
-    bg1.mapData = map;
-    bg1.priority = -1;
-    bg1.scroll(-50, -50);
-    bg1.scale = 1.0;
-    bg1.angleDeg = 30;
-    bg1.priority = -1;
-    bg1.show;
-    addObject(bg1);
 
     auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
     import kanity.text;

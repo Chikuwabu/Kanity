@@ -16,11 +16,13 @@ function init()
   log("Yuuashi might be hage.")
   --sleep(1000);
   local spimg = loadImg("SPTest.png")
-  log("load img:",spimg)
+  local bgimg = loadImg("BGTest2.png")
   local tori = newCharacter(spimg)
   tori:setCutRect(20, 16)
-  tori:setCutAxis(CHARACTER_SCANAXIS.Y)
+  tori:setCutAxis(Character_ScanAxis.Y)
   tori:cut()
+  local kusa = newCharacter(bgimg)
+  kusa:add(0, 0, 0)
   local sp = newSprite(tori)
   sp:setCharacterNum(1)
   sp:move(50, 50);
@@ -28,9 +30,23 @@ function init()
   sp:setScale(2.0)
   sp:setAngleDeg(60)
   sp:show()
-  --deleteCharacter(toriniku)
+  local bg = newBG(kusa)
+  local map = {}
+  for x = 1, 64 do
+    map[x]={}
+    for y = 1, 64 do
+      map[x][y] = 0
+    end
+  end
+  bg:setMapData(map)
+  bg:move(-50, -50)
+  bg:setAngleDeg(30)
+  bg:setPriority(-1)
+  bg:show()
+
 
   unloadImg(spimg)
+  unloadImg(bgimg)
   log("Unload img:", spimg)
   return 1
 end
