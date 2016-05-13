@@ -11,7 +11,7 @@ class BG : DrawableObject{
 private:
   SDL_Rect bg;
   Character character;
-  int[] mapData;
+  int[][] mapData_;//[x][y]
 
   SDL_Surface* bgScreen;
   import kanity.animation;
@@ -31,9 +31,7 @@ public:
       sizeHeight = Renderer.getData("bgSizeHeight").get!uint;
 
     character = chara;
-    mapData.length = sizeWidth * sizeHeight;
     bgScreen = SDL_CreateRGBSurface(0, chipSize * sizeWidth, chipSize * sizeHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-    setTexture();
     SDL_Rect rect;
     with(rect){
       x = 0; y =0;
@@ -47,40 +45,26 @@ public:
     scroll(x, y);
     return;
   }
-  this(Character chara, int[] mapData_){
+  this(Character chara, int[][] lmapData){
     this(chara);
-    mapData[] = mapData_[];
+    mapData = lmapData;
+    setTexture();
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
   }
 
   bool updateFlag;
-  //functions
-  override void draw(){
-    //xAnim.animation;
-    //yAnim.animation;
-    /*if (xAnim.isStarted  || yAnim.isStarted){
-        updateFlag = true;
-    }
-    //toriaezu
-    /*if(updateFlag){
-        setTexture();
-        updateFlag = false;
-    }*/
-    super.draw();
-    return;
-  }
 
   alias scroll = move;
   override void move(int x, int y){
-    bg.x += x; bg.y += y;
+    bg.x = x; bg.y = y;
     posX = bg.x; posY = bg.y;
   }
 
-  void scroll(int x, int y, int frame){
-      //xAnim.setAnimation(x, frame);
-      //yAnim.setAnimation(y, frame);
+  override void reloadHome(){
+    hx = +(cast(real)(homeX - texRect.x) / drawWidth * 2);
+    hy = -(cast(real)(homeY - texRect.y) / drawWidth * 2);
   }
   @property{
     override int posX(){ return bg.x; }
@@ -115,7 +99,12 @@ public:
       }
       drawRect = rectD; texRect = rectT;
     }
+    void mapData(int[][] data){
+      mapData_ = data.dup;
+      setTexture;
+    }
   }
+
 private:
   void setTexture(){
     //転送
@@ -126,7 +115,7 @@ private:
     }
     for(int x = 0; x < sizeWidth; x++){
       for(int y = 0; y < sizeHeight; y++){
-        rectS = character.get(mapData[x * sizeHeight + y]);
+        rectS = character.get(mapData_[x][y]);
         rectD.x = x * chipSize; rectD.y = y * chipSize;
         SDL_BlitSurface(character.surface, &rectS, bgScreen, &rectD);
       }

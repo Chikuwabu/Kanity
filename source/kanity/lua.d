@@ -1,4 +1,5 @@
 module kanity.lua;
+
 import kanity.imports;
 import kanity.core;
 import kanity.render;
@@ -7,8 +8,10 @@ import kanity.event;
 import kanity.object;
 import kanity.sprite;
 import core.thread;
+import std.container;
 
 import luad.all;
+import luad.c.all;
 
 class LuaThread{
     /*void setLeftButtonEvent(LuaFunction luafunc)
@@ -24,10 +27,6 @@ class LuaThread{
 
         event.leftButtonDownEvent.addEventHandler(ev);
     }*/
-    void test()
-    {
-        //event.leftButtonDownEvent();
-    }
     Event event;
     LuaState lua;
     Thread T;
@@ -37,7 +36,7 @@ class LuaThread{
     this(RenderEventInterface renderEvent_, string script_){
         renderEvent = renderEvent_;
         script = script_;
-        lua = new LuaState;
+        lua = new LuaState();
         lua.openLibs();
         lua.setPanicHandler(&panic);
         //lua["test"] = &test;
@@ -111,36 +110,67 @@ public:
     renderEvent.event_character_new(surface, super.setId);
   }
   void free(){
-    renderEvent.event_character_delete(id);
+    exec((){renderEvent.event_character_delete(id);});
   }
   void setCutRect(int w, int h){
-    renderEvent.event_character_set_cutRect(id, w, h);
+    exec((){renderEvent.event_character_set_cutRect(id, w, h);});
   }
   void setCutAxis(CHARACTER_SCANAXIS scan){
-    renderEvent.event_character_set_scanAxis(id, scan);
+    exec((){renderEvent.event_character_set_scanAxis(id, scan);});
   }
   void cut(){
-    renderEvent.event_character_cut(id);
+    exec((){renderEvent.event_character_cut(id);});
   }
 }
-class Lua_Sprite : Lua_DrawableObject{
+class Lua_Sprite : Lua_RenderObject{
 public:
   this(RenderEventInterface renderEventInterface, Lua_Character character){
-    super(renderEventInterface, OBJECTTYPE.SPRITE, character);
+    super(renderEventInterface);
+    create(OBJECTTYPE.SPRITE, character);
+  }
+  mixin Lua_DrawableObject;
+
+  void setCharacterNum(int chara){
+    exec((){renderEvent.event_sprite_setCharacterNum(id, chara);});
+  }
+  void setCharacterStr(string chara){
+    exec((){renderEvent.event_sprite_setCharacterStr(id, chara);});
   }
 }
-abstract class Lua_DrawableObject : Lua_RenderObject{
-protected{
-  this(RenderEventInterface renderEventInterface, OBJECTTYPE type, Lua_Character character){
-    super(renderEventInterface);
+template Lua_DrawableObject(){
+  void create(OBJECTTYPE type, Lua_Character character){
     renderEvent.event_object_new(type, character.id, super.setId);
   }
-}
+  void show(){
+    exec((){renderEvent.event_object_show(id);});
+  }
+  void hide(){
+    exec((){renderEvent.event_object_hide(id);});
+  }
+  void move(int x, int y){
+    exec((){renderEvent.event_object_move(id, x, y);});
+  }
+  void setHome(int x, int y){
+    exec((){renderEvent.event_object_setHome(id, x, y);});
+  }
+  void setScale(real scale){
+    exec((){renderEvent.event_object_setScale(id, scale);});
+  }
+  void setAngleDeg(real deg){
+    exec((){renderEvent.event_object_setAngleDeg(id, deg);});
+  }
+  void setAngleRad(real rad){
+    exec((){renderEvent.event_object_setAngleRad(id, rad);});
+  }
+  void setPriority(int p){
+    exec((){renderEvent.event_object_setPriority(id, p);});
+  }
 }
 abstract class Lua_RenderObject{
   private int id_;
   private bool isAvailable = false;
   protected RenderEventInterface renderEvent;
+  private Queue!(DList!(void delegate())) queue;
 protected:
   this(RenderEventInterface renderEventInterface){
     renderEvent = renderEventInterface;
@@ -150,12 +180,30 @@ protected:
       if(isAvailable){
         return id_;
       }else{
-        error("[Lua]Not initialized");
-        return -1;
+        //どうしても必要なら強制的に取得する
+        "flush".log;
+        while(!isAvailable){}
+        return id_;
       }
     }
     void delegate(int) setId(){
-      return (int a){id_ = a; isAvailable = true;};
+      return (int a){
+        id_ = a;
+        isAvailable = true;
+        synchronized execQueue();
+      };
+    }
+    void exec(void delegate() f){
+      if(isAvailable){
+        f();
+      }else{
+        queue.enqueue(f);
+      }
+    }
+    private void execQueue(){
+      foreach(a; queue[]){
+        a();
+      }
     }
   }
 }

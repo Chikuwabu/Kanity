@@ -11,6 +11,7 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
+import derelict.sdl2.ttf;
 
 import std.string;
 import std.variant;
@@ -32,7 +33,7 @@ public:
   uint windowHeight = 480;
   string title = "Kanity"; //ウインドウタイトル
   bool isFullScreen = false; //フルスクリーンにするかどうか
-  float renderScale = 1.0f; //拡大率
+  real renderScale = 1.0; //拡大率
   uint bgChipSize = 16; //BG1チップの大きさ(幅、高さ共通)
   uint bgSizeWidth = 64; //横方向に配置するチップの数
   uint bgSizeHeight = 64; //縦方向に配置するチップの数
@@ -90,51 +91,35 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto chara = new Character(IMG_Load("BGTest2.png"),"BG");
-    auto a = chara.add(64, 0);
-    int[64*64] map;
-    map[] = a;
-    auto bg1 = new BG(chara, map);
-    bg1.priority = 256;
+    auto chara = new Character(IMG_Load_RW(FileSystem.loadRWops("BGTest2.png"), 1),"BG");
+    auto a = chara.add(0, 0);
+
+    import std.algorithm;
+    int[][] map;
+    map.length = 64;
+    for(int i = 0; i < 64; i++){
+      map[i].length = 64;
+      map[i][] = a;
+    }
+
+    auto bg1 = new BG(chara);
+    bg1.mapData = map;
+    bg1.priority = -1;
     bg1.scroll(-50, -50);
+    bg1.scale = 1.0;
+    bg1.angleDeg = 30;
+    bg1.priority = -1;
+    bg1.show;
     addObject(bg1);
 
-    //spriteList = new Sprite[100];
-    surfaceData.add("SPTest.png", IMG_Load("SPTest.png"));
-    auto spchip = new Character(surfaceData.get("SPTest.png"),"Tori");
-    spchip.chipWidth = 20; spchip.chipHeight = 16; spchip.scanAxis = CHARACTER_SCANAXIS.Y;
-    spchip.cut;
-    auto sp = new Sprite(spchip);
-    sp.setHome(10, 8);
-    sp.priority = 0;
-    sp.character = 0;
-    sp.move(50, 50);
-    sp.scale = 1.0;
-    sp.scaleAnimation(2.0,60);
-    addObject(sp);
-
+    auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
     import kanity.text;
-    import std.stdio;
-    import std.conv;
-    auto font_datfile = File("mplus_j10r.dat.txt", "r");
-    dstring[] font_dat = new dstring[0];
-    while(!font_datfile.eof)
-    {
-        auto line = font_datfile.readln();
-        font_dat ~=line.to!dstring;
-    }
-    auto fontChara = new Character(IMG_Load("mplus_j10r.png"),"Font");
-    with(fontChara){
-      chipWidth = 10;
-      chipHeight = 11;
-      scanAxis = CHARACTER_SCANAXIS.X;
-    }
-    fontChara.cut;
-    auto mplus10font = new Font(font_dat,  fontChara);
-    auto text = new Text(mplus10font);
-    text.posX = 20;
-    text.text = "こんにちは、世界";
+    auto text = new Text(font);
+    text.hinting = TTF_HINTING_NONE;
+    text.text = "こんにちは、世界\nゆうあしは、ハゲ";
+    text.show;
     addObject(text);
+
     drawFlag = true;
     SDL_Delay(100);
     glInit;

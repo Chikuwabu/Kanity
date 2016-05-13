@@ -1,5 +1,6 @@
 //The logger of the kanity, for the kanity, by the kanity.
 module kanity.logger;
+import kanity.imports;
 import std.experimental.logger;
 import std.stdio : File;
 import std.concurrency : Tid;
