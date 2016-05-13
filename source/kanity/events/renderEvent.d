@@ -41,7 +41,7 @@ public:
   }
 }
 
-enum ObjectType{Sprite, BG, }
+enum ObjectType{Sprite, BG, Text, }
 class RenderEvent{
   import core.sync.mutex;
   private Renderer renderer;
@@ -69,12 +69,21 @@ public:
   void event_log(string s){
     s.trace;
   }
+
   void event_surface_load(string name){
     import derelict.sdl2.image, derelict.sdl2.sdl;
     renderer.surfaceData.add(name, IMG_Load_RW(FileSystem.loadRW(name), 1));
   }
   void event_surface_unload(string name){
     renderer.surfaceData.remove(name);
+  }
+
+  void event_font_load(string name, int size){
+    import derelict.sdl2.sdl, derelict.sdl2.ttf;
+    renderer.fontData.add(name, TTF_OpenFontRW(FileSystem.loadRW(name), 1, size));
+  }
+  void event_font_unload(string name){
+    renderer.fontData.remove(name);
   }
 
   void event_character_new(string surface, void delegate(int) callback){
@@ -127,6 +136,19 @@ public:
     auto id = renderer.objectID.add(obj);
     callback(id);
   }
+  void event_object_new(ObjectType type, string data, void delegate(int) callback){
+    DrawableObject obj;
+    switch(type){
+      case ObjectType.Text:
+        obj = new Text(renderer.fontData.get(data), data);
+        break;
+      default:
+        break;
+    }
+    renderer.addObject(obj);
+    auto id = renderer.objectID.add(obj);
+    callback(id);
+  }
   void event_object_show(int id){
     renderer.objectID.get(id).show;
   }
@@ -164,6 +186,11 @@ public:
   void event_bg_setMapData(int id, int[][] data){
     auto b = cast(BG)(renderer.objectID.get(id));
     b.mapData = data;
+  }
+
+  void event_text_setText(int id, string text){
+    auto t = cast(Text)(renderer.objectID.get(id));
+    t.text = text;
   }
 
 }

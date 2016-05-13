@@ -94,11 +94,7 @@ public:
 
     auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
     import kanity.text;
-    auto text = new Text(font);
-    text.hinting = TTF_HINTING_NONE;
-    text.text = "こんにちは、世界\nゆうあしは、ハゲ";
-    text.show;
-    addObject(text);
+    auto text = new Text(font);//dummy
 
     drawFlag = true;
     SDL_Delay(100);
@@ -144,13 +140,16 @@ private:
   public IDTable!DrawableObject objectID;
   public IDTable!Character charaID;
   public DataTable!(string, SDL_Surface*) surfaceData;
+  public DataTable!(string, TTF_Font*) fontData;
   public RenderEvent renderEvent;
 
   void initRenderEvent(){
     objectID = new IDTable!DrawableObject();
     charaID = new IDTable!Character();
     surfaceData = new DataTable!(string, SDL_Surface*)();
+    fontData = new DataTable!(string, TTF_Font*)();
     surfaceData.deleteFunc = (SDL_Surface* a) => (a.SDL_FreeSurface());
+    fontData.deleteFunc = (TTF_Font* a) => (a.TTF_CloseFont());
     renderEvent = new RenderEvent(this);
   }
 }

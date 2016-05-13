@@ -17,6 +17,8 @@ function init()
   --sleep(1000);
   local spimg = loadImg("SPTest.png")
   local bgimg = loadImg("BGTest2.png")
+  local font = loadFont("PixelMplus10-Regular.ttf", 10)
+
   local tori = newCharacter(spimg)
   tori:setCutRect(20, 16)
   tori:setCutAxis(Character_ScanAxis.Y)
@@ -29,7 +31,7 @@ function init()
   sp:setHome(10, 8)
   sp:setScale(2.0)
   sp:setAngleDeg(60)
-  sp:show()
+
   local bg = newBG(kusa)
   local map = {}
   for x = 1, 64 do
@@ -42,11 +44,15 @@ function init()
   bg:move(-50, -50)
   bg:setAngleDeg(30)
   bg:setPriority(-1)
-  bg:show()
 
+  local text = newText(font)
+  text:setText("こんにちは、世界\nゆうあしは、ハゲ")
+  text:show()
 
   unloadImg(spimg)
   unloadImg(bgimg)
   log("Unload img:", spimg)
+  sp:show()
+  bg:show()
   return 1
 end

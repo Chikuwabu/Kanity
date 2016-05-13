@@ -7,6 +7,7 @@ import derelict.sdl2.ttf;
 
 class Text : DrawableObject{
 private TTF_Font* font_;
+public string fontName;
 private string text_ = "";
 private SDL_Color color;
   this(TTF_Font* f){
@@ -16,6 +17,10 @@ private SDL_Color color;
     }
     font_ = f;
     render();
+  }
+  this(TTF_Font* f, string name){
+    this(f);
+    fontName = name;
   }
   private void render(){
     import std.string, std.utf, std.algorithm, std.array, std.conv;

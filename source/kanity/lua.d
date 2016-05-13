@@ -48,6 +48,9 @@ class LuaThread{
         lua["loadImg"] = &lua_loadImg;
         lua["unloadImg"] = &lua_unloadImg;
 
+        lua["loadFont"] = &lua_loadFont;
+        lua["unloadFont"] = &lua_unloadFont;
+
         lua["Character"] = lua.registerType!Lua_Character();
         lua["newCharacter"] = &lua_newCharacter;
 
@@ -56,6 +59,9 @@ class LuaThread{
 
         lua["BG"] = lua.registerType!Lua_BG();
         lua["newBG"] = &lua_newBG;
+
+        lua["Text"] = lua.registerType!Lua_Text();
+        lua["newText"] = &lua_newText;
 
         T = new Thread(() => run(script));
         T.start;
@@ -93,6 +99,7 @@ class LuaThread{
     void lua_flush(){
       renderEvent.flush;
     }
+
     string lua_loadImg(string name){
       renderEvent.event_surface_load(name);
       return name;
@@ -100,6 +107,15 @@ class LuaThread{
     void lua_unloadImg(string name){
       renderEvent.event_surface_unload(name);
     }
+
+    string lua_loadFont(string name, int size){
+      renderEvent.event_font_load(name, size);
+      return name;
+    }
+    void lua_unloadFont(string name){
+      renderEvent.event_font_unload(name);
+    }
+
     Lua_Character lua_newCharacter(string surface){
       return new Lua_Character(renderEvent, surface);
     }
@@ -108,6 +124,9 @@ class LuaThread{
     }
     Lua_BG lua_newBG(Lua_Character c){
       return new Lua_BG(renderEvent, c);
+    }
+    Lua_Text lua_newText(string font){
+      return new Lua_Text(renderEvent, font);
     }
 }
 class Lua_Character : Lua_RenderObject{
@@ -184,9 +203,25 @@ public:
     exec((){renderEvent.event_bg_setMapData(id, data);});
   }
 }
+
+class Lua_Text : Lua_RenderObject{
+public:
+  this(RenderEventInterface renderEventInterface, string font){
+    super(renderEventInterface);
+    renderEvent.event_object_new(ObjectType.Text, font, this.setId);
+  }
+  mixin Lua_DrawableObject;
+
+  void setText(string text){
+    exec((){renderEvent.event_text_setText(id, text);});
+  }
+}
 template Lua_DrawableObject(){
   void create(ObjectType type, Lua_Character character){
     renderEvent.event_object_new(type, character.id, super.setId);
+  }
+  void create(ObjectType type, string data){
+    renderEvent.event_object_new(type, data, super.setId);
   }
   void show(){
     exec((){renderEvent.event_object_show(id);});
