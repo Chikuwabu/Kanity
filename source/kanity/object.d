@@ -38,6 +38,7 @@ public:
     scaleOrigin = kanity.render.Renderer.getData("renderScale").get!real;
 
     renderer = window.SDL_GetRenderer();
+
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
     aspect = (cast(real)drawWidth / cast(real)drawHeight);
 
@@ -47,7 +48,8 @@ public:
     m_hide = true;
   }
   ~this(){
-    texture.SDL_DestroyTexture;
+    if (texture)
+        texture.SDL_DestroyTexture;
   }
 
   void draw(SDL_Rect drawrect, SDL_Rect texrect){
@@ -78,7 +80,8 @@ public:
       glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(w, h, z);
       glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(w, 0, z);
     glEnd();
-    texture_.SDL_GL_UnbindTexture();
+    if (texture)
+      texture_.SDL_GL_UnbindTexture();
     glFlush();
   }
 

@@ -7,23 +7,43 @@ import std.experimental.logger;
 
 class EventHandler(F)
 {
-    F event;
+    F[F] event;
     public void addEventHandler(F)(F func)
     {
-        event = func;
+        event[func] = func;
+    }
+    public void removeEventHandler(F)(F func)
+    {
+        event.remove(func);
     }
     public void opCall(Args...)(Args args)
     {
-        event(args);
+        foreach(e; event)
+            e(args);
     }
 }
-alias ButtonEventFunction = void delegate();
+
+alias ButtonEventFunction = void delegate(bool);
+alias KeyEventFunction = void delegate(SDL_KeyboardEvent);
+alias EventFunction = void delegate(SDL_Event);
 class Event{
 private:
     bool running;
 
 public:
     auto leftButtonDownEvent = new EventHandler!ButtonEventFunction;
+    auto rightButtonDownEvent = new EventHandler!ButtonEventFunction;
+    auto upButtonDownEvent = new EventHandler!ButtonEventFunction;
+    auto downButtonDownEvent = new EventHandler!ButtonEventFunction;
+
+    auto leftButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto rightButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto upButtonUpEvent = new EventHandler!ButtonEventFunction;
+    auto downButtonUpEvent = new EventHandler!ButtonEventFunction;
+
+    auto keyDownEvent = new EventHandler!KeyEventFunction;
+    auto keyUpEvent = new EventHandler!KeyEventFunction;
+    auto eventHandler = new EventHandler!EventFunction;
     void init(){
         running = true;
     }
@@ -39,17 +59,24 @@ public:
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_UP:
+                        upButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     case SDLK_RIGHT:
+                        rightButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     case SDLK_DOWN:
+                        downButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     case SDLK_LEFT:
-                        leftButtonDownEvent();
+                        leftButtonDownEvent(event.key.repeat == 0 ? false : true);
                         break;
                     default:
                         break;
                 }
+                keyDownEvent(event.key);
+                break;
+            case SDL_KEYUP:
+                keyUpEvent(event.key);
                 break;
             case SDL_QUIT:
                 this.stop;
@@ -57,6 +84,7 @@ public:
             default:
                 break;
         }
+        eventHandler(event);
     }
     void stop(){
         running = false;

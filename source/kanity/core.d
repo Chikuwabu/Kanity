@@ -16,7 +16,7 @@ import kanity.logger;
 
 class Engine{
   //フィールド
-private:
+protected:
  Renderer renderer;
  Event event;
  Control control;
@@ -76,24 +76,29 @@ public:
     IMG_Quit();
   }
 
-  int run(){
+  protected void init()
+  {
     renderer.init();
     event.init();
-    control.run(renderer, event);
-    auto frame1 = 1000 / 60;
-    do
-    {
-      auto start = cast(long)SDL_GetTicks;
-      renderer.render();
-      event.process();
+  }
 
-      auto end = cast(long)SDL_GetTicks;
-      if (end - start < frame1)
+  int run(){
+      init();
+      control.run(renderer, event);
+      auto frame1 = 1000 / 60;
+      do
       {
-          SDL_Delay(cast(uint)(frame1 - end + start));
-      }
-    } while(event.isRunning);
-    return 0;
+          auto start = cast(long)SDL_GetTicks;
+          renderer.render();
+          event.process();
+
+          auto end = cast(long)SDL_GetTicks;
+          if (end - start < frame1)
+          {
+              SDL_Delay(cast(uint)(frame1 - end + start));
+          }
+      } while(event.isRunning);
+      return 0;
   }
   private void loadConfig(string jsonText){
     import std.json;
