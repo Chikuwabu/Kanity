@@ -23,7 +23,7 @@ private SDL_Color color;
     fontName = name;
   }
   private void render(){
-    import std.string, std.utf, std.algorithm, std.array, std.conv;
+    import std.string, std.utf, std.array;
     if(text == "") return;
 
     auto tempText = text.split("\n").map!(a => cast(ushort*)(a.toUTF16z)).array;

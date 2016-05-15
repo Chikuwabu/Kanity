@@ -92,12 +92,10 @@ public:
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
-    import kanity.text;
-    auto text = new Text(font);//dummy
+    //SDLを起動させるためのダミーの描画
+    renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1).SDL_DestroyTexture;
 
     drawFlag = true;
-    SDL_Delay(100);
     glInit;
   }
   void render(){
