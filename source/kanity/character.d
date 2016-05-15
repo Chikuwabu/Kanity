@@ -78,6 +78,8 @@ public:
   @property{
     SDL_Surface* surface(){return surface_;}
     string surfaceName(){return surfaceName_;}
+    SDL_Rect[int] characters(){return characters_;}
+    void characters(SDL_Rect[int] c){characters_ = c;}
   }
   private uint bgChipSize(){
     import kanity.render;

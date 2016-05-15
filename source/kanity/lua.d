@@ -20,9 +20,9 @@ class LuaThread{
         import std.algorithm.mutation;
         LuaFunction *temp = new LuaFunction();
         move(luafunc, *temp);
-        auto ev = (()
+        auto ev = ((bool repeat)
         {
-            (*temp)();
+            (*temp)(repeat);
         });
 
         event.leftButtonDownEvent.addEventHandler(ev);

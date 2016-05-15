@@ -1,0 +1,14 @@
+{
+  "window":{
+    "width":640,
+    "height":480,
+    "title":"(An Excellent Title of your game)",
+    "fullscreen":false
+  },
+  "BG":{
+    "chipSize":16,
+    "width":64,
+    "height":64
+  },
+  "renderScale":1.0
+}

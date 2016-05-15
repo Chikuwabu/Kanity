@@ -106,8 +106,34 @@ public:
     }
   }
 
+  void set(int x, int y, int chip)
+  {
+      mapData_[x][y] = chip;
+      //ha??????????
+      setTexture();
+      //updateFlag = true;
+  }
+
+  int get(int x, int y)
+  {
+      return mapData_[x][y];
+  }
+
+  int[][] rawMapData()
+  {
+      return mapData_;
+  }
+  void rawMapData(int[][] map)
+  {
+      mapData = map;
+      setTexture();
+  }
 private:
   void setTexture(){
+      SDL_Rect aw;
+      aw.w = sizeWidth * chipSize;
+      aw.h = sizeHeight * chipSize;
+     bgScreen.SDL_FillRect(&aw, bgScreen.format.SDL_MapRGBA(0, 0, 0, 0));
     //転送
     SDL_Rect rectS, rectD;//source, destnation
     with(rectD){

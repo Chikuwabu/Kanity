@@ -21,4 +21,15 @@
   "subPackages": [
       "./LuaD/"
   ],
+  "sourcePaths":[],
+  "configurations":[
+    {
+      "name":"engine",
+      "sourcePaths":["source"]
+    },
+    {
+      "name":"mapeditor",
+      "sourcePaths":["mapeditor/source", "source/kanity"]
+    }
+  ]
 }
