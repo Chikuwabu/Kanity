@@ -1,10 +1,12 @@
 module kanity.mapeditor.editor;
 
+import kanity.imports;
 import kanity.core;
 import kanity.render;
 import kanity.character;
 import kanity.bg;
 import kanity.sprite;
+import kanity.text;
 import kanity.event;
 import kanity.lua;
 import kanity.object;
@@ -12,10 +14,10 @@ import kanity.map;
 import kanity.text;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
+import derelict.sdl2.ttf;
 import derelict.opengl3.gl;
 import core.thread;
 import std.string;
-import std.conv;
 import std.range;
 import std.algorithm;
 import std.experimental.logger;
@@ -103,13 +105,13 @@ class TextBox : DrawableObject
                 }
                 auto len = event.text.text.indexOf('\0');
                 auto text = event.text.text[0..len].to!string;
-                std.stdio.writeln(text);
+                text.trace;
                 this.text.text = this.text.text ~ text;
                 break;
             default:
         }
     }
-    
+
 }
 
 class Button : DrawableObject
@@ -378,8 +380,9 @@ class Editor : Engine
         character = new Character(IMG_Load(chraracterFile.toStringz));
         character.cut(16, 16, CHARACTER_SCANAXIS.X);
         int listheight = 3;
-        int[] m = new int[listheight * bgwidth];
-        auto bg = new BG(character, m);
+        int[][] m = new int[][](listheight, bgwidth);
+        auto bg = new BG(character);
+        bg.mapData = m;
         bg.sizeWidth = bgwidth;
         bg.sizeHeight = listheight;
         renderer.addObject(bg);
@@ -392,7 +395,7 @@ class Editor : Engine
         map = newMapBG();
         initMapBG(map);
         renderer.addObject(map);
-        auto cursor = new Character(IMG_Load("SPTest.png"));
+        auto cursor = new Character(IMG_Load_RW(FileSystem.loadRW("SPTest.png"), 1));
         cursor.cut(20, 16, CHARACTER_SCANAXIS.X);
         chipCursor = new Sprite(cursor);
         chipCursor.homeX = 2;
@@ -430,7 +433,7 @@ class Editor : Engine
         operationList = new Operation[0];
         registerEvent();
     }
-    Font font;
+    TTF_Font* font;
     Box selectBox;
     void addLayerEvent()
     {
@@ -438,21 +441,16 @@ class Editor : Engine
         initMapBG(bg);
         layer ~= bg;
         renderer.addObject(bg);
-        chLayer(layer.length - 1);
+        chLayer(layer.length.to!int - 1);
     }
     Text layerText;
     void initFont()
     {
-        import std.stdio;
-        auto font_datfile = File("mplus_j10r.dat.txt", "r");
-        dstring[] font_dat = font_datfile.byLine.map!(x => x.to!dstring).array;
-        auto hage = new Character(IMG_Load("mplus_j10r.png"));
-        hage.cut(10, 11, CHARACTER_SCANAXIS.X);
-        auto mplus10font = new Font(font_dat, hage);
+        auto mplus10font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);//new Font(font_dat, hage);
         auto text = new Text(mplus10font);
         text.posY = 16 * 3;
         text.text = "現在のレイヤ：０";
-        text.color = SDL_Color(0, 0, 0, 255);
+        //text.color = SDL_Color(0, 0, 0, 255);
         layerText = text;
         renderer.addObject(text);
         font = mplus10font;
@@ -470,9 +468,9 @@ class Editor : Engine
     void initFileTextBox()
     {
         auto textBoxText = new Text(font);
-        textBoxText.color = SDL_Color(0, 0, 0, 255);
+        //textBoxText.color = SDL_Color(0, 0, 0, 255);
         auto label = new Text(font);
-        label.color = SDL_Color(0, 0, 0, 255);
+        //label.color = SDL_Color(0, 0, 0, 255);
         label.text = "マップのファイル名";
         label.posY = 16 * 3 + 1;
         label.posX = 300;
@@ -554,10 +552,13 @@ class Editor : Engine
     BG newMapBG()
     {
         int mapWidth = 256, mapHeight = 256;
-        int[] mapdata = new int[mapWidth *  mapHeight];
-        mapdata[] = -1;
+        int[][] mapdata = new int[][](mapWidth, mapHeight);
+        for(int i = 0; i < mapWidth; i++){
+          mapdata[i][] = -1;
+        }
 
-        auto map = new BG(character, mapdata);
+        auto map = new BG(character);
+        map.mapData = mapdata;
         map.sizeWidth = mapWidth;
         map.sizeHeight = mapHeight;
         map.height = mapHeight * map.chipSize;
