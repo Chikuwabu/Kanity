@@ -14,7 +14,6 @@
     "kanity:luad": "~master",
   },
   "targetType":"executable",
-  "preBuildCommands": [ "git submodule update" ],
   "targetPath":"bin",
   "workingDirectory":"bin",
   "copyFiles":["resources"],
