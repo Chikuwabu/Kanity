@@ -2,6 +2,7 @@ module kanity.utils;
 import kanity.imports;
 import std.container;
 import std.range;
+import core.sync.mutex;
 
 //勝手に管理してID振ってくれるやつ
 class IDTable(T){
@@ -9,64 +10,85 @@ class IDTable(T){
   private uint count = 0;
   private SList!(uint) unused;
   private uint unusedCount = 0;
+  private Mutex mutex;
   public void delegate(T) deleteFunc;
 public:
   this(){
     data_.length = 1;
     deleteFunc = (T a) => (delete a);
+    mutex = new Mutex();
   }
   uint add(T data){
-    int a;
-    if(unusedCount > 0){
-      //すき間があるならそちらに入れる
-      a = unused.removeAny;
-      unusedCount--;
-    }else{
-      //ないなら領域を増やす
-      a = count++;
-      if(count >= data_.length){
-        //メモリが足りなくなったら多めに確保する
-        data_.length = data_.length * 2;
+    synchronized(mutex){
+      int a;
+      if(unusedCount > 0){
+        //すき間があるならそちらに入れる
+        a = unused.removeAny;
+        unusedCount--;
+      }else{
+        //ないなら領域を増やす
+        a = count++;
+        if(count >= data_.length){
+          //メモリが足りなくなったら多めに確保する
+          data_.length = data_.length * 2;
+        }
       }
+      data_[a] = data;
+      return a;
     }
-    data_[a] = data;
-    return a;
   }
   void remove(uint a){
-    deleteFunc(data_[a]);
-    unused.insertFront(a);
-    unusedCount++;
+    synchronized(mutex){
+      deleteFunc(data_[a]);
+      unused.insertFront(a);
+      unusedCount++;
+    }
   }
-  void set(uint a, T data){ data_[a] = data; }
-  T get(uint a){ return data_[a]; }
+  void set(uint a, T data){
+    synchronized(mutex){
+      data_[a] = data;
+    }
+  }
+  T get(uint a){
+    synchronized(mutex){
+      return data_[a];
+    }
+  }
 }
 //参照カウントして開放
 class DataTable(TKey, TData){
   private TData[TKey] data;
   private uint[TKey] count;
+  private Mutex mutex;
   public void delegate(TData) deleteFunc;
 
   this(){
     deleteFunc = (TData a) => (delete a);
+    mutex = new Mutex();
   }
-  alias LoadFunc = TData delegate();
   public void add(TKey key, lazy TData load){
-    if(key !in data) data[key] = load;
-    count[key]++;
+    synchronized(mutex){
+      if(key !in data) data[key] = load;
+      count[key]++;
+    }
   }
   public void remove(TKey key){
-    enforce(key in data);
-    count[key]--;
-    if(count[key] <= 0){
-      deleteFunc(data[key]);
-      data.remove(key);
+    synchronized(mutex){
+      enforce(key in data);
+      count[key]--;
+      if(count[key] <= 0){
+        deleteFunc(data[key]);
+        data.remove(key);
+      }
     }
   }
   //getして使用が終わったらremoveする
   public TData get(TKey key){
-    enforce(key in data);
-    count[key]++;
-    return data[key];
+    synchronized(mutex){
+      enforce(key in data);
+      count[key]++;
+      return data[key];
+    }
   }
 
   alias this get;
@@ -177,6 +199,9 @@ struct MultiCastableDelegate(T) if(isCallable!T){
   }
   public auto opSlice(){
     return funcs[];
+  }
+  public void clear(){
+    funcs.clear;
   }
   private void addFunc(T arg){
     funcs.insertBack(arg);

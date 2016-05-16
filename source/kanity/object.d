@@ -1,9 +1,9 @@
 module kanity.object;
 
+import kanity.imports;
 import derelict.sdl2.sdl;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
-import std.experimental.logger;
 import std.stdio;
 import std.math;
 
@@ -25,6 +25,7 @@ private:
   double[16] matrix;//変換行列
   float[4 * 2] vertex;//頂点配列
   float[4 * 2] coords;//テクスチャ座標配列
+  MultiCastableDelegate!(void delegate()) preDraw;
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -73,9 +74,10 @@ public:
   }
   void draw(){
     if (m_hide) return;
+    preDraw();
+    preDraw.clear;
     glColor4ub(color_.r, color_.g, color_.b, color_.a);
 
-    real l_scale = scale_ * scaleOrigin;
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixd(matrix.ptr);
 
@@ -87,26 +89,32 @@ public:
     //glFlush();
   }
   private void updateMatrix(){
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslated(x * scaleOrigin - 1 , 1 - y * scaleOrigin, z); //5.描画先座標へ移動
-    glScaled(1, aspect, 1);                                     //4.アスペクト比を調節
-    glScaled(scale_ * scaleOrigin, scale_ * scaleOrigin, 1);    //3.拡大
-    glRotated(angle_, 0, 0, 1);                                 //2.回転
-    glTranslated(-hx, -hy, 0);                                  //1.原点を移動
-    glGetDoublev(GL_MODELVIEW_MATRIX, matrix.ptr);
+    preDraw += (){
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      glTranslated(x * scaleOrigin - 1 , 1 - y * scaleOrigin, z); //5.描画先座標へ移動
+      glScaled(1, aspect, 1);                                     //4.アスペクト比を調節
+      glScaled(scale_ * scaleOrigin, scale_ * scaleOrigin, 1);    //3.拡大
+      glRotated(angle_, 0, 0, 1);                                 //2.回転
+      glTranslated(-hx, -hy, 0);                                  //1.原点を移動
+      glGetDoublev(GL_MODELVIEW_MATRIX, matrix.ptr);
+    };
   }
   private void updateVertex(){
-    vertex[0] = 0; vertex[1] = 0;
-    vertex[2] = 0; vertex[3] = h;
-    vertex[4] = w; vertex[5] = h;
-    vertex[6] = w; vertex[7] = 0;
+    preDraw += (){
+      vertex[0] = 0; vertex[1] = 0;
+      vertex[2] = 0; vertex[3] = h;
+      vertex[4] = w; vertex[5] = h;
+      vertex[6] = w; vertex[7] = 0;
+    };
   }
   private void updateTexCoord(){
-    coords[0] = u1; coords[1] = v1;
-    coords[2] = u1; coords[3] = v2;
-    coords[4] = u2; coords[5] = v2;
-    coords[6] = u2; coords[7] = v1;
+    preDraw += (){
+      coords[0] = u1; coords[1] = v1;
+      coords[2] = u1; coords[3] = v2;
+      coords[4] = u2; coords[5] = v2;
+      coords[6] = u2; coords[7] = v1;
+    };
   }
 
   void move(int x, int y){

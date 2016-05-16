@@ -10,3 +10,4 @@ public:
   import std.experimental.logger;
   import std.conv;
   import std.algorithm;
+  import std.typecons;

@@ -9,20 +9,23 @@ import kanity.text;
 class RenderEventInterface{
   import std.container;
   private RenderEvent renderEvent;
+  private Renderer renderer;
   private Queue!(DList!(EventData*)) tempQueue; //まとめて送る前に貯めておく
 public:
-  this(RenderEvent r){
-    renderEvent = r;
+  this(RenderEvent re, Renderer r){
+    renderEvent = re;
+    renderer = r;
     tempQueue.init;
   }
   void send(EventData* e){
     synchronized renderEvent.eventQueue.enqueue(*e);
   }
   void flush(){
+    "flush".log;
     //実際は作業が完了するのを待つだけ
-    bool flag = true;
-    this.event_flush((){flag = false;});
-    while(flag){}
+    bool flag = false;
+    event_flush((){flag = true;});
+    while(!flag){}
   }
   //ラッパー関数を自動で生成する
   mixin(wrapperGenerator!RenderEvent());
@@ -39,62 +42,11 @@ public:
     }
     return o;
   }
-}
-
-enum ObjectType{Sprite, BG, Text, }
-class RenderEvent{
-  import core.sync.mutex;
-  private Renderer renderer;
-  public EventQueue!int eventQueue;
-public:
-  this(Renderer r){
-    renderer = r;
-    eventQueue.init;
-  }
-  void event(){
-    if(eventQueue.length == 0) return;
-    foreach(EventData e; eventQueue[]){
-      enforce(e.func != null);
-      e.func();
-    }
-    if(eventQueue.callback != null) eventQueue.callback();
-    return;
-  }
-  @property auto getInterface(){
-    return new RenderEventInterface(this);
-  }
-  void event_flush(void delegate() callback){
-    callback();
-  }
+  //メッセージ送信するまでもないイベント
   void event_log(string s){
     s.trace;
   }
 
-  void event_surface_load(string name){
-    import derelict.sdl2.image, derelict.sdl2.sdl;
-    renderer.surfaceData.add(name, IMG_Load_RW(FileSystem.loadRW(name), 1));
-  }
-  void event_surface_unload(string name){
-    renderer.surfaceData.remove(name);
-  }
-
-  void event_font_load(string name, int size){
-    import derelict.sdl2.sdl, derelict.sdl2.ttf;
-    renderer.fontData.add(name, TTF_OpenFontRW(FileSystem.loadRW(name), 1, size));
-  }
-  void event_font_unload(string name){
-    renderer.fontData.remove(name);
-  }
-
-  void event_character_new(string surface, void delegate(int) callback){
-    auto n = renderer.charaID.add(new Character(renderer.surfaceData.get(surface), surface));
-    callback(n);
-  }
-  void event_character_delete(int id){
-    auto c = renderer.charaID.get(id);
-    renderer.surfaceData.remove(c.surfaceName);
-    renderer.charaID.remove(id);
-  }
   void event_character_set_cutRect(int id, int w, int h){
     auto c = renderer.charaID.get(id);
     c.chipWidth = w; c.chipHeight = h;
@@ -119,44 +71,21 @@ public:
     renderer.charaID.get(id).add(s, x, y);
   }
 
-  void event_object_new(ObjectType type, int characterID, void delegate(int) callback){
-    auto character = renderer.charaID.get(characterID);
-    DrawableObject obj;
-    switch(type){
-      case ObjectType.Sprite:
-        obj = new Sprite(character);
-        break;
-      case ObjectType.BG:
-        obj = new BG(character);
-        break;
-      default:
-        break;
-    }
-    renderer.addObject(obj);
-    auto id = renderer.objectID.add(obj);
-    callback(id);
-  }
-  void event_object_new(ObjectType type, string data, void delegate(int) callback){
-    DrawableObject obj;
-    switch(type){
-      case ObjectType.Text:
-        obj = new Text(renderer.fontData.get(data), data);
-        break;
-      default:
-        break;
-    }
-    renderer.addObject(obj);
-    auto id = renderer.objectID.add(obj);
-    callback(id);
-  }
   void event_object_show(int id){
     renderer.objectID.get(id).show;
   }
   void event_object_hide(int id){
     renderer.objectID.get(id).hide;
   }
+  bool event_object_isVisible(int id){
+    return renderer.objectID.get(id).isVisible;
+  }
   void event_object_move(int id, int x, int y){
     renderer.objectID.get(id).move(x, y);
+  }
+  auto event_object_getPos(int id){
+    auto o = renderer.objectID.get(id);
+    return tuple(o.posX, o.posY);
   }
   void event_object_setHome(int id, int x, int y){
     renderer.objectID.get(id).setHome(x, y);
@@ -191,6 +120,90 @@ public:
   void event_text_setText(int id, string text){
     auto t = cast(Text)(renderer.objectID.get(id));
     t.text = text;
+  }
+}
+
+enum ObjectType{Sprite, BG, Text, }
+class RenderEvent{
+  import core.sync.mutex;
+  private Renderer renderer;
+  public EventQueue!int eventQueue;
+public:
+  this(Renderer r){
+    renderer = r;
+    eventQueue.init;
+  }
+  void event(){
+    if(eventQueue.length == 0) return;
+    foreach(EventData e; eventQueue[]){
+      enforce(e.func != null);
+      e.func();
+    }
+    if(eventQueue.callback != null) eventQueue.callback();
+    return;
+  }
+  @property auto getInterface(){
+    return new RenderEventInterface(this, renderer);
+  }
+  void event_flush(void delegate() callback){
+    callback();
+  }
+
+  void event_surface_load(string name){
+    import derelict.sdl2.image, derelict.sdl2.sdl;
+    renderer.surfaceData.add(name, IMG_Load_RW(FileSystem.loadRW(name), 1));
+  }
+  void event_surface_unload(string name){
+    renderer.surfaceData.remove(name);
+  }
+
+  void event_font_load(string name, int size){
+    import derelict.sdl2.sdl, derelict.sdl2.ttf;
+    renderer.fontData.add(name, TTF_OpenFontRW(FileSystem.loadRW(name), 1, size));
+  }
+  void event_font_unload(string name){
+    renderer.fontData.remove(name);
+  }
+
+  void event_character_new(string surface, void delegate(int) callback){
+    auto n = renderer.charaID.add(new Character(renderer.surfaceData.get(surface), surface));
+    callback(n);
+  }
+  void event_character_delete(int id){
+    auto c = renderer.charaID.get(id);
+    renderer.surfaceData.remove(c.surfaceName);
+    renderer.charaID.remove(id);
+  }
+
+  void event_object_new(ObjectType type, int characterID, void delegate(int) callback){
+    auto character = renderer.charaID.get(characterID);
+    DrawableObject obj;
+    switch(type){
+      case ObjectType.Sprite:
+        obj = new Sprite(character);
+        break;
+      case ObjectType.BG:
+        obj = new BG(character);
+        break;
+      default:
+        break;
+    }
+    renderer.addObject(obj);
+    auto id = renderer.objectID.add(obj);
+    callback(id);
+  }
+  void event_object_new(ObjectType type, string data, void delegate(int) callback){
+    DrawableObject obj;
+    switch(type){
+      case ObjectType.Text:
+        obj = new Text(renderer.fontData.get(data), data);
+        break;
+      default:
+        break;
+    }
+    renderer.addObject(obj);
+    auto id = renderer.objectID.add(obj);
+    callback(id);
   }
 
 }

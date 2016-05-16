@@ -105,7 +105,7 @@ public:
       foreach(DrawableObject obj; object){
         obj.draw;
       }
-      glFinish();
+      glFlush();
       renderer.SDL_RenderPresent;
       window_.SDL_GL_SwapWindow;
     }

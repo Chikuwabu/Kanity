@@ -54,5 +54,6 @@ function init()
   log("Unload img:", spimg)
   sp:show()
   bg:show()
+  log(sp:getPos())
   return 1
 end

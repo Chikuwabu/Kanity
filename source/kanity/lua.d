@@ -229,8 +229,14 @@ template Lua_DrawableObject(){
   void hide(){
     exec((){renderEvent.event_object_hide(id);});
   }
+  bool isVisible(){
+    return renderEvent.event_object_isVisible(id);
+  }
   void move(int x, int y){
     exec((){renderEvent.event_object_move(id, x, y);});
+  }
+  auto getPos(){
+    return renderEvent.event_object_getPos(id);
   }
   void setHome(int x, int y){
     exec((){renderEvent.event_object_setHome(id, x, y);});
@@ -263,7 +269,6 @@ protected:
         return id_;
       }else{
         //どうしても必要なら強制的に取得する
-        "flush".log;
         renderEvent.flush;
         return id_;
       }
@@ -275,6 +280,7 @@ protected:
         synchronized execQueue();
       };
     }
+    import std.traits;
     void exec(void delegate() f){
       if(isAvailable){
         f();
