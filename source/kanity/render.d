@@ -85,43 +85,17 @@ public:
     data["bgChipSize"] = bgChipSize;
     data["bgSizeWidth"] = bgSizeWidth;
     data["bgSizeHeight"] = bgSizeHeight;
+    data.rehash;
 
     renderer = window_.SDL_CreateRenderer(-1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if(renderer == null) logf(LogLevel.fatal, "Failed to create renderer.");
     info("Success to create renderer.");
     window_.SDL_ShowWindow;
 
-    auto chara = new Character(IMG_Load_RW(FileSystem.loadRWops("BGTest2.png"), 1),"BG");
-    auto a = chara.add(0, 0);
-
-    import std.algorithm;
-    int[][] map;
-    map.length = 64;
-    for(int i = 0; i < 64; i++){
-      map[i].length = 64;
-      map[i][] = a;
-    }
-
-    auto bg1 = new BG(chara);
-    bg1.mapData = map;
-    bg1.priority = -1;
-    bg1.scroll(-50, -50);
-    bg1.scale = 1.0;
-    bg1.angleDeg = 30;
-    bg1.priority = -1;
-    bg1.show;
-    addObject(bg1);
-
-    auto font = TTF_OpenFontRW(FileSystem.loadRW("PixelMplus10-Regular.ttf"), 1, 10);
-    import kanity.text;
-    auto text = new Text(font);
-    text.hinting = TTF_HINTING_NONE;
-    text.text = "こんにちは、世界\nゆうあしは、ハゲ";
-    text.show;
-    addObject(text);
+    //SDLを起動させるためのダミーの描画
+    renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1).SDL_DestroyTexture;
 
     drawFlag = true;
-    SDL_Delay(100);
     glInit;
   }
   void render(){
@@ -164,13 +138,16 @@ private:
   public IDTable!DrawableObject objectID;
   public IDTable!Character charaID;
   public DataTable!(string, SDL_Surface*) surfaceData;
+  public DataTable!(string, TTF_Font*) fontData;
   public RenderEvent renderEvent;
 
   void initRenderEvent(){
     objectID = new IDTable!DrawableObject();
     charaID = new IDTable!Character();
     surfaceData = new DataTable!(string, SDL_Surface*)();
+    fontData = new DataTable!(string, TTF_Font*)();
     surfaceData.deleteFunc = (SDL_Surface* a) => (a.SDL_FreeSurface());
+    fontData.deleteFunc = (TTF_Font* a) => (a.TTF_CloseFont());
     renderEvent = new RenderEvent(this);
   }
 }

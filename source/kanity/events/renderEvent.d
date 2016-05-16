@@ -3,6 +3,8 @@ module kanity.events.render;
 import kanity.imports;
 import kanity.render;
 import kanity.sprite;
+import kanity.bg;
+import kanity.text;
 
 class RenderEventInterface{
   import std.container;
@@ -13,18 +15,8 @@ public:
     renderEvent = r;
     tempQueue.init;
   }
-  void add(EventData* e){
-    tempQueue.enqueue(e);
-  }
   void send(EventData* e){
     synchronized renderEvent.eventQueue.enqueue(*e);
-  }
-  void send(EventData e){
-    send(&e);
-  }
-  auto data(){
-    auto a = renderEvent.eventQueue.data;
-    return a;
   }
   void flush(){
     //実際は作業が完了するのを待つだけ
@@ -49,7 +41,7 @@ public:
   }
 }
 
-enum OBJECTTYPE{SPRITE, BG}
+enum ObjectType{Sprite, BG, Text, }
 class RenderEvent{
   import core.sync.mutex;
   private Renderer renderer;
@@ -77,6 +69,7 @@ public:
   void event_log(string s){
     s.trace;
   }
+
   void event_surface_load(string name){
     import derelict.sdl2.image, derelict.sdl2.sdl;
     renderer.surfaceData.add(name, IMG_Load_RW(FileSystem.loadRW(name), 1));
@@ -84,6 +77,15 @@ public:
   void event_surface_unload(string name){
     renderer.surfaceData.remove(name);
   }
+
+  void event_font_load(string name, int size){
+    import derelict.sdl2.sdl, derelict.sdl2.ttf;
+    renderer.fontData.add(name, TTF_OpenFontRW(FileSystem.loadRW(name), 1, size));
+  }
+  void event_font_unload(string name){
+    renderer.fontData.remove(name);
+  }
+
   void event_character_new(string surface, void delegate(int) callback){
     auto n = renderer.charaID.add(new Character(renderer.surfaceData.get(surface), surface));
     callback(n);
@@ -97,21 +99,48 @@ public:
     auto c = renderer.charaID.get(id);
     c.chipWidth = w; c.chipHeight = h;
   }
-  void event_character_set_scanAxis(int id, CHARACTER_SCANAXIS scan){
+  void event_character_set_scanAxis(int id, Character_ScanAxis scan){
     auto c = renderer.charaID.get(id);
     c.scanAxis = scan;
   }
   void event_character_cut(int id){
     renderer.charaID.get(id).cut;
   }
-  void event_object_new(OBJECTTYPE type, int characterID, void delegate(int) callback){
+  void event_character_add(int id, int num, int x, int y, int w, int h){
+    renderer.charaID.get(id).add(num, x, y, w, h);
+  }
+  void event_character_add(int id, int num, int x, int y){
+    renderer.charaID.get(id).add(num, x, y);
+  }
+  void event_character_add(int id, string s, int x, int y, int w, int h){
+    renderer.charaID.get(id).add(s, x, y, w, h);
+  }
+  void event_character_add(int id, string s, int x, int y){
+    renderer.charaID.get(id).add(s, x, y);
+  }
+
+  void event_object_new(ObjectType type, int characterID, void delegate(int) callback){
     auto character = renderer.charaID.get(characterID);
     DrawableObject obj;
     switch(type){
-      case OBJECTTYPE.SPRITE:
+      case ObjectType.Sprite:
         obj = new Sprite(character);
         break;
-      case OBJECTTYPE.BG:
+      case ObjectType.BG:
+        obj = new BG(character);
+        break;
+      default:
+        break;
+    }
+    renderer.addObject(obj);
+    auto id = renderer.objectID.add(obj);
+    callback(id);
+  }
+  void event_object_new(ObjectType type, string data, void delegate(int) callback){
+    DrawableObject obj;
+    switch(type){
+      case ObjectType.Text:
+        obj = new Text(renderer.fontData.get(data), data);
         break;
       default:
         break;
@@ -144,6 +173,7 @@ public:
   void event_object_setPriority(int id, int p){
     renderer.objectID.get(id).priority = p;
   }
+
   void event_sprite_setCharacterNum(int id, int chara){
     auto s = cast(Sprite)(renderer.objectID.get(id));
     s.character = chara;
@@ -151,6 +181,16 @@ public:
   void event_sprite_setCharacterStr(int id, string chara){
     auto s = cast(Sprite)(renderer.objectID.get(id));
     s.character = chara;
+  }
+
+  void event_bg_setMapData(int id, int[][] data){
+    auto b = cast(BG)(renderer.objectID.get(id));
+    b.mapData = data;
+  }
+
+  void event_text_setText(int id, string text){
+    auto t = cast(Text)(renderer.objectID.get(id));
+    t.text = text;
   }
 
 }

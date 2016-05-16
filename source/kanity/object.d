@@ -8,20 +8,23 @@ import std.stdio;
 import std.math;
 
 abstract class DrawableObject{
-protected:
-  real x, y, w, h;//座標
-  real z;//Z座標(描画優先度)
-  real u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
-  real hx = 0.0, hy = 0.0; //描画時用の原点
+private:
+  double x, y; float w, h;//座標
+  double z;//Z座標(描画優先度)
+  float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
+  protected real hx = 0.0, hy = 0.0; //描画時用の原点
   real scale_ = 1.0f, scaleOrigin;//拡大倍率
   real angle_ = 0; //なぜかOpenGLの仕様により度数法
   real aspect;//アスペクト比
   bool m_hide;//描画するかどうか
   SDL_Color color_;//描画色
   SDL_Texture* texture_;
-  float gltexWidth, gltexHeight;
+  float gltexWidth = 1.0f, gltexHeight = 1.0f;
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;//処理用の原点(誤差対策)
+  double[16] matrix;//変換行列
+  float[4 * 2] vertex;//頂点配列
+  float[4 * 2] coords;//テクスチャ座標配列
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -40,12 +43,20 @@ public:
     renderer = window.SDL_GetRenderer();
 
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+    if(!texture){
+      error("Failed to create texture.");
+    }
     aspect = (cast(real)drawWidth / cast(real)drawHeight);
 
     color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
     m_hide = true;
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    updateMatrix();
+    updateVertex();
+    updateTexCoord();
   }
   ~this(){
     if (texture)
@@ -66,23 +77,36 @@ public:
 
     real l_scale = scale_ * scaleOrigin;
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslated(x * scaleOrigin - 1 , 1 - y * scaleOrigin, 0); //5.描画先座標へ移動
-    glScaled(1, aspect, 1);                                     //4.アスペクト比を調節
-    glScaled(l_scale, l_scale, 1);                              //3.拡大
-    glRotated(angle_, 0, 0, 1);                                 //2.回転
-    glTranslated(-hx, -hy, 0);                                  //1.原点を移動
+    glLoadMatrixd(matrix.ptr);
 
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
-    glBegin(GL_QUADS);
-      glTexCoord2f(u1 * gltexWidth, v1 * gltexHeight); glVertex3f(0, 0, z);
-      glTexCoord2f(u1 * gltexWidth, v2 * gltexHeight); glVertex3f(0, h, z);
-      glTexCoord2f(u2 * gltexWidth, v2 * gltexHeight); glVertex3f(w, h, z);
-      glTexCoord2f(u2 * gltexWidth, v1 * gltexHeight); glVertex3f(w, 0, z);
-    glEnd();
-    if (texture)
-      texture_.SDL_GL_UnbindTexture();
-    glFlush();
+    glVertexPointer(2, GL_FLOAT, 0, vertex.ptr);
+    glTexCoordPointer(2, GL_FLOAT, 0, coords.ptr);
+    glDrawArrays(GL_QUADS, 0, 4);
+    texture_.SDL_GL_UnbindTexture();
+    //glFlush();
+  }
+  private void updateMatrix(){
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslated(x * scaleOrigin - 1 , 1 - y * scaleOrigin, z); //5.描画先座標へ移動
+    glScaled(1, aspect, 1);                                     //4.アスペクト比を調節
+    glScaled(scale_ * scaleOrigin, scale_ * scaleOrigin, 1);    //3.拡大
+    glRotated(angle_, 0, 0, 1);                                 //2.回転
+    glTranslated(-hx, -hy, 0);                                  //1.原点を移動
+    glGetDoublev(GL_MODELVIEW_MATRIX, matrix.ptr);
+  }
+  private void updateVertex(){
+    vertex[0] = 0; vertex[1] = 0;
+    vertex[2] = 0; vertex[3] = h;
+    vertex[4] = w; vertex[5] = h;
+    vertex[6] = w; vertex[7] = 0;
+  }
+  private void updateTexCoord(){
+    coords[0] = u1; coords[1] = v1;
+    coords[2] = u1; coords[3] = v2;
+    coords[4] = u2; coords[5] = v2;
+    coords[6] = u2; coords[7] = v1;
   }
 
   void move(int x, int y){
@@ -103,12 +127,16 @@ public:
   protected void reloadHome(){
     hx = +(cast(real)homeX / drawWidth * 2);
     hy = -(cast(real)homeY / drawWidth * 2);
+    updateMatrix();
   }
   public:
   @property{
     //描画優先度
     int priority(){return cast(int)(z * 256);} //描画優先度のZ座標に対する倍率は暫定
-    float priority(int p_){return z = cast(real)p_ / 256.0;}
+    void priority(int p_){
+      z = cast(real)p_ / 256.0;
+      updateMatrix();
+    }
     //見えているか
     bool isVisible(){
       return !m_hide;
@@ -118,17 +146,23 @@ public:
     float scale(){return scale_;}
     void scale(float s){
       scale_ = s;
+      updateMatrix();
     }
     //描画角度
-    real angleDeg(){return angle_;}
+    real angleDeg(){return angle;}
     void angleDeg(real deg){
-      angle_ = deg % 360;
+      angle = deg % 360;
     }
     real angleRad(){
-      return angle_ * 180 / PI;
+      return angle * 180 / PI;
     }
     void angleRad(real rad){
-      angle_ = rad / 180 * PI;
+      angle = rad / 180 * PI;
+    }
+    private real angle(){return angle_;}
+    private void angle(real a){
+      angle_ = a;
+      updateMatrix();
     }
     //描画色
     void color(SDL_Color c){ color_ = c; }
@@ -143,7 +177,7 @@ public:
     int homeY(){ return homeY_; }
     void homeX(int n){ homeX_ = n; reloadHome; }
     void homeY(int n){ homeY_ = n; reloadHome; }
-    //描画領域の大きさ
+    //描画領域の大きさ?
     int width(){ return drawWidth; }
     int height(){ return drawHeight; }
     void width(int a){
@@ -178,6 +212,8 @@ public:
       y = (cast(real)rect.y / drawHeight * 2);
       w = +(cast(real)rect.w / drawWidth * 2);
       h = -(cast(real)rect.h / drawWidth * 2);
+      updateMatrix();
+      updateVertex();
     }
 
     //サーフェスの描画に使う領域
@@ -190,19 +226,20 @@ public:
         u2 = cast(real)(x + w) / texWidth;
         v2 = cast(real)(y + h) / texHeight;
       }
+      updateTexCoord();
     }
-    SDL_Surface* surface(SDL_Surface* surface){
+    void surface(SDL_Surface* surface){
+      auto tRect = texRect; auto dRect = drawRect;
       texture.SDL_DestroyTexture;
       texture = renderer.SDL_CreateTextureFromSurface(surface);
       texWidth = surface.w; texHeight = surface.h;
-      return surface;
+      texRect = tRect; drawRect = dRect;
     }
     SDL_Texture* texture(){return texture_;}
-    SDL_Texture* texture(SDL_Texture* tex){
+    void texture(SDL_Texture* tex){
       uint f; int a;
       tex.SDL_QueryTexture(&f, &a, &texWidth, &texHeight);
       texture_ = tex;
-      return tex;
     }
   }
 }

@@ -9,3 +9,4 @@ public:
   import std.exception;
   import std.experimental.logger;
   import std.conv;
+  import std.algorithm;

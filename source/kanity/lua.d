@@ -40,18 +40,28 @@ class LuaThread{
         lua.openLibs();
         lua.setPanicHandler(&panic);
         //lua["test"] = &test;
-        lua["CHARACTER_SCANAXIS"] = lua.registerType!CHARACTER_SCANAXIS();
+        lua["Character_ScanAxis"] = lua.registerType!Character_ScanAxis();
         lua["log"] = &lua_log;
         lua["sleep"] = &lua_sleep;
         lua["flush"] = &lua_flush;
-        lua["Character"] = lua.registerType!Lua_Character();
-        lua["newCharacter"] = &lua_newCharacter;
 
         lua["loadImg"] = &lua_loadImg;
         lua["unloadImg"] = &lua_unloadImg;
 
+        lua["loadFont"] = &lua_loadFont;
+        lua["unloadFont"] = &lua_unloadFont;
+
+        lua["Character"] = lua.registerType!Lua_Character();
+        lua["newCharacter"] = &lua_newCharacter;
+
         lua["Sprite"] = lua.registerType!Lua_Sprite();
         lua["newSprite"] = &lua_newSprite;
+
+        lua["BG"] = lua.registerType!Lua_BG();
+        lua["newBG"] = &lua_newBG;
+
+        lua["Text"] = lua.registerType!Lua_Text();
+        lua["newText"] = &lua_newText;
 
         T = new Thread(() => run(script));
         T.start;
@@ -77,7 +87,7 @@ class LuaThread{
     }
     void lua_log(LuaObject[] params...){
       if(params.length > 0){
-        import std.algorithm, std.string;
+        import std.string;
         string s = "[Lua]"~params.map!((LuaObject a) => (a.toString())).join("");
         renderEvent.event_log(s);
       }
@@ -89,6 +99,7 @@ class LuaThread{
     void lua_flush(){
       renderEvent.flush;
     }
+
     string lua_loadImg(string name){
       renderEvent.event_surface_load(name);
       return name;
@@ -96,11 +107,26 @@ class LuaThread{
     void lua_unloadImg(string name){
       renderEvent.event_surface_unload(name);
     }
+
+    string lua_loadFont(string name, int size){
+      renderEvent.event_font_load(name, size);
+      return name;
+    }
+    void lua_unloadFont(string name){
+      renderEvent.event_font_unload(name);
+    }
+
     Lua_Character lua_newCharacter(string surface){
       return new Lua_Character(renderEvent, surface);
     }
     Lua_Sprite lua_newSprite(Lua_Character c){
       return new Lua_Sprite(renderEvent, c);
+    }
+    Lua_BG lua_newBG(Lua_Character c){
+      return new Lua_BG(renderEvent, c);
+    }
+    Lua_Text lua_newText(string font){
+      return new Lua_Text(renderEvent, font);
     }
 }
 class Lua_Character : Lua_RenderObject{
@@ -115,18 +141,46 @@ public:
   void setCutRect(int w, int h){
     exec((){renderEvent.event_character_set_cutRect(id, w, h);});
   }
-  void setCutAxis(CHARACTER_SCANAXIS scan){
+  void setCutAxis(Character_ScanAxis scan){
     exec((){renderEvent.event_character_set_scanAxis(id, scan);});
   }
   void cut(){
     exec((){renderEvent.event_character_cut(id);});
+  }
+  void add(LuaObject[] params...){
+    switch(Pattern(params)){
+      case Pattern(LuaType.Number, LuaType.Number, LuaType.Number):
+        exec((){renderEvent.event_character_add(
+          id, params[0].to!int, params[1].to!int, params[2].to!int);
+        });
+        break;
+      case Pattern(LuaType.Number, LuaType.Number, LuaType.Number, LuaType.Number, LuaType.Number):
+        exec((){renderEvent.event_character_add(
+          id, params[0].to!int, params[1].to!int, params[2].to!int, params[3].to!int, params[4].to!int);
+        });
+        break;
+      case Pattern(LuaType.String, LuaType.Number, LuaType.Number):
+        exec((){renderEvent.event_character_add(
+          id, params[0].to!string, params[1].to!int, params[2].to!int);
+        });
+        break;
+      case Pattern(LuaType.String, LuaType.Number, LuaType.Number, LuaType.Number, LuaType.Number):
+        exec((){renderEvent.event_character_add(
+          id, params[0].to!string, params[1].to!int, params[2].to!int, params[3].to!int, params[4].to!int);
+        });
+        break;
+      default:
+        error("[Lua][Character.add]Invalid Arguments.");
+        enforce(0);
+        break;
+    }
   }
 }
 class Lua_Sprite : Lua_RenderObject{
 public:
   this(RenderEventInterface renderEventInterface, Lua_Character character){
     super(renderEventInterface);
-    create(OBJECTTYPE.SPRITE, character);
+    create(ObjectType.Sprite, character);
   }
   mixin Lua_DrawableObject;
 
@@ -137,9 +191,37 @@ public:
     exec((){renderEvent.event_sprite_setCharacterStr(id, chara);});
   }
 }
+class Lua_BG : Lua_RenderObject{
+public:
+  this(RenderEventInterface renderEventInterface, Lua_Character character){
+    super(renderEventInterface);
+    create(ObjectType.BG, character);
+  }
+  mixin Lua_DrawableObject;
+
+  void setMapData(int[][] data){
+    exec((){renderEvent.event_bg_setMapData(id, data);});
+  }
+}
+
+class Lua_Text : Lua_RenderObject{
+public:
+  this(RenderEventInterface renderEventInterface, string font){
+    super(renderEventInterface);
+    renderEvent.event_object_new(ObjectType.Text, font, this.setId);
+  }
+  mixin Lua_DrawableObject;
+
+  void setText(string text){
+    exec((){renderEvent.event_text_setText(id, text);});
+  }
+}
 template Lua_DrawableObject(){
-  void create(OBJECTTYPE type, Lua_Character character){
+  void create(ObjectType type, Lua_Character character){
     renderEvent.event_object_new(type, character.id, super.setId);
+  }
+  void create(ObjectType type, string data){
+    renderEvent.event_object_new(type, data, super.setId);
   }
   void show(){
     exec((){renderEvent.event_object_show(id);});
@@ -182,7 +264,7 @@ protected:
       }else{
         //どうしても必要なら強制的に取得する
         "flush".log;
-        while(!isAvailable){}
+        renderEvent.flush;
         return id_;
       }
     }
@@ -201,9 +283,39 @@ protected:
       }
     }
     private void execQueue(){
-      foreach(a; queue[]){
+      queue[].each!((a){
         a();
-      }
+      });
     }
   }
+}
+
+static string Pattern(LuaObject[] params){
+  import std.array;
+  return params.map!(a => a.type).array.Pattern;
+}
+static string Pattern(LuaType[] params...){
+  return params.Pattern;
+}
+static string Pattern(LuaType[] params){
+  import std.string;
+  return params.map!((a){
+      switch(a){
+        case LuaType.String:
+          return "string";
+        case LuaType.Number:
+          return "number";
+        case LuaType.Nil:
+          return "nil";
+        case LuaType.Boolean:
+          return "boolean";
+        case LuaType.Function:
+          return "function";
+        case LuaType.Userdata:
+        case LuaType.LightUserdata:
+          return "userdata";
+        default:
+          return "";
+      }
+    }).join(",");
 }
