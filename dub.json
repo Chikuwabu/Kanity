@@ -11,7 +11,7 @@
   "dependencies":{
     "derelict-sdl2":"~master",
     "derelict-gl3":"~master",
-    "kanity:luad": "~master",
+    "kanity:luad":"~master"
   },
   "targetType":"executable",
   "targetPath":"bin",

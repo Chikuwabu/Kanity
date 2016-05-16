@@ -137,3 +137,69 @@ struct Stack(T){
   }
   @property public uint length(){return count;}
 }
+//マルチキャストなデリゲート
+import std.traits;
+struct MultiCastableDelegate(T) if(isCallable!T){
+  import std.container;
+  private DList!T funcs;
+  alias S = ReturnType!T;
+
+  public S opCall(ParameterTypeTuple!T args...){
+    static if(__traits(compiles, {S x;})){
+      S a;
+      funcs.each!((func){
+          a = func(args);
+      });
+      return a;
+    }else{
+      funcs.each!((func){
+        func(args);
+      });
+    }
+  }
+  public auto opBinary(string op)(T arg){
+    static if(op == "+"){
+      auto a = this;
+      a += arg;
+      return a;
+    }else static if(op == "-"){
+      auto a = this;
+      a -= arg;
+      return a;
+    }
+  }
+  public auto opOpAssign(string op)(T arg){
+    static if(op == "+"){
+      this.addFunc(arg);
+    }else static if(op == "-"){
+      this.removeFunc(arg);
+    }
+  }
+  public auto opSlice(){
+    return funcs[];
+  }
+  private void addFunc(T arg){
+    funcs.insertBack(arg);
+  }
+  private void removeFunc(T arg){
+    import std.algorithm, std.range;
+    funcs.linearRemove(find(funcs[], arg).take(1));
+  }
+}
+unittest{
+  import std.array, std.functional;
+  "雲丹おいしい".log;
+  MultiCastableDelegate!(string delegate(string, string)) d;
+  auto a = delegate (string a, string b){a.log; b.log; return "ゆうあし";};
+  d += a;
+  d = d + (&test).toDelegate;
+  d("hoge", "hage");
+  d[].map!((f) => f("hoge", "hage")).array.each!((a){a.log;});
+  //rtn.log;
+}
+
+string test(string a, string b){
+  a.log;
+  b.log;
+  return "ハゲ";
+}
