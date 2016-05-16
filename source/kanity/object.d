@@ -9,9 +9,9 @@ import std.math;
 
 abstract class DrawableObject{
 private:
-  real x, y, w, h;//座標
-  real z;//Z座標(描画優先度)
-  real u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
+  double x, y; float w, h;//座標
+  double z;//Z座標(描画優先度)
+  float u1,v1,u2,v2; //(u1,v1)-(u2,v2)までの範囲
   protected real hx = 0.0, hy = 0.0; //描画時用の原点
   real scale_ = 1.0f, scaleOrigin;//拡大倍率
   real angle_ = 0; //なぜかOpenGLの仕様により度数法
@@ -19,12 +19,12 @@ private:
   bool m_hide;//描画するかどうか
   SDL_Color color_;//描画色
   SDL_Texture* texture_;
-  float gltexWidth, gltexHeight;
+  float gltexWidth = 1.0f, gltexHeight = 1.0f;
   SDL_Rect drawRect_, texRect_; //誤差対策
   int homeX_ = 0, homeY_ = 0;//処理用の原点(誤差対策)
   double[16] matrix;//変換行列
-  real[4 * 2] vertex;//頂点配列
-  real[4 * 2] coords;//テクスチャ座標配列
+  float[4 * 2] vertex;//頂点配列
+  float[4 * 2] coords;//テクスチャ座標配列
 protected:
   SDL_Window* window; //描画先のウインドウ
   SDL_Renderer* renderer; //描画に用いるレンダラ
@@ -43,13 +43,20 @@ public:
     renderer = window.SDL_GetRenderer();
 
     texture = renderer.SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+    if(!texture){
+      error("Failed to create texture.");
+    }
     aspect = (cast(real)drawWidth / cast(real)drawHeight);
 
     color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
     m_hide = true;
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     updateMatrix();
+    updateVertex();
+    updateTexCoord();
   }
   ~this(){
     if (texture)
@@ -73,15 +80,11 @@ public:
     glLoadMatrixd(matrix.ptr);
 
     texture_.SDL_GL_BindTexture(&gltexWidth, &gltexHeight);
-    glBegin(GL_QUADS);
-      glTexCoord2d(u1 * gltexWidth, v1 * gltexHeight); glVertex2d(0, 0);
-      glTexCoord2d(u1 * gltexWidth, v2 * gltexHeight); glVertex2d(0, h);
-      glTexCoord2d(u2 * gltexWidth, v2 * gltexHeight); glVertex2d(w, h);
-      glTexCoord2d(u2 * gltexWidth, v1 * gltexHeight); glVertex2d(w, 0);
-    glEnd();
-    if (texture)
-      texture_.SDL_GL_UnbindTexture();
-    glFlush();
+    glVertexPointer(2, GL_FLOAT, 0, vertex.ptr);
+    glTexCoordPointer(2, GL_FLOAT, 0, coords.ptr);
+    glDrawArrays(GL_QUADS, 0, 4);
+    texture_.SDL_GL_UnbindTexture();
+    //glFlush();
   }
   private void updateMatrix(){
     glMatrixMode(GL_MODELVIEW);
@@ -92,6 +95,18 @@ public:
     glRotated(angle_, 0, 0, 1);                                 //2.回転
     glTranslated(-hx, -hy, 0);                                  //1.原点を移動
     glGetDoublev(GL_MODELVIEW_MATRIX, matrix.ptr);
+  }
+  private void updateVertex(){
+    vertex[0] = 0; vertex[1] = 0;
+    vertex[2] = 0; vertex[3] = h;
+    vertex[4] = w; vertex[5] = h;
+    vertex[6] = w; vertex[7] = 0;
+  }
+  private void updateTexCoord(){
+    coords[0] = u1; coords[1] = v1;
+    coords[2] = u1; coords[3] = v2;
+    coords[4] = u2; coords[5] = v2;
+    coords[6] = u2; coords[7] = v1;
   }
 
   void move(int x, int y){
@@ -198,6 +213,7 @@ public:
       w = +(cast(real)rect.w / drawWidth * 2);
       h = -(cast(real)rect.h / drawWidth * 2);
       updateMatrix();
+      updateVertex();
     }
 
     //サーフェスの描画に使う領域
@@ -210,6 +226,7 @@ public:
         u2 = cast(real)(x + w) / texWidth;
         v2 = cast(real)(y + h) / texHeight;
       }
+      updateTexCoord();
     }
     void surface(SDL_Surface* surface){
       auto tRect = texRect; auto dRect = drawRect;
