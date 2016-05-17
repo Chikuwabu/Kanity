@@ -241,17 +241,32 @@ template Lua_DrawableObject(){
   void setHome(int x, int y){
     exec((){renderEvent.event_object_setHome(id, x, y);});
   }
+  auto getHome(){
+    return renderEvent.event_object_getHome(id);
+  }
   void setScale(real scale){
     exec((){renderEvent.event_object_setScale(id, scale);});
+  }
+  auto getScale(){
+    return renderEvent.event_object_getScale(id);
   }
   void setAngleDeg(real deg){
     exec((){renderEvent.event_object_setAngleDeg(id, deg);});
   }
+  auto getAngledeg(){
+    return renderEvent.event_object_getAngleDeg(id);
+  }
   void setAngleRad(real rad){
     exec((){renderEvent.event_object_setAngleRad(id, rad);});
   }
+  auto getAngleRad(){
+    return renderEvent.event_object_getAngleRad(id);
+  }
   void setPriority(int p){
     exec((){renderEvent.event_object_setPriority(id, p);});
+  }
+  auto getPriority(){
+    return renderEvent.event_object_getPriority(id);
   }
 }
 abstract class Lua_RenderObject{

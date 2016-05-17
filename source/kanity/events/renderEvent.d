@@ -90,17 +90,33 @@ public:
   void event_object_setHome(int id, int x, int y){
     renderer.objectID.get(id).setHome(x, y);
   }
+  auto event_object_getHome(int id){
+    auto o = renderer.objectID.get(id);
+    return tuple(o.homeX, o.homeY);
+  }
   void event_object_setScale(int id, real scale){
     renderer.objectID.get(id).scale = scale;
+  }
+  auto event_object_getScale(int id){
+    return renderer.objectID.get(id).scale;
   }
   void event_object_setAngleDeg(int id, real deg){
     renderer.objectID.get(id).angleDeg = deg;
   }
+  auto event_object_getAngleDeg(int id){
+    return renderer.objectID.get(id).angleDeg;
+  }
   void event_object_setAngleRad(int id, real rad){
     renderer.objectID.get(id).angleRad = rad;
   }
+  auto event_object_getAngleRad(int id){
+    return renderer.objectID.get(id).angleRad;
+  }
   void event_object_setPriority(int id, int p){
     renderer.objectID.get(id).priority = p;
+  }
+  auto event_object_getPriority(int id){
+    return renderer.objectID.get(id).priority;
   }
 
   void event_sprite_setCharacterNum(int id, int chara){
