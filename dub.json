@@ -17,6 +17,7 @@
   "targetPath":"bin",
   "workingDirectory":"bin",
   "copyFiles":["resources"],
+  "stringImportPaths":["buildConfig"],
   "subPackages": [
       "./LuaD/"
   ],
