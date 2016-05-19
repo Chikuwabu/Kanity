@@ -197,6 +197,10 @@ struct MultiCastableDelegate(T) if(isCallable!T){
       this.removeFunc(arg);
     }
   }
+  public auto opAssign(T arg){
+    funcs.clear;
+    this.addFunc(arg);
+  }
   public auto opSlice(){
     return funcs[];
   }

@@ -1,92 +1,49 @@
 //イベント処理
 module kanity.event;
 
-import kanity.render;
+import kanity.imports;
+import kanity.input;
 import derelict.sdl2.sdl;
 import std.experimental.logger;
 
-class EventHandler(F)
-{
-    F[F] event;
-    public void addEventHandler(F)(F func)
-    {
-        event[func] = func;
-    }
-    public void removeEventHandler(F)(F func)
-    {
-        event.remove(func);
-    }
-    public void opCall(Args...)(Args args)
-    {
-        foreach(e; event)
-            e(args);
-    }
-}
-
-alias ButtonEventFunction = void delegate(bool);
-alias KeyEventFunction = void delegate(SDL_KeyboardEvent);
-alias EventFunction = void delegate(SDL_Event);
 class Event{
-private:
-    bool running;
+  private bool running;
+  private Input input;
 
-public:
-    auto leftButtonDownEvent = new EventHandler!ButtonEventFunction;
-    auto rightButtonDownEvent = new EventHandler!ButtonEventFunction;
-    auto upButtonDownEvent = new EventHandler!ButtonEventFunction;
-    auto downButtonDownEvent = new EventHandler!ButtonEventFunction;
+  this(){
+  }
 
-    auto leftButtonUpEvent = new EventHandler!ButtonEventFunction;
-    auto rightButtonUpEvent = new EventHandler!ButtonEventFunction;
-    auto upButtonUpEvent = new EventHandler!ButtonEventFunction;
-    auto downButtonUpEvent = new EventHandler!ButtonEventFunction;
+  void init(){
+      running = true;
+      input = new Input();
+  }
+  bool isRunning(){
+      return running;
+  }
 
-    auto keyDownEvent = new EventHandler!KeyEventFunction;
-    auto keyUpEvent = new EventHandler!KeyEventFunction;
-    auto eventHandler = new EventHandler!EventFunction;
-    void init(){
-        running = true;
+  void process(){
+    SDL_Event event;
+    while(SDL_PollEvent(&event)){
+      switch(event.type){
+        //Inputに投げるイベント
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+          input.key(event.key);
+          break;
+        case SDL_JOYHATMOTION:
+        case SDL_JOYBUTTONDOWN:
+        case SDL_JOYBUTTONUP:
+          input.button(event);
+          break;
+        case SDL_QUIT:
+          this.stop;
+          break;
+        default:
+          break;
+      }
     }
-    bool isRunning()
-    {
-        return running;
-    }
-
-    void process(){
-        SDL_Event event;
-        SDL_PollEvent(&event);
-        switch(event.type){
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        upButtonDownEvent(event.key.repeat == 0 ? false : true);
-                        break;
-                    case SDLK_RIGHT:
-                        rightButtonDownEvent(event.key.repeat == 0 ? false : true);
-                        break;
-                    case SDLK_DOWN:
-                        downButtonDownEvent(event.key.repeat == 0 ? false : true);
-                        break;
-                    case SDLK_LEFT:
-                        leftButtonDownEvent(event.key.repeat == 0 ? false : true);
-                        break;
-                    default:
-                        break;
-                }
-                keyDownEvent(event.key);
-                break;
-            case SDL_KEYUP:
-                keyUpEvent(event.key);
-                break;
-            case SDL_QUIT:
-                this.stop;
-                break;
-            default:
-                break;
-        }
-        eventHandler(event);
-    }
-    void stop(){
-        running = false;
-    }
+  }
+  void stop(){
+    running = false;
+  }
 }

@@ -26,6 +26,9 @@ public:
       case LogLevel.error:
         lt.put("[ERROR]");
         break;
+      case LogLevel.warning:
+        lt.put("[WARNING]");
+        break;
       default:
         super.beginLogMsg(file, line, funcName, prettyFuncName, moduleName, logLevel, threadId, timestamp, logger);
         break;

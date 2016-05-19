@@ -58,7 +58,7 @@ public:
     info("Load the library \"OpenGL\"."); DerelictGL.load;
     info("Load the library \"OpenGL3\"."); DerelictGL3.load;
 
-    const int sdlInitFlag = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    const int sdlInitFlag = SDL_INIT_EVERYTHING;
     const int sdlImageInitFlag = IMG_INIT_PNG | IMG_INIT_JPG;
     if(SDL_Init(sdlInitFlag) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
     info("Success initalization of \"SDL2\".");
