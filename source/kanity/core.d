@@ -60,11 +60,11 @@ public:
 
     const int sdlInitFlag = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
     const int sdlImageInitFlag = IMG_INIT_PNG | IMG_INIT_JPG;
-    if(SDL_Init(sdlInitFlag) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%.*s", SDL_GetError());
+    if(SDL_Init(sdlInitFlag) != 0) logf(LogLevel.fatal,"Failed initalization of \"SDL2\".\n%s", SDL_GetError()[0..core.stdc.string.strlen(SDL_GetError())]);
     info("Success initalization of \"SDL2\".");
-    if(IMG_Init(sdlImageInitFlag) != sdlImageInitFlag) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%.*s", IMG_GetError());
+    if(IMG_Init(sdlImageInitFlag) != sdlImageInitFlag) logf(LogLevel.fatal,"Failed initalization of \"SDL_Image\".\n%s", IMG_GetError()[0..core.stdc.string.strlen(IMG_GetError())]);
     info("Success initalization of \"SDL_Image\"");
-    if(TTF_Init() != 0) logf(LogLevel.fatal, "Failed initalization of \"SDL_ttf\".\n%.*s", TTF_GetError());
+    if(TTF_Init() != 0) logf(LogLevel.fatal, "Failed initalization of \"SDL_ttf\".\n%s", TTF_GetError()[0..core.stdc.string.strlen(TTF_GetError())]);
     info("Success initalization of \"SDL_ttf\"");
 
     SDL_HINT_RENDER_DRIVER.SDL_SetHint("opengl");
