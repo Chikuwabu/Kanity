@@ -39,6 +39,7 @@ public:
     }
     this.drawRect = rect;
     this.texRect = rect;
+    this.scroll(0, 0);
   }
   this(int x, int y, Character chara){
     this(chara);
@@ -82,7 +83,7 @@ public:
         rectD.x = 0; rectD.w = drawWidth;
         rectT.x = n; rectD.w = drawWidth;
       }
-      drawRect = rectD; texRect = rectT;
+      this.drawRect = rectD; this.texRect = rectT;
     }
     override void posY(int n){
       bg.y = n;
@@ -97,7 +98,7 @@ public:
         rectD.y = 0; rectD.h = drawHeight;
         rectT.y = n; rectD.h = drawHeight;
       }
-      drawRect = rectD; texRect = rectT;
+      this.drawRect = rectD; this.texRect = rectT;
     }
     void mapData(int[][] data){
       mapData_ = data.dup;
@@ -139,8 +140,9 @@ private:
       x = 0; y = 0;
       w = chipSize; h = chipSize;
     }
-    for(int x = 0; x < sizeWidth; x++){
-      for(int y = 0; y < sizeHeight; y++){
+    if(mapData_.length == 0) return;
+    for(int x = 0; x < min(mapData_.length, sizeWidth); x++){
+      for(int y = 0; y < min(mapData_[x].length, sizeHeight); y++){
         rectS = character.get(mapData_[x][y]);
         rectD.x = x * chipSize; rectD.y = y * chipSize;
         SDL_BlitSurface(character.surface, &rectS, bgScreen, &rectD);

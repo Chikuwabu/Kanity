@@ -113,8 +113,13 @@ class MapChip
         file.rawRead(chrlen);
         char[] characterFileName = new char[chrdata[0]];
         file.rawRead(characterFileName);
-        SDL_Rect[] characters = new SDL_Rect[chrlen[0]];
-        file.rawRead(characters);
+        SDL_Rect[] characters_ = new SDL_Rect[chrlen[0]];
+        SDL_Rect[int] characters;
+        file.rawRead(characters_);
+        foreach(int i, a; characters_){
+          characters[i] = a;
+        }
+        characters.rehash;
         character = new Character(IMG_Load(characterFileName.toStringz), "hage");
         character.characters = characters;
         //当たり判定
@@ -128,12 +133,17 @@ class MapChip
         file.write("KANITYCHIP");
         //character
         auto characters = character.characters;
+        SDL_Rect[] characters_ = new SDL_Rect[](characters.keys.minCount!"a>b"()[0]);
+        characters.keys.each!((int i){
+          characters_[i] = characters[i];
+        });
+
         int[] chrdata = [cast(int)characterFileName.length];
         int[] chrlen = [cast(int)characters.length];
         file.rawWrite(chrdata);
         file.rawWrite(chrlen);
         file.rawWrite(characterFileName);
-        file.rawWrite(characters);
+        file.rawWrite(characters_);
         //当たり判定
         file.rawWrite(colList);
     }
