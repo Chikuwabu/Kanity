@@ -30,10 +30,12 @@ class Event{
         case SDL_KEYUP:
           input.key(event.key);
           break;
-        case SDL_JOYHATMOTION:
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
-          input.button(event);
+          input.button(event.jbutton);
+          break;
+        case SDL_JOYHATMOTION:
+          input.hat(event.jhat);
           break;
         case SDL_QUIT:
           this.stop;
