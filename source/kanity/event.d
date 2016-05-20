@@ -37,6 +37,9 @@ class Event{
         case SDL_JOYHATMOTION:
           input.hat(event.jhat);
           break;
+        case SDL_JOYAXISMOTION:
+          input.stickAxis(event.jaxis);
+          break;
         case SDL_QUIT:
           this.stop;
           break;
@@ -44,6 +47,7 @@ class Event{
           break;
       }
     }
+    input.end();
   }
   void stop(){
     running = false;

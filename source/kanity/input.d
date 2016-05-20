@@ -10,6 +10,7 @@ class Input{
 
   private MultiCastableDelegate!Button[int] keyButton;
   private MultiCastableDelegate!Button[int] controllerButton;
+  private MultiCastableDelegate!Stick stick;
   private MultiCastableDelegate!Keyboard keyboard;
   private MultiCastableDelegate!Controller joyButton, joyAxis;
 
@@ -41,9 +42,9 @@ class Input{
       (["up", "down", "right", "left"][a] ~ " " ~ (b ? "press" : "release")).log;
     };
 
-    auto c = new Controller();
+    auto c = new Controller(Controller.Type.Axis);
     c.event += (a){
-      a.log;
+      //a.log;
     };
     bind(c);
 
@@ -52,8 +53,19 @@ class Input{
       (a ? "press" : "release").log;
     };
     bind(b);
+
+    auto s = new Stick(0, 1);
+    s.event += (a, b){
+      (a.to!string ~","~b.to!string).log;
+    };
+    bind(s);
   }
 
+  void end(){
+    stick[].filter!(a => a.update).each!((f){
+      f();
+    });
+  }
   void key(SDL_KeyboardEvent e){
     if(e.type == SDL_KEYDOWN){
       keyboard(SDL_GetKeyName(e.keysym.sym).to!string);
@@ -103,8 +115,20 @@ class Input{
     hatStateList[SDL_HAT_RIGHTDOWN] = [0, 1, 1, 0];
     hatStateList.rehash;
   }
-  void stickAxis(SDL_Event e){
+  void stickAxis(SDL_JoyAxisEvent e){
+    if(e.axis >= 4) return; //5軸以上は処理しない
+    joyAxis(e.axis);
 
+    auto r = stick[];
+    //TODO:こういう操作よくない
+    r.filter!(a => a.xAxis == e.axis).each!((f){
+      f.setX(e.value.to!real / 32768);
+      f.update = true;
+    });
+    r.filter!(a => a.yAxis == e.axis).each!((f){
+      f.setY(e.value.to!real / 32768);
+      f.update = true;
+    });
   }
 
   public void bind(Button bt){
@@ -132,6 +156,25 @@ class Input{
     switch(bt.type){
       case Button.Type.Key:
         keyButton[bt.keycode] -= bt;
+        break;
+      case Button.Type.Controller:
+        controllerButton[bt.buttonId] -= bt;
+        break;
+      default:
+    }
+  }
+  public void bind(Stick st){
+    switch(st.type){
+      case Stick.Type.Real:
+        stick += st;
+        break;
+      default:
+    }
+  }
+  public void unbind(Stick st){
+    switch(st.type){
+      case Stick.Type.Real:
+        stick -= st;
         break;
       default:
     }
@@ -235,6 +278,42 @@ class CombindButton{
 
   void opCall(int num, bool state){
     event(num, state);
+  }
+}
+class Stick{
+  alias EventFunc = void delegate(real, real); //x, y軸
+  alias Event = MultiCastableDelegate!EventFunc;
+  enum Type{Real, Virtual}; //物理スティックか、CombinedButtonをバインドするか
+
+  public Event event;
+  private Type type_;
+  @property auto type(){return type_;}
+  union{
+    struct{
+      int xAxis, yAxis;
+      real xPos = 0.0, yPos = 0.0;
+      bool update;
+    }
+  }
+
+  this(int x, int y){ //軸番号指定
+    xAxis = x; yAxis = y;
+  }
+
+  void opCall(real x, real y){
+    event(x, y);
+    update = false;
+  }
+  void opCall(){
+    event(xPos, yPos);
+    update = false;
+  }
+
+  void setX(real x){
+    xPos = x;
+  }
+  void setY(real y){
+    yPos = y;
   }
 }
 class Keyboard{
