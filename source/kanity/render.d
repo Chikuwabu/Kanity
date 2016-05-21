@@ -70,6 +70,7 @@ public:
     public SDL_Renderer* SDLRenderer(){return renderer;}
   }
   void init(){
+      object = make!(typeof(object));
     initRenderEvent;
 
     SDL_GL_DEPTH_SIZE.SDL_GL_SetAttribute(16);
