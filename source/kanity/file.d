@@ -30,9 +30,26 @@ abstract class FileObject{
     return fileObject.loadBinary;
   }
   alias loadRW = loadRWops;
+  static shared extern(C) int function(SDL_RWops*) mem_close;
+  import core.memory;
   final SDL_RWops* loadRWops(string path){
     auto data = loadBinary(path);
-    return SDL_RWFromMem(cast(void*)(data.ptr), data.length.to!int);
+      GC.addRoot(cast(void*)(data.ptr));
+      GC.setAttr(cast(void*)data.ptr, GC.BlkAttr.NO_MOVE);
+      auto rwops = SDL_RWFromMem(cast(void*)(data.ptr), data.length.to!int);
+      if (!mem_close)
+      {
+          mem_close = rwops.close;
+      }
+      
+      rwops.close = cast(typeof(rwops.close))&fileSystemMemClose;
+    return rwops;
+  }
+  static extern(C) int fileSystemMemClose(SDL_RWops* context)
+  {
+      GC.removeRoot(context.hidden.mem.base);
+      GC.clrAttr(context.hidden.mem.base, GC.BlkAttr.NO_MOVE);
+      return mem_close(context);
   }
   final public FileObject get(string path){
     return get(Path(path));
