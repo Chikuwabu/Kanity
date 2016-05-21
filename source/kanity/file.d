@@ -14,7 +14,7 @@ enum FileType{
 }
 abstract class FileObject{
   protected FileObject parent_;
-  protected FileObject[string] childs;
+  protected FileObject[string] children;
   protected FileType type;
 
   this(FileObject parent = null, FileType ft = FileType.Directry){
@@ -70,11 +70,11 @@ abstract class FileObject{
         case ".":
           return this.get(path);
         default:
-          if(obj !in childs){
+          if(obj !in children){
             errorf("\'%s\' is not found.", obj);
             enforce(0);
           }
-          return childs[obj].get(path);
+          return children[obj].get(path);
       }
     }
   }
@@ -94,9 +94,9 @@ class FileFileObject : FileObject{ //OSのファイルシステムを使用す�
     path.dirEntries(SpanMode.shallow).each!((DirEntry a){
       auto name = a.name.relativePath(path);
       auto fileType = a.isDir ? FileType.Directry : FileType.File;
-      childs[name] = new FileFileObject(a.name, this, fileType);
+      children[name] = new FileFileObject(a.name, this, fileType);
     });
-    childs.rehash;
+    children.rehash;
     path.log;
   }
   override string loadString(){
