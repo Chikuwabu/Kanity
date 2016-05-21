@@ -27,7 +27,7 @@ function init()
   kusa:add(0, 0, 0)
   local sp = newSprite(tori)
   sp:setCharacterNum(1)
-  sp:move(50, 50);
+  sp:setPos(50, 50);
   sp:setHome(10, 8)
   sp:setScale(2.0)
   sp:setAngleDeg(60)
@@ -41,7 +41,7 @@ function init()
     end
   end
   bg:setMapData(map)
-  bg:move(-50, -50)
+  bg:setPos(-50, -50)
   bg:setAngleDeg(30)
   bg:setPriority(-1)
 
