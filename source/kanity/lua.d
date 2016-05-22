@@ -232,8 +232,8 @@ template Lua_DrawableObject(){
   bool isVisible(){
     return renderEvent.event_object_isVisible(id);
   }
-  void move(int x, int y){
-    exec((){renderEvent.event_object_move(id, x, y);});
+  void moveRelative(int x, int y){
+    exec((){renderEvent.event_object_moveRelative(id, x, y);});
   }
   auto getPos(){
     return renderEvent.event_object_getPos(id);

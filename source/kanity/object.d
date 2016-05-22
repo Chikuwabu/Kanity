@@ -52,7 +52,7 @@ public:
     color_ = SDL_Color(255, 255, 255, 255);
 
     this.priority = 0;
-    m_hide = true;
+    m_hide = !true;
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     updateMatrix();
@@ -117,9 +117,9 @@ public:
     };
   }
 
-  void move(int x, int y){
+  void moveRelative(int x, int y){
     auto rect = drawRect;
-    rect.x = x; rect.y = y;
+    rect.x += x; rect.y += y;
     drawRect = rect;
   }
   void setHome(int x, int y){

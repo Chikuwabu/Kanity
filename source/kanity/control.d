@@ -28,7 +28,10 @@ public:
 
     void run(Renderer renderer_, Event event_){
         m_renderer = renderer_; m_event = event_;
-        auto lua = new LuaThread(m_renderer.renderEvent.getInterface, FileSystem.loadString(startScript));
-        //lua.stop;
+        if (startScript && startScript.length)
+        {
+            auto lua = new LuaThread(m_renderer.renderEvent.getInterface, FileSystem.loadString(startScript));
+            //lua.stop;
+        }
     }
 }

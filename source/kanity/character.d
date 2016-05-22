@@ -16,17 +16,27 @@ private:
   SDL_Rect[string] charactersWithString;
 
 public:
-  //Surfaceだけ渡された場合、BGのキャラクタの大きさで生成
+  this(SDL_Surface* sf){
+      surface_ = sf;
+      chipWidth = bgChipSize; chipHeight = bgChipSize;
+      scanAxis = Character_ScanAxis.Y;
+  }
+  //BGのキャラクタの大きさで生成
   this(SDL_Surface* sf, string name){
-    surface_ = sf;
     surfaceName_ = name;
-    chipWidth = bgChipSize; chipHeight = bgChipSize;
-    scanAxis = Character_ScanAxis.Y;
+      this(sf);
   }
   //キャラクタの幅の指定もできる
   //サーフェスを指定の設定で分割する
   uint chipWidth, chipHeight;
   Character_ScanAxis scanAxis;
+  public void cut(int chipWidth, int chipHeight, Character_ScanAxis scanAxis)
+  {
+      this.chipWidth = chipWidth;
+      this.chipHeight = chipHeight;
+      this.scanAxis = scanAxis;
+      cut();
+  }
   public void cut(){
     int w, h;
     w = surface_.w / chipWidth; h = surface_.h / chipHeight;

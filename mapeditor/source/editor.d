@@ -120,7 +120,7 @@ class Button : DrawableObject
     DrawableObject foreground;
     void delegate() onClick;
     Event event;
-    float __foggaf__;
+    real __foggaf__;
     this(Event event, Text text, void delegate() onClick)
     {
         foreground = text;
@@ -130,7 +130,7 @@ class Button : DrawableObject
         event.eventHandler.addEventHandler(&checkEvent);
         this.event = event;
         this.onClick = onClick;
-        __foggaf__ = kanity.render.Renderer.getData("renderScale").get!float;
+        __foggaf__ = kanity.render.Renderer.getData("renderScale").get!real;
     }
     override void draw()
     {
@@ -369,7 +369,7 @@ class Editor : Engine
     string chraracterFile = "BGTest2.png";
     Button[] buttons;
 
-    override void init()
+    protected override void init()
     {
         super.init();
         renderer.clear();
@@ -378,9 +378,9 @@ class Editor : Engine
         bgheight = height/ 16;
         bgwidth = width / 16;
         character = new Character(IMG_Load(chraracterFile.toStringz));
-        character.cut(16, 16, CHARACTER_SCANAXIS.X);
+        character.cut(16, 16, Character_ScanAxis.X);
         int listheight = 3;
-        int[][] m = new int[][](listheight, bgwidth);
+        int[][] m = new int[][](bgwidth, listheight);
         auto bg = new BG(character);
         bg.mapData = m;
         bg.sizeWidth = bgwidth;
@@ -396,7 +396,7 @@ class Editor : Engine
         initMapBG(map);
         renderer.addObject(map);
         auto cursor = new Character(IMG_Load_RW(FileSystem.loadRW("SPTest.png"), 1));
-        cursor.cut(20, 16, CHARACTER_SCANAXIS.X);
+        cursor.cut(20, 16, Character_ScanAxis.X);
         chipCursor = new Sprite(cursor);
         chipCursor.homeX = 2;
         renderer.addObject(chipCursor);
@@ -518,7 +518,7 @@ class Editor : Engine
         btn2.height = 12;
         renderer.addObject(btn2);
         auto colChar = new Character(IMG_Load("mapeditor.png"));
-        colChar.cut(16, 16, CHARACTER_SCANAXIS.X);
+        colChar.cut(16, 16, Character_ScanAxis.X);
         colBG = new BG(colChar);
         colBG.posX = chipList.posX;
         colBG.posY = chipList.posY;
@@ -567,13 +567,13 @@ class Editor : Engine
     }
     void initMapBG(BG map)
     {
-        map.move(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
+        map.moveRelative(0, -16 * 3 - 16);// map.posY = -16 * 3 - 16;
     }
     void layerMove(int mx, int my)
     {
         foreach (i; layer)
         {
-            i.move(mx, my);
+            i.moveRelative(mx, my);
         }
         updateSelectBox();
     }
@@ -590,7 +590,7 @@ class Editor : Engine
             }
             else
             {
-                chipCursor.move(map.chipSize, 0);
+                chipCursor.moveRelative(map.chipSize, 0);
             }
         }
         else if (currentCursor == mapCursor)
@@ -606,7 +606,7 @@ class Editor : Engine
             }
             else
             {
-                mapCursor.move(map.chipSize, 0);
+                mapCursor.moveRelative(map.chipSize, 0);
             }
             if (SDL_GetModState() & KMOD_SHIFT)
             {
@@ -627,7 +627,7 @@ class Editor : Engine
             }
             else
             {
-                chipCursor.move(-map.chipSize, 0);
+                chipCursor.moveRelative(-map.chipSize, 0);
             }
         }
         else if (currentCursor == mapCursor)
@@ -642,7 +642,7 @@ class Editor : Engine
             }
             else
             {
-                mapCursor.move(-map.chipSize, 0);
+                mapCursor.moveRelative(-map.chipSize, 0);
             }
             mapCX--;
             if (SDL_GetModState() & KMOD_SHIFT)
@@ -661,7 +661,7 @@ class Editor : Engine
                 scrollChipList(-1);
                 return;
             }
-            chipCursor.move(0, -map.chipSize);
+            chipCursor.moveRelative(0, -map.chipSize);
         }
         else if (currentCursor == mapCursor)
         {
@@ -675,7 +675,7 @@ class Editor : Engine
             }
             else
             {
-                mapCursor.move(0, -map.chipSize);
+                mapCursor.moveRelative(0, -map.chipSize);
             }
             mapCY--;
             if (SDL_GetModState() & KMOD_SHIFT)
@@ -711,7 +711,7 @@ class Editor : Engine
                 scrollChipList(1);
                 return;
             }
-            chipCursor.move(0, map.chipSize);
+            chipCursor.moveRelative(0, map.chipSize);
         }
         else if (currentCursor == mapCursor)
         {
@@ -725,7 +725,7 @@ class Editor : Engine
             }
             else
             {
-                mapCursor.move(0, map.chipSize);
+                mapCursor.moveRelative(0, map.chipSize);
             }
             mapCY++;
             if (SDL_GetModState() & KMOD_SHIFT)

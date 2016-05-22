@@ -57,9 +57,9 @@ public:
 
   bool updateFlag;
 
-  alias scroll = move;
-  override void move(int x, int y){
-    bg.x = x; bg.y = y;
+  alias scroll = moveRelative;
+  override void moveRelative(int x, int y){
+    bg.x += x; bg.y += y;
     posX = bg.x; posY = bg.y;
   }
 
