@@ -85,7 +85,9 @@ public:
     glVertexPointer(2, GL_FLOAT, 0, vertex.ptr);
     glTexCoordPointer(2, GL_FLOAT, 0, coords.ptr);
     glDrawArrays(GL_QUADS, 0, 4);
-    texture_.SDL_GL_UnbindTexture();
+
+    //トラブルシューティング？
+    //texture_.SDL_GL_UnbindTexture();
     //glFlush();
   }
   private void updateMatrix(){
@@ -117,10 +119,8 @@ public:
     };
   }
 
-  void move(int x, int y){
-    auto rect = drawRect;
-    rect.x = x; rect.y = y;
-    drawRect = rect;
+  void moveRelative(int x, int y){
+    posX = posX + x; posY = posY + y;
   }
   void setHome(int x, int y){
     homeX_ = x; homeY_ = y;

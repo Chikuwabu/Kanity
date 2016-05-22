@@ -80,8 +80,12 @@ public:
   bool event_object_isVisible(int id){
     return renderer.objectID.get(id).isVisible;
   }
-  void event_object_move(int id, int x, int y){
-    renderer.objectID.get(id).move(x, y);
+  void event_object_moveRelative(int id, int x, int y){
+    renderer.objectID.get(id).moveRelative(x, y);
+  }
+  void event_object_setPos(int id, int x, int y){
+    auto o = renderer.objectID.get(id);
+    o.posX = x; o.posY = y;
   }
   auto event_object_getPos(int id){
     auto o = renderer.objectID.get(id);

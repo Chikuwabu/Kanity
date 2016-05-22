@@ -39,29 +39,13 @@ public:
     }
     this.drawRect = rect;
     this.texRect = rect;
-    this.scroll(0, 0);
-  }
-  this(int x, int y, Character chara){
-    this(chara);
-    scroll(x, y);
-    return;
-  }
-  this(Character chara, int[][] lmapData){
-    this(chara);
-    mapData = lmapData;
-    setTexture();
+    this.posX = 0; this.posY = 0;
   }
   ~this(){
     bgScreen.SDL_FreeSurface;
   }
 
   bool updateFlag;
-
-  alias scroll = move;
-  override void move(int x, int y){
-    bg.x = x; bg.y = y;
-    posX = bg.x; posY = bg.y;
-  }
 
   override void reloadHome(){
     hx = +(cast(real)(homeX - texRect.x) / drawWidth * 2);
